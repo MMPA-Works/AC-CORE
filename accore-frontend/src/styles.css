@@ -3,75 +3,96 @@
 @import 'tailwindcss/preflight.css' layer(base);
 @import 'tailwindcss/utilities.css';
 
-/* You can add global styles to this file, and also import other style files */
-
 @import '@spartan-ng/brain/hlm-tailwind-preset.css';
 
 :root {
   color-scheme: light;
 
   --font-sans:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans',
+    'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans',
     sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-
+    
   --radius: 0.625rem;
+  
+  /* Backgrounds: Pure white and very light warm gray */
   --background: oklch(1 0 0);
-  --foreground: oklch(0.141 0.005 285.823);
+  --foreground: oklch(0.15 0.01 28);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.141 0.005 285.823);
+  --card-foreground: oklch(0.15 0.01 28);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.141 0.005 285.823);
-  --primary: oklch(0.21 0.006 285.885);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.967 0.001 286.375);
-  --secondary-foreground: oklch(0.21 0.006 285.885);
-  --muted: oklch(0.967 0.001 286.375);
-  --muted-foreground: oklch(0.552 0.016 285.938);
-  --accent: oklch(0.967 0.001 286.375);
-  --accent-foreground: oklch(0.21 0.006 285.885);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.92 0.004 286.32);
-  --input: oklch(0.92 0.004 286.32);
-  --ring: oklch(0.705 0.015 286.067);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.141 0.005 285.823);
-  --sidebar-primary: oklch(0.21 0.006 285.885);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.967 0.001 286.375);
-  --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
-  --sidebar-border: oklch(0.92 0.004 286.32);
-  --sidebar-ring: oklch(0.705 0.015 286.067);
+  --popover-foreground: oklch(0.15 0.01 28);
+  
+  /* Primary: Angeles City Red */
+  --primary: oklch(0.51 0.19 28);
+  --primary-foreground: oklch(1 0 0);
+  
+  /* Secondary: Mustard Yellow */
+  --secondary: oklch(0.77 0.16 70);
+  --secondary-foreground: oklch(0.15 0.01 28);
+  
+  /* Muted elements: Warm grays to complement the red */
+  --muted: oklch(0.96 0.01 28);
+  --muted-foreground: oklch(0.55 0.02 28);
+  --accent: oklch(0.96 0.01 28);
+  --accent-foreground: oklch(0.51 0.19 28);
+  
+  /* States and borders */
+  --destructive: oklch(0.6 0.2 25);
+  --border: oklch(0.90 0.01 28);
+  --input: oklch(0.90 0.01 28);
+  --ring: oklch(0.77 0.16 70); /* Yellow focus ring */
+  
+  /* Sidebar */
+  --sidebar: oklch(1 0 0);
+  --sidebar-foreground: oklch(0.15 0.01 28);
+  --sidebar-primary: oklch(0.51 0.19 28);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.96 0.01 28);
+  --sidebar-accent-foreground: oklch(0.51 0.19 28);
+  --sidebar-border: oklch(0.90 0.01 28);
+  --sidebar-ring: oklch(0.77 0.16 70);
 }
 
 :root.dark {
   color-scheme: dark;
 
-  --background: oklch(0.141 0.005 285.823);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.21 0.006 285.885);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.21 0.006 285.885);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.92 0.004 286.32);
-  --primary-foreground: oklch(0.21 0.006 285.885);
-  --secondary: oklch(0.274 0.006 286.033);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.274 0.006 286.033);
-  --muted-foreground: oklch(0.705 0.015 286.067);
-  --accent: oklch(0.274 0.006 286.033);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.552 0.016 285.938);
-  --sidebar: oklch(0.21 0.006 285.885);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.985 0 0);
-  --sidebar-primary-foreground: oklch(0.21 0.006 285.885);
-  --sidebar-accent: oklch(0.274 0.006 286.033);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.552 0.016 285.938);
+  /* Dark mode: Deep warm grays instead of pure black */
+  --background: oklch(0.15 0.01 28);
+  --foreground: oklch(0.98 0 0);
+  --card: oklch(0.18 0.01 28);
+  --card-foreground: oklch(0.98 0 0);
+  --popover: oklch(0.18 0.01 28);
+  --popover-foreground: oklch(0.98 0 0);
+  
+  /* Primary: Slightly brighter red for dark mode contrast */
+  --primary: oklch(0.60 0.19 28);
+  --primary-foreground: oklch(1 0 0);
+  
+  /* Secondary: Mustard Yellow */
+  --secondary: oklch(0.77 0.16 70);
+  --secondary-foreground: oklch(0.15 0.01 28);
+  
+  /* Muted elements */
+  --muted: oklch(0.25 0.01 28);
+  --muted-foreground: oklch(0.70 0.02 28);
+  --accent: oklch(0.25 0.01 28);
+  --accent-foreground: oklch(0.98 0 0);
+  
+  /* States and borders */
+  --destructive: oklch(0.70 0.19 22);
+  --border: oklch(0.25 0.01 28);
+  --input: oklch(0.25 0.01 28);
+  --ring: oklch(0.77 0.16 70);
+  
+  /* Sidebar */
+  --sidebar: oklch(0.18 0.01 28);
+  --sidebar-foreground: oklch(0.98 0 0);
+  --sidebar-primary: oklch(0.60 0.19 28);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.25 0.01 28);
+  --sidebar-accent-foreground: oklch(0.98 0 0);
+  --sidebar-border: oklch(0.25 0.01 28);
+  --sidebar-ring: oklch(0.77 0.16 70);
 }
 
 @layer base {
