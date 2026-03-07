@@ -4,6 +4,7 @@ import cors from 'cors';
 import connectDB from './config/db';
 import connectCloudinary from './config/cloudinary';
 import hazardReportRoutes from './routes/hazard-report.routes';
+import uploadRoutes from './routes/upload.routes';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -23,3 +24,6 @@ app.use('/api/reports', hazardReportRoutes);
 app.listen(PORT, () => {
   console.log(`Server is listening on port ${PORT}`);
 });
+
+app.use('/api/reports', hazardReportRoutes);
+app.use('/api/upload', uploadRoutes);
