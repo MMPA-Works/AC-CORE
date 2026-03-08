@@ -6,12 +6,15 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class HazardReportService {
-  // Update this URL to match your server.ts exactly
   private apiUrl = 'http://localhost:5000/api/reports';
 
   constructor(private http: HttpClient) {}
 
   submitReport(formData: FormData): Observable<any> {
     return this.http.post(this.apiUrl, formData);
+  }
+
+  getReports(): Observable<any[]> {
+    return this.http.get<any[]>(this.apiUrl);
   }
 }

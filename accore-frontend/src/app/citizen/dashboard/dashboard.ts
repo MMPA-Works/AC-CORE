@@ -1,7 +1,8 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
+import { HazardReportService } from '../../services/hazard-report';
 
 @Component({
   selector: 'app-citizen-dashboard',
@@ -9,18 +10,47 @@ import { HlmButtonImports } from '@spartan-ng/helm/button';
   imports: [RouterModule, CommonModule, HlmButtonImports],
   templateUrl: './dashboard.html',
 })
-export class Dashboard {
+export class Dashboard implements OnInit {
   private router = inject(Router);
+  private hazardReportService = inject(HazardReportService);
+  private platformId = inject(PLATFORM_ID);
 
-  // Temporary mock data to structure the UI. 
-  // We will replace this with a real API call later.
-  myReports = [
-    { id: 1, title: 'Deep Pothole', location: 'Balibago', status: 'Pending', date: '2026-03-05' },
-    { id: 2, title: 'Clogged Drainage', location: 'Santo Rosario', status: 'Resolved', date: '2026-02-28' }
-  ];
+  // We inject this to manually tell Angular to update the screen
+  private cdr = inject(ChangeDetectorRef);
+
+  myReports: any[] = [];
+  isLoading = true;
+  errorMessage = '';
+
+  ngOnInit() {
+    if (isPlatformBrowser(this.platformId)) {
+      this.fetchReports();
+    }
+  }
+
+  fetchReports() {
+    this.hazardReportService.getReports().subscribe({
+      next: (data) => {
+        this.myReports = data;
+        this.isLoading = false;
+        // Manually trigger a screen update
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Failed to fetch reports', error);
+        this.errorMessage = 'Could not load your reports. Please try again later.';
+        this.isLoading = false;
+        // Manually trigger a screen update
+        this.cdr.detectChanges();
+      },
+    });
+  }
 
   onLogout() {
-    // We will clear the citizen auth token here later
+    localStorage.removeItem('token');
+    localStorage.clear();
+    sessionStorage.clear();
+
     this.router.navigate(['/']);
   }
 }
