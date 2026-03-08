@@ -4,6 +4,7 @@
 @import 'tailwindcss/utilities.css';
 
 @import '@spartan-ng/brain/hlm-tailwind-preset.css';
+@import "leaflet/dist/leaflet.css";
 
 :root {
   color-scheme: light;

@@ -1,28 +1,46 @@
 <div class="min-h-screen bg-gray-50 p-4 md:p-8">
-  <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
-    
-    <header class="p-6 border-b border-gray-200 bg-red-800 text-white flex justify-between items-center">
+  <div
+    class="max-w-3xl mx-auto bg-white rounded-xl shadow-md overflow-hidden border border-gray-200"
+  >
+    <header
+      class="p-6 border-b border-gray-200 bg-red-800 text-white flex justify-between items-center"
+    >
       <div>
         <h1 class="text-2xl font-bold">Report a Hazard</h1>
         <p class="text-red-200 text-sm">Help us improve Angeles City</p>
       </div>
-      <a routerLink="/dashboard" hlmBtn variant="outline" class="text-black bg-white hover:bg-gray-100 border-transparent">
+      <a
+        routerLink="/dashboard"
+        hlmBtn
+        variant="outline"
+        class="text-black bg-white hover:bg-gray-100 border-transparent"
+      >
         Cancel
       </a>
     </header>
 
     <main class="p-6">
-<form [formGroup]="reportForm" (ngSubmit)="onSubmit()" class="space-y-6">
-        
+      <form [formGroup]="reportForm" (ngSubmit)="onSubmit()" class="space-y-6">
         <div class="space-y-2">
           <label hlmLabel for="title">Report Title</label>
-          <input hlmInput id="title" type="text" formControlName="title" placeholder="Brief summary of the issue" class="w-full" />
+          <input
+            hlmInput
+            id="title"
+            type="text"
+            formControlName="title"
+            placeholder="Brief summary of the issue"
+            class="w-full"
+          />
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="space-y-2">
             <label hlmLabel for="category">Hazard Category</label>
-            <select id="category" formControlName="category" class="flex h-10 w-full rounded-md border border-gray-200 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-700">
+            <select
+              id="category"
+              formControlName="category"
+              class="flex h-10 w-full rounded-md border border-gray-200 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-700"
+            >
               <option value="" disabled selected>Select a category</option>
               <option value="Pothole">Pothole</option>
               <option value="Clogged Drain">Clogged Drain</option>
@@ -34,7 +52,11 @@
 
           <div class="space-y-2">
             <label hlmLabel for="severity">Severity Level</label>
-            <select id="severity" formControlName="severity" class="flex h-10 w-full rounded-md border border-gray-200 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-700">
+            <select
+              id="severity"
+              formControlName="severity"
+              class="flex h-10 w-full rounded-md border border-gray-200 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-700"
+            >
               <option value="" disabled selected>Select severity</option>
               <option value="Low">Low</option>
               <option value="Medium">Medium</option>
@@ -45,40 +67,67 @@
 
         <div class="space-y-2">
           <label hlmLabel for="barangay">Barangay</label>
-          <input hlmInput id="barangay" type="text" formControlName="barangay" placeholder="e.g., Balibago" class="w-full" />
+          <input
+            hlmInput
+            id="barangay"
+            type="text"
+            formControlName="barangay"
+            placeholder="e.g., Balibago"
+            class="w-full"
+          />
         </div>
 
         <div class="space-y-2">
           <label hlmLabel for="description">Description</label>
-          <textarea hlmInput id="description" formControlName="description" rows="4" placeholder="Describe the issue and specific landmarks nearby..." class="w-full min-h-[100px]"></textarea>
+          <textarea
+            hlmInput
+            id="description"
+            formControlName="description"
+            rows="4"
+            placeholder="Describe the issue and specific landmarks nearby..."
+            class="w-full min-h-[100px]"
+          ></textarea>
         </div>
 
         <div class="space-y-2">
           <label hlmLabel for="image">Upload Photo</label>
-          <input type="file" id="image" (change)="onFileSelected($event)" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100 cursor-pointer" />
+          <input
+            type="file"
+            id="image"
+            (change)="onFileSelected($event)"
+            accept="image/*"
+            class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100 cursor-pointer"
+          />
         </div>
 
         <div class="space-y-2">
           <label hlmLabel>Pin Exact Location</label>
-          <div class="w-full h-64 bg-gray-100 rounded-md border-2 border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-500">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mb-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.242-4.243a8 8 0 1111.314 0z" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-            <span class="font-medium">Shared Leaflet Map will render here</span>
-          </div>
+          <div
+            id="map"
+            class="w-full h-64 bg-gray-100 rounded-md border border-gray-300 z-0 relative"
+          ></div>
+          <p class="text-xs text-gray-500 mt-1">
+            Click anywhere on the map or drag the pin to set the hazard location.
+          </p>
         </div>
 
-        <button hlmBtn type="submit" class="w-full bg-red-700 hover:bg-red-800 text-white" [disabled]="reportForm.invalid || !selectedFile || isSubmitting">
+        <button
+          hlmBtn
+          type="submit"
+          class="w-full bg-red-700 hover:bg-red-800 text-white"
+          [disabled]="reportForm.invalid || !selectedFile || isSubmitting"
+        >
           {{ isSubmitting ? 'Submitting Report...' : 'Submit Report' }}
         </button>
 
-        <div *ngIf="statusMessage" [ngClass]="{'text-red-600': isError, 'text-green-600': !isError}" class="text-sm font-medium text-center mt-4">
+        <div
+          *ngIf="statusMessage"
+          [ngClass]="{ 'text-red-600': isError, 'text-green-600': !isError }"
+          class="text-sm font-medium text-center mt-4"
+        >
           {{ statusMessage }}
         </div>
-
       </form>
     </main>
-
   </div>
 </div>

@@ -17,7 +17,7 @@ export const createReport = async (req: Request, res: Response): Promise<void> =
     
     console.log('2. Uploading image to Cloudinary...');
     const uploadResponse = await cloudinary.uploader.upload(dataURI, {
-      folder: 'angeles-fix-it/hazards'
+      folder: 'accore_hazards'
     });
 
     console.log('3. Image uploaded. Saving data to MongoDB...');
