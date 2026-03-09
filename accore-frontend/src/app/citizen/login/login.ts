@@ -4,8 +4,6 @@ import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { SocialAuthService, GoogleSigninButtonModule } from '@abacritt/angularx-social-login';
-
-// Spartan UI Imports
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmInputImports } from '@spartan-ng/helm/input';
 import { HlmLabelImports } from '@spartan-ng/helm/label';
@@ -39,6 +37,11 @@ export class Login implements OnInit {
   });
 
   ngOnInit() {
+    // Clear lingering sessions if no local token exists
+    if (!localStorage.getItem('token')) {
+      this.authService.signOut().catch(() => {});
+    }
+
     this.authService.authState.subscribe((user) => {
       if (user && user.idToken) {
         this.handleGoogleLogin(user.idToken);

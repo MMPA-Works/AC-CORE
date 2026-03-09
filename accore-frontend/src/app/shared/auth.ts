@@ -2,12 +2,14 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
+import { SocialAuthService } from '@abacritt/angularx-social-login';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
   private http = inject(HttpClient);
+  private socialAuthService = inject(SocialAuthService, { optional: true });
   private adminLoginUrl = 'http://localhost:5000/api/auth/admin/login';
 
   login(credentials: any): Observable<any> {
@@ -21,7 +23,6 @@ export class AuthService {
   }
 
   getToken(): string | null {
-    // Check for admin token first, then fall back to citizen token
     return localStorage.getItem('adminToken') || localStorage.getItem('token');
   }
 
@@ -32,7 +33,6 @@ export class AuthService {
     }
 
     try {
-      // Decode the token payload to extract the RBAC role securely
       const decoded: any = jwtDecode(token);
       return decoded.role || null;
     } catch (error) {
@@ -43,5 +43,12 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem('adminToken');
     localStorage.removeItem('token');
+
+    // Forcefully revokes the Google session
+    if (this.socialAuthService) {
+      this.socialAuthService.signOut(true).catch(() => {
+        console.log('User was not logged in via Google.');
+      });
+    }
   }
 }

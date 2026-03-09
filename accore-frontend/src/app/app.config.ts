@@ -9,10 +9,7 @@ export const appConfig: ApplicationConfig = {
     provideZonelessChangeDetection(),
     provideRouter(routes),
     provideHttpClient(withFetch()),
-    
-    // This line tells Angular to load the internal services required by the library
     importProvidersFrom(SocialLoginModule), 
-    
     {
       provide: 'SocialAuthServiceConfig',
       useValue: {
@@ -20,7 +17,12 @@ export const appConfig: ApplicationConfig = {
         providers: [
           {
             id: GoogleLoginProvider.PROVIDER_ID,
-            provider: new GoogleLoginProvider('184337788465-d57oaputgh4s9vvc384sbe6olrvc8ffd.apps.googleusercontent.com')
+            provider: new GoogleLoginProvider(
+              '184337788465-d57oaputgh4s9vvc384sbe6olrvc8ffd.apps.googleusercontent.com',
+              {
+                prompt: 'select_account' // Forces Google to show the account selection prompt every time
+              }
+            )
           }
         ],
         onError: (error) => {
