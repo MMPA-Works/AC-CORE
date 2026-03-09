@@ -11,7 +11,8 @@ export class HazardReportService {
   constructor(private http: HttpClient) {}
 
   private getAuthHeaders(): HttpHeaders {
-    const token = localStorage.getItem('token');
+    // Check for the admin token first, then fall back to the citizen token
+    const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
     return new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
@@ -23,5 +24,9 @@ export class HazardReportService {
 
   getReports(): Observable<any[]> {
     return this.http.get<any[]>(this.apiUrl, { headers: this.getAuthHeaders() });
+  }
+
+  updateReportStatus(id: string, status: string): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}/status`, { status }, { headers: this.getAuthHeaders() });
   }
 }

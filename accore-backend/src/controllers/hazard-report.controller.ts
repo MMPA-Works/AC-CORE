@@ -65,16 +65,53 @@ export const createReport = async (req: AuthRequest, res: Response): Promise<voi
 
 export const getReports = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const citizenId = req.user?.id;
+    const userId = req.user?.id;
+    const userRole = req.user?.role; 
 
-    if (!citizenId) {
+    if (!userId) {
       res.status(401).json({ message: 'Unauthorized. Please log in.' });
       return;
     }
 
-    const reports = await HazardReport.find({ citizenId }).sort({ createdAt: -1 });
-    res.status(200).json(reports);
+    if (userRole === 'admin') {
+      // Admins get everything
+      const reports = await HazardReport.find().sort({ createdAt: -1 });
+      res.status(200).json(reports);
+    } else {
+      // Citizens only get their own reports
+      const reports = await HazardReport.find({ citizenId: userId }).sort({ createdAt: -1 });
+      res.status(200).json(reports);
+    }
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch hazard reports', error });
+  }
+};
+
+export const updateReportStatus = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const validStatuses = ['Reported', 'Dispatched', 'Resolved'];
+    
+    if (!validStatuses.includes(status)) {
+      res.status(400).json({ message: 'Invalid status. Must be Reported, Dispatched, or Resolved.' });
+      return;
+    }
+
+    const updatedReport = await HazardReport.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true } 
+    );
+
+    if (!updatedReport) {
+      res.status(404).json({ message: 'Hazard report not found.' });
+      return;
+    }
+
+    res.status(200).json(updatedReport);
+  } catch (error: any) {
+    res.status(500).json({ message: 'Failed to update report status', error: error.message });
   }
 };

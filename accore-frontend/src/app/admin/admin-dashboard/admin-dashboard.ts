@@ -67,12 +67,18 @@ export class AdminDashboard implements OnInit, OnDestroy {
     }).addTo(this.map);
 
     this.plotAllMarkers();
+
+    // Forces Leaflet to adjust to the flexbox container properly
+    setTimeout(() => {
+      if (this.map) {
+        this.map.invalidateSize();
+      }
+    }, 100);
   }
 
   private plotAllMarkers(): void {
     if (!this.map) return;
 
-    // FIX: Lock the map instance into a constant so TypeScript knows it is not undefined inside the loop
     const currentMap = this.map;
 
     this.reports.forEach((report) => {
@@ -97,7 +103,6 @@ export class AdminDashboard implements OnInit, OnDestroy {
           popupAnchor: [0, -40],
         });
 
-        // FIX: Use currentMap instead of this.map
         const marker = L.marker([lat, lng], { icon: customIcon }).addTo(currentMap);
 
         const popupContent = `
@@ -135,6 +140,38 @@ export class AdminDashboard implements OnInit, OnDestroy {
 
       this.map.flyTo([lat, lng], 17, { duration: 1.5 });
     }
+  }
+
+  onStatusChange(report: any, event: Event) {
+    const selectElement = event.target as HTMLSelectElement;
+    const newStatus = selectElement.value;
+
+    this.hazardReportService.updateReportStatus(report._id, newStatus).subscribe({
+      next: (updatedReport) => {
+        // Update the local report status to match the database
+        report.status = updatedReport.status;
+        this.cdr.detectChanges();
+        this.refreshMapMarkers();
+      },
+      error: (error) => {
+        console.error('Failed to update status', error);
+        // Revert the dropdown UI if the API request fails
+        selectElement.value = report.status; 
+      }
+    });
+  }
+
+  private refreshMapMarkers() {
+    // Remove all existing markers from the map
+    this.markers.forEach(marker => {
+      if (this.map) {
+        this.map.removeLayer(marker);
+      }
+    });
+    
+    // Clear the array and redraw everything with updated colors
+    this.markers = [];
+    this.plotAllMarkers();
   }
 
   onLogout() {
