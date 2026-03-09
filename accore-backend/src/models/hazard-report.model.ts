@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IHazardReport extends Document {
+  citizenId: mongoose.Types.ObjectId;
   title: string;
   description: string;
   category: string;
@@ -18,6 +19,11 @@ export interface IHazardReport extends Document {
 
 const hazardReportSchema: Schema = new Schema(
   {
+    citizenId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Citizen',
+      required: true,
+    },
     title: {
       type: String,
       required: true,

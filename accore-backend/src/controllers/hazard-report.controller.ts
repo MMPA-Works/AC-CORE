@@ -2,10 +2,25 @@ import { Request, Response } from 'express';
 import HazardReport from '../models/hazard-report.model';
 import { v2 as cloudinary } from 'cloudinary';
 
-export const createReport = async (req: Request, res: Response): Promise<void> => {
+// Extend the Request interface to recognize the user object attached by the middleware
+interface AuthRequest extends Request {
+  user?: {
+    id: string;
+    role: string;
+  };
+}
+
+export const createReport = async (req: AuthRequest, res: Response): Promise<void> => {
   console.log('1. Controller reached successfully. Processing image...');
 
   try {
+    const citizenId = req.user?.id;
+
+    if (!citizenId) {
+      res.status(401).json({ message: 'Unauthorized. Please log in.' });
+      return;
+    }
+
     if (!req.file) {
       console.log('Error: No image file received.');
       res.status(400).json({ message: 'Image file is required.' });
@@ -24,6 +39,7 @@ export const createReport = async (req: Request, res: Response): Promise<void> =
     const { title, description, category, severity, barangay, latitude, longitude } = req.body;
 
     const newReport = new HazardReport({
+      citizenId,
       title,
       description,
       category,
@@ -47,9 +63,16 @@ export const createReport = async (req: Request, res: Response): Promise<void> =
   }
 };
 
-export const getReports = async (req: Request, res: Response): Promise<void> => {
+export const getReports = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const reports = await HazardReport.find().sort({ createdAt: -1 });
+    const citizenId = req.user?.id;
+
+    if (!citizenId) {
+      res.status(401).json({ message: 'Unauthorized. Please log in.' });
+      return;
+    }
+
+    const reports = await HazardReport.find({ citizenId }).sort({ createdAt: -1 });
     res.status(200).json(reports);
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch hazard reports', error });
