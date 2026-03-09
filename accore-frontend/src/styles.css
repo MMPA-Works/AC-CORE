@@ -119,3 +119,59 @@
     cursor: not-allowed;
   }
 }
+
+/* =========================================================
+   Modern Leaflet Map UI Overrides 
+   ========================================================= */
+
+.leaflet-popup-content-wrapper {
+  border-radius: 20px !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12) !important;
+  border: 1px solid rgba(255, 255, 255, 0.8) !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(12px) !important;
+  padding: 6px !important;
+}
+
+.leaflet-popup-content {
+  margin: 8px !important;
+  line-height: normal !important;
+}
+
+.leaflet-popup-tip {
+  background: rgba(255, 255, 255, 0.95) !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* Sleek frosted glass close button. 
+  It floats over the image for perfect contrast. 
+*/
+.leaflet-popup-close-button {
+  top: 14px !important;
+  right: 14px !important;
+  width: 26px !important;
+  height: 26px !important;
+  background: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(4px) !important;
+  border-radius: 50% !important;
+  color: #4b5563 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-weight: bold !important;
+  font-size: 14px !important;
+  text-decoration: none !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.2s ease !important;
+  padding: 0 !important; 
+}
+
+/* Clean hover state. 
+  No spinning, just a subtle lift and color change. 
+*/
+.leaflet-popup-close-button:hover {
+  background: rgba(255, 255, 255, 1) !important;
+  color: #ef4444 !important; 
+  transform: scale(1.08) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
