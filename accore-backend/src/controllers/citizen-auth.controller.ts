@@ -80,7 +80,23 @@ export const registerCitizen = async (req: Request, res: Response): Promise<void
       lastName,
     });
 
-    res.status(201).json({ message: 'Account created successfully' });
+    // Generate custom JWT so the user is authenticated automatically
+    const jwtToken = jwt.sign(
+      { id: newCitizen._id, role: 'citizen' },
+      process.env.JWT_SECRET as string,
+      { expiresIn: '7d' }
+    );
+
+    res.status(201).json({
+      message: 'Account created successfully',
+      token: jwtToken,
+      citizen: {
+        id: newCitizen._id,
+        email: newCitizen.email,
+        firstName: newCitizen.firstName,
+        lastName: newCitizen.lastName,
+      }
+    });
   } catch (error) {
     res.status(500).json({ message: 'Server error during registration' });
   }

@@ -54,7 +54,7 @@ export class Signup implements OnInit {
     this.http.post('http://localhost:5000/api/auth/citizen/google', { token }).subscribe({
       next: (response: any) => {
         localStorage.setItem('token', response.token);
-        this.router.navigate(['/citizen/home']);
+        this.router.navigate(['/dashboard']);
       },
       error: (err) => {
         this.errorMessage.set('Google signup failed. Please try again.');
@@ -75,9 +75,11 @@ export class Signup implements OnInit {
     const newCitizen = this.signupForm.value;
 
     this.http.post('http://localhost:5000/api/auth/citizen/register', newCitizen).subscribe({
-      next: () => {
-        // Registration successful, navigate to login page so they can sign in
-        this.router.navigate(['/citizen/login']);
+      next: (response: any) => {
+        if (response.token) {
+          localStorage.setItem('token', response.token);
+        }
+        this.router.navigate(['/dashboard']);
       },
       error: (err) => {
         this.errorMessage.set(err.error?.message || 'Registration failed. Please try again.');
