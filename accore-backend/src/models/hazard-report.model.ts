@@ -9,10 +9,16 @@ export interface IHazardReport extends Document {
   barangay: string;
   location: {
     type: string;
-    coordinates: number[]; // Array of [longitude, latitude]
+    coordinates: number[];
   };
   status: string;
   imageURL: string;
+  statusHistory: {
+    status: string;
+    updatedBy: mongoose.Types.ObjectId;
+    adminName: string;
+    updatedAt: Date;
+  }[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -68,13 +74,20 @@ const hazardReportSchema: Schema = new Schema(
       type: String,
       required: true,
     },
+    statusHistory: [
+      {
+        status: { type: String, required: true },
+        updatedBy: { type: Schema.Types.ObjectId, ref: 'Admin', required: true },
+        adminName: { type: String, required: true },
+        updatedAt: { type: Date, default: Date.now }
+      }
+    ]
   },
   {
-    timestamps: true, // Automatically adds createdAt and updatedAt
+    timestamps: true,
   }
 );
 
-// Add a geospatial index to allow fast map proximity searches
 hazardReportSchema.index({ location: '2dsphere' });
 
 export default mongoose.model<IHazardReport>('HazardReport', hazardReportSchema);

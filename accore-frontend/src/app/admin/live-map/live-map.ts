@@ -2,24 +2,22 @@ import { Component, inject, OnInit, OnDestroy, PLATFORM_ID, signal } from '@angu
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { HazardReportService } from '../../services/hazard-report';
 import * as L from 'leaflet';
-import { SidebarComponent } from '../sidebar/sidebar';
 import { LucideAngularModule } from 'lucide-angular';
 import { HlmScrollAreaImports } from '@spartan-ng/helm/scroll-area';
 import { HlmSkeletonImports } from '@spartan-ng/helm/skeleton';
 
 @Component({
-  selector: 'app-admin-dashboard',
+  selector: 'app-live-map', // Updated selector name
   standalone: true,
   imports: [
     CommonModule,
-    SidebarComponent,
     LucideAngularModule,
     HlmScrollAreaImports,
     HlmSkeletonImports,
   ],
-  templateUrl: './admin-dashboard.html',
+  templateUrl: './live-map.html',
 })
-export class AdminDashboard implements OnInit, OnDestroy {
+export class LiveMap implements OnInit, OnDestroy {
   private hazardReportService = inject(HazardReportService);
   private platformId = inject(PLATFORM_ID);
 
@@ -27,7 +25,6 @@ export class AdminDashboard implements OnInit, OnDestroy {
   isLoading = signal<boolean>(true);
   errorMessage = signal<string>('');
 
-  // New Signal to control the collapsible panel
   isPanelOpen = signal<boolean>(true);
 
   private map: L.Map | undefined;
@@ -45,7 +42,6 @@ export class AdminDashboard implements OnInit, OnDestroy {
     }
   }
 
-  // Toggles the panel open and closed
   togglePanel() {
     this.isPanelOpen.update((state) => !state);
   }
@@ -101,7 +97,6 @@ export class AdminDashboard implements OnInit, OnDestroy {
         const markerColor = this.getMarkerColor(report.status);
         const categoryInitial = report.category ? report.category.charAt(0) : '!';
 
-        // Keep the sleek marker icon we built
         const customIcon = L.divIcon({
           className: 'bg-transparent border-0',
           html: `
@@ -114,12 +109,11 @@ export class AdminDashboard implements OnInit, OnDestroy {
           `,
           iconSize: [32, 40],
           iconAnchor: [16, 40],
-          popupAnchor: [0, -42], // Slightly raised to clear the marker pin
+          popupAnchor: [0, -42], 
         });
 
         const marker = L.marker([lat, lng], { icon: customIcon }).addTo(currentMap);
 
-        // Define the color classes for the status dot
         let dotColor = 'bg-gray-500';
         let glowShadow = '';
         if (report.status === 'Reported') {
@@ -133,10 +127,8 @@ export class AdminDashboard implements OnInit, OnDestroy {
           glowShadow = 'shadow-[0_0_8px_rgba(34,197,94,0.8)]';
         }
 
-        // The Premium Popup HTML
         const popupContent = `
           <div class="p-1 min-w-[260px] max-w-[300px] font-sans cursor-default">
-            
             ${
               report.imageURL
                 ? `
@@ -170,7 +162,6 @@ export class AdminDashboard implements OnInit, OnDestroy {
                 <span class="shrink-0 font-medium">${new Date(report.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
               </div>
             </div>
-
           </div>
         `;
 
@@ -200,7 +191,6 @@ export class AdminDashboard implements OnInit, OnDestroy {
 
       this.map.flyTo([lat, lng], 17, { duration: 1.5 });
 
-      // Optional: Automatically close the panel on smaller screens when they click a report
       if (window.innerWidth < 1024) {
         this.isPanelOpen.set(false);
       }

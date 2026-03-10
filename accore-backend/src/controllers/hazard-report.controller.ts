@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import HazardReport from '../models/hazard-report.model';
 import { v2 as cloudinary } from 'cloudinary';
+import Admin from '../models/admin.model'; 
 
 // Extend the Request interface to recognize the user object attached by the middleware
 interface AuthRequest extends Request {
@@ -91,6 +92,12 @@ export const updateReportStatus = async (req: AuthRequest, res: Response): Promi
   try {
     const { id } = req.params;
     const { status } = req.body;
+    const adminId = req.user?.id;
+
+    if (!adminId) {
+      res.status(401).json({ message: 'Unauthorized. Admin ID missing.' });
+      return;
+    }
 
     const validStatuses = ['Reported', 'Dispatched', 'Resolved'];
     
@@ -99,16 +106,30 @@ export const updateReportStatus = async (req: AuthRequest, res: Response): Promi
       return;
     }
 
-    const updatedReport = await HazardReport.findByIdAndUpdate(
-      id,
-      { status },
-      { new: true } 
-    );
+    // 1. Fetch the admin to get their name
+    const admin = await Admin.findById(adminId);
+    if (!admin) {
+      res.status(404).json({ message: 'Admin not found.' });
+      return;
+    }
 
-    if (!updatedReport) {
+    // 2. Fetch the report
+    const report = await HazardReport.findById(id);
+    if (!report) {
       res.status(404).json({ message: 'Hazard report not found.' });
       return;
     }
+
+    // 3. Update status and push to history
+    report.status = status;
+    report.statusHistory.push({
+      status: status,
+      updatedBy: admin._id as any,
+      adminName: `${admin.firstName} ${admin.lastName}`,
+      updatedAt: new Date()
+    });
+
+    const updatedReport = await report.save();
 
     res.status(200).json(updatedReport);
   } catch (error: any) {

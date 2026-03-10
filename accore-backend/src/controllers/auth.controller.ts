@@ -23,10 +23,12 @@ export const loginAdmin = async (
       return;
     }
 
-    // Create a secure token that expires in 1 day
+    // Create a secure token that includes the admin's name
     const token = jwt.sign(
       {
         id: admin._id,
+        firstName: admin.firstName, 
+        lastName: admin.lastName,   
         department: admin.department,
         role: "admin",
       },
