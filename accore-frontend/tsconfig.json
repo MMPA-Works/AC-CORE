@@ -24,7 +24,8 @@
       "@spartan-ng/helm/sonner": ["./libs/ui/sonner/src/index.ts"],
       "@spartan-ng/helm/scroll-area": ["./libs/ui/scroll-area/src/index.ts"],
       "@spartan-ng/helm/skeleton": ["./libs/ui/skeleton/src/index.ts"],
-      "@spartan-ng/helm/spinner": ["./libs/ui/spinner/src/index.ts"]
+      "@spartan-ng/helm/spinner": ["./libs/ui/spinner/src/index.ts"],
+      "@spartan-ng/helm/textarea": ["./libs/ui/textarea/src/index.ts"]
     }
   },
   "angularCompilerOptions": {

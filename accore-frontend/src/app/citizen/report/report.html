@@ -29,63 +29,65 @@
             type="text"
             formControlName="title"
             placeholder="Brief summary of the issue"
-            class="w-full"
+            class="w-full focus:ring-red-700"
           />
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="space-y-2">
-            <label hlmLabel for="category">Hazard Category</label>
-            <select
-              id="category"
-              formControlName="category"
-              class="flex h-10 w-full rounded-md border border-gray-200 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-700"
-            >
-              <option value="" disabled selected>Select a category</option>
-              <option value="Pothole">Pothole</option>
-              <option value="Clogged Drain">Clogged Drain</option>
-              <option value="Fallen Tree">Fallen Tree</option>
-              <option value="Streetlight Out">Streetlight Out</option>
-              <option value="Flooding">Flooding</option>
-            </select>
+          <div class="space-y-2 flex flex-col">
+            <label hlmLabel>Hazard Category</label>
+            <brn-select class="w-full" formControlName="category" placeholder="Select a category">
+              <hlm-select-trigger class="w-full border-gray-200 focus:ring-red-700">
+                <hlm-select-value />
+              </hlm-select-trigger>
+              <hlm-select-content class="w-[300px]">
+                <hlm-option value="Pothole">Pothole</hlm-option>
+                <hlm-option value="Clogged Drain">Clogged Drain</hlm-option>
+                <hlm-option value="Fallen Tree">Fallen Tree</hlm-option>
+                <hlm-option value="Streetlight Out">Streetlight Out</hlm-option>
+                <hlm-option value="Flooding">Flooding</hlm-option>
+              </hlm-select-content>
+            </brn-select>
           </div>
 
-          <div class="space-y-2">
-            <label hlmLabel for="severity">Severity Level</label>
-            <select
-              id="severity"
-              formControlName="severity"
-              class="flex h-10 w-full rounded-md border border-gray-200 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-700"
-            >
-              <option value="" disabled selected>Select severity</option>
-              <option value="Low">Low</option>
-              <option value="Medium">Medium</option>
-              <option value="Critical">Critical</option>
-            </select>
+          <div class="space-y-2 flex flex-col">
+            <label hlmLabel>Severity Level</label>
+            <brn-select class="w-full" formControlName="severity" placeholder="Select severity">
+              <hlm-select-trigger class="w-full border-gray-200 focus:ring-red-700">
+                <hlm-select-value />
+              </hlm-select-trigger>
+              <hlm-select-content class="w-[300px]">
+                <hlm-option value="Low">Low</hlm-option>
+                <hlm-option value="Medium">Medium</hlm-option>
+                <hlm-option value="Critical">Critical</hlm-option>
+              </hlm-select-content>
+            </brn-select>
           </div>
         </div>
 
-        <div class="space-y-2">
-          <label hlmLabel for="barangay">Barangay</label>
-          <input
-            hlmInput
-            id="barangay"
-            type="text"
-            formControlName="barangay"
-            placeholder="e.g., Balibago"
-            class="w-full"
-          />
+        <div class="space-y-2 flex flex-col">
+          <label hlmLabel>Barangay</label>
+          <brn-select class="w-full" formControlName="barangay" placeholder="Select your barangay">
+            <hlm-select-trigger class="w-full border-gray-200 focus:ring-red-700">
+              <hlm-select-value />
+            </hlm-select-trigger>
+            <hlm-select-content class="w-[350px] max-h-60 overflow-y-auto">
+              @for (brgy of barangays; track brgy) {
+                <hlm-option [value]="brgy">{{ brgy }}</hlm-option>
+              }
+            </hlm-select-content>
+          </brn-select>
         </div>
 
         <div class="space-y-2">
           <label hlmLabel for="description">Description</label>
           <textarea
-            hlmInput
+            hlmTextarea
             id="description"
             formControlName="description"
             rows="4"
             placeholder="Describe the issue and specific landmarks nearby..."
-            class="w-full min-h-[100px]"
+            class="w-full min-h-[100px] border-gray-200 focus:ring-red-700"
           ></textarea>
         </div>
 
@@ -111,22 +113,31 @@
           </p>
         </div>
 
-        <button
+<button
           hlmBtn
           type="submit"
-          class="w-full bg-red-700 hover:bg-red-800 text-white"
-          [disabled]="reportForm.invalid || !selectedFile || isSubmitting"
+          class="w-full bg-red-700 hover:bg-red-800 text-white flex items-center justify-center gap-2"
+          [disabled]="reportForm.invalid || !selectedFile || isSubmitting() || isCompressing()"
         >
-          {{ isSubmitting ? 'Submitting Report...' : 'Submit Report' }}
+          @if (isSubmitting()) {
+            <hlm-spinner class="w-4 h-4 text-white"></hlm-spinner>
+            <span>Submitting Report...</span>
+          } @else if (isCompressing()) {
+            <hlm-spinner class="w-4 h-4 text-white"></hlm-spinner>
+            <span>Optimizing Image...</span>
+          } @else {
+            <span>Submit Report</span>
+          }
         </button>
 
-        <div
-          *ngIf="statusMessage"
-          [ngClass]="{ 'text-red-600': isError, 'text-green-600': !isError }"
-          class="text-sm font-medium text-center mt-4"
-        >
-          {{ statusMessage }}
-        </div>
+        @if (statusMessage()) {
+          <div
+            [ngClass]="{ 'text-red-600': isError(), 'text-green-600': !isError() }"
+            class="text-sm font-medium text-center mt-4"
+          >
+            {{ statusMessage() }}
+          </div>
+        }
       </form>
     </main>
   </div>
