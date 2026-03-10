@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
 import HazardReport from '../models/hazard-report.model';
+import Admin from '../models/admin.model';
 import { v2 as cloudinary } from 'cloudinary';
-import Admin from '../models/admin.model'; 
+import { PRIORITY_COMMERCIAL_ZONES } from '../utils/constants';
 
-// Extend the Request interface to recognize the user object attached by the middleware
 interface AuthRequest extends Request {
   user?: {
     id: string;
@@ -75,11 +75,28 @@ export const getReports = async (req: AuthRequest, res: Response): Promise<void>
     }
 
     if (userRole === 'admin') {
-      // Admins get everything
-      const reports = await HazardReport.find().sort({ createdAt: -1 });
+      const reports = await HazardReport.aggregate([
+        {
+          $addFields: {
+            priorityWeight: {
+              $cond: {
+                if: { $in: ['$barangay', PRIORITY_COMMERCIAL_ZONES] },
+                then: 1, 
+                else: 2  
+              }
+            }
+          }
+        },
+        {
+          $sort: {
+            priorityWeight: 1, 
+            createdAt: -1      
+          }
+        }
+      ]);
+
       res.status(200).json(reports);
     } else {
-      // Citizens only get their own reports
       const reports = await HazardReport.find({ citizenId: userId }).sort({ createdAt: -1 });
       res.status(200).json(reports);
     }
@@ -106,21 +123,18 @@ export const updateReportStatus = async (req: AuthRequest, res: Response): Promi
       return;
     }
 
-    // 1. Fetch the admin to get their name
     const admin = await Admin.findById(adminId);
     if (!admin) {
       res.status(404).json({ message: 'Admin not found.' });
       return;
     }
 
-    // 2. Fetch the report
     const report = await HazardReport.findById(id);
     if (!report) {
       res.status(404).json({ message: 'Hazard report not found.' });
       return;
     }
 
-    // 3. Update status and push to history
     report.status = status;
     report.statusHistory.push({
       status: status,

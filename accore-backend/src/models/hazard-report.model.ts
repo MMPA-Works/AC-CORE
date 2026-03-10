@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import { ANGELES_CITY_BARANGAYS } from '../utils/constants';
 
 export interface IHazardReport extends Document {
   citizenId: mongoose.Types.ObjectId;
@@ -52,6 +53,7 @@ const hazardReportSchema: Schema = new Schema(
     barangay: {
       type: String,
       required: true,
+      enum: ANGELES_CITY_BARANGAYS, // Strictly enforced here
     },
     location: {
       type: {

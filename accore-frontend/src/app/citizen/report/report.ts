@@ -1,10 +1,17 @@
-import { Component, inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import imageCompression from 'browser-image-compression';
+
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmInputImports } from '@spartan-ng/helm/input';
 import { HlmLabelImports } from '@spartan-ng/helm/label';
+import { BrnSelectImports } from '@spartan-ng/brain/select';
+import { HlmSelectImports } from '@spartan-ng/helm/select';
+import { HlmTextareaImports } from '@spartan-ng/helm/textarea';
+import { HlmSpinnerImports } from '@spartan-ng/helm/spinner';
+
 import { HazardReportService } from '../../services/hazard-report';
 import * as L from 'leaflet';
 
@@ -18,6 +25,10 @@ import * as L from 'leaflet';
     HlmButtonImports,
     HlmInputImports,
     HlmLabelImports,
+    BrnSelectImports,
+    HlmSelectImports,
+    HlmTextareaImports,
+    HlmSpinnerImports
   ],
   templateUrl: './report.html',
 })
@@ -28,7 +39,16 @@ export class Report implements OnInit, OnDestroy {
   private map: L.Map | undefined;
   private marker: L.Marker | undefined;
 
-  // Default Angeles City coordinates are kept as a safe fallback
+  readonly barangays = [
+    'Agapito del Rosario', 'Amsic', 'Anunas', 'Balibago', 'Capaya', 
+    'Claro M. Recto', 'Cuayan', 'Cutcut', 'Cutud', 'Lourdes North West', 
+    'Lourdes Sur', 'Lourdes Sur East', 'Malabañas', 'Margot', 'Mining', 
+    'Ninoy Aquino', 'Pampang', 'Pandan', 'Pulung Cacutud', 'Pulung Maragul', 
+    'Pulungbulu', 'Salapungan', 'San Jose', 'San Nicolas', 'Santa Teresita', 
+    'Santa Trinidad', 'Santo Cristo', 'Santo Domingo', 'Santo Rosario', 
+    'Sapalibutad', 'Sapangbato', 'Tabun', 'Virgen Delos Remedios'
+  ];
+
   reportForm: FormGroup = this.fb.group({
     title: ['', [Validators.required, Validators.maxLength(100)]],
     category: ['', Validators.required],
@@ -40,9 +60,12 @@ export class Report implements OnInit, OnDestroy {
   });
 
   selectedFile: File | null = null;
-  isSubmitting = false;
-  statusMessage = '';
-  isError = false;
+  
+  // Converted state to Signals for Zoneless Angular
+  isSubmitting = signal(false);
+  isCompressing = signal(false);
+  statusMessage = signal('');
+  isError = signal(false);
 
   ngOnInit() {
     this.initMap();
@@ -109,7 +132,6 @@ export class Report implements OnInit, OnDestroy {
           const userLat = position.coords.latitude;
           const userLng = position.coords.longitude;
 
-          // Fly to the user's actual location with a smooth animation
           this.map?.flyTo([userLat, userLng], 16, { duration: 1.5 });
           this.marker?.setLatLng([userLat, userLng]);
           this.updateCoordinates(userLat, userLng);
@@ -129,23 +151,51 @@ export class Report implements OnInit, OnDestroy {
     });
   }
 
-  onFileSelected(event: Event) {
+  async onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
-      this.selectedFile = input.files[0];
+      const originalFile = input.files[0];
+      
+      const options = {
+        maxSizeMB: 0.5,
+        maxWidthOrHeight: 1280,
+        useWebWorker: true 
+      };
+
+      try {
+        // Trigger UI update using Signals
+        this.isCompressing.set(true);
+        this.statusMessage.set('Optimizing image...');
+
+        const compressedBlob = await imageCompression(originalFile, options);
+        
+        this.selectedFile = new File([compressedBlob], originalFile.name, {
+          type: compressedBlob.type,
+          lastModified: Date.now(),
+        });
+
+        // Trigger UI update to clear loading state
+        this.isCompressing.set(false);
+        this.statusMessage.set('');
+      } catch (error) {
+        console.error('Error compressing image:', error);
+        this.selectedFile = originalFile; 
+        this.isCompressing.set(false);
+        this.statusMessage.set('');
+      }
     }
   }
 
   onSubmit() {
     if (this.reportForm.invalid || !this.selectedFile) {
-      this.statusMessage = 'Please fill all required fields and select an image.';
-      this.isError = true;
+      this.statusMessage.set('Please fill all required fields and select an image.');
+      this.isError.set(true);
       return;
     }
 
-    this.isSubmitting = true;
-    this.statusMessage = '';
-    this.isError = false;
+    this.isSubmitting.set(true);
+    this.statusMessage.set('');
+    this.isError.set(false);
 
     const formData = new FormData();
     formData.append('image', this.selectedFile);
@@ -159,9 +209,9 @@ export class Report implements OnInit, OnDestroy {
 
     this.hazardReportService.submitReport(formData).subscribe({
       next: () => {
-        this.isSubmitting = false;
-        this.statusMessage = 'Report submitted successfully.';
-        this.isError = false;
+        this.isSubmitting.set(false);
+        this.statusMessage.set('Report submitted successfully.');
+        this.isError.set(false);
 
         this.reportForm.reset({ latitude: 15.145, longitude: 120.5887 });
         this.marker?.setLatLng([15.145, 120.5887]);
@@ -169,9 +219,9 @@ export class Report implements OnInit, OnDestroy {
         this.selectedFile = null;
       },
       error: () => {
-        this.isSubmitting = false;
-        this.statusMessage = 'Failed to submit the report. Please try again.';
-        this.isError = true;
+        this.isSubmitting.set(false);
+        this.statusMessage.set('Failed to submit the report. Please try again.');
+        this.isError.set(true);
       },
     });
   }
