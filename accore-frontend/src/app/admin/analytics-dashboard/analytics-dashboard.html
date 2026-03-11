@@ -1,1 +1,108 @@
-<p>analytics-dashboard works!</p>
+<div class="p-8 mx-auto space-y-8 max-w-[1400px]">
+  
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <h2 class="text-3xl font-bold tracking-tight text-gray-900">Analytics Dashboard</h2>
+      <p class="text-sm text-gray-500 mt-1">Real-time overview of municipal hazard reports.</p>
+    </div>
+    <button hlmBtn variant="outline" (click)="exportData()" class="gap-2 shadow-sm">
+      <lucide-icon name="upload-cloud" size="16"></lucide-icon>
+      Export CSV Report
+    </button>
+  </div>
+
+  @if (isLoading()) {
+    <div class="flex flex-col justify-center items-center h-64 space-y-4">
+      <lucide-icon name="loader-2" class="w-8 h-8 text-primary animate-spin"></lucide-icon>
+      <p class="text-gray-500 font-medium animate-pulse">Aggregating city data...</p>
+    </div>
+  } @else {
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div hlmCard class="shadow-sm border-gray-100">
+        <div hlmCardHeader class="flex flex-row items-center justify-between pb-2">
+          <h3 hlmCardTitle class="text-sm font-semibold text-gray-600">Active Hazards</h3>
+          <div class="p-2 bg-red-50 rounded-full"><lucide-icon name="alert-triangle" class="h-4 w-4 text-red-600"></lucide-icon></div>
+        </div>
+        <div hlmCardContent>
+          <div class="text-4xl font-bold text-gray-900">{{ analyticsData()?.totalActive || 0 }}</div>
+          <p class="text-xs text-gray-500 mt-2 font-medium uppercase tracking-wider">Requires Attention</p>
+        </div>
+      </div>
+      <div hlmCard class="shadow-sm border-gray-100">
+        <div hlmCardHeader class="flex flex-row items-center justify-between pb-2">
+          <h3 hlmCardTitle class="text-sm font-semibold text-gray-600">In Progress</h3>
+          <div class="p-2 bg-blue-50 rounded-full"><lucide-icon name="clock" class="h-4 w-4 text-blue-600"></lucide-icon></div>
+        </div>
+        <div hlmCardContent>
+          <div class="text-4xl font-bold text-gray-900">{{ getStatusCount('In Progress') }}</div>
+          <p class="text-xs text-gray-500 mt-2 font-medium uppercase tracking-wider">Currently Handled</p>
+        </div>
+      </div>
+      <div hlmCard class="shadow-sm border-gray-100">
+        <div hlmCardHeader class="flex flex-row items-center justify-between pb-2">
+          <h3 hlmCardTitle class="text-sm font-semibold text-gray-600">Resolved Reports</h3>
+          <div class="p-2 bg-green-50 rounded-full"><lucide-icon name="check-circle-2" class="h-4 w-4 text-green-600"></lucide-icon></div>
+        </div>
+        <div hlmCardContent>
+          <div class="text-4xl font-bold text-gray-900">{{ getStatusCount('Resolved') }}</div>
+          <p class="text-xs text-gray-500 mt-2 font-medium uppercase tracking-wider">Successfully Fixed</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-3">
+      <div hlmCard class="shadow-sm border-gray-100 lg:col-span-2">
+        <div hlmCardHeader class="border-b border-gray-50 pb-4">
+          <h3 hlmCardTitle class="text-lg font-semibold text-gray-800">Reports by Barangay</h3>
+        </div>
+        <div hlmCardContent class="pt-6 relative h-[300px] w-full">
+          <canvas baseChart [data]="barChartData" [options]="barChartOptions" [type]="barChartType"></canvas>
+        </div>
+      </div>
+
+      <div hlmCard class="shadow-sm border-gray-100 lg:col-span-1">
+        <div hlmCardHeader class="border-b border-gray-50 pb-4">
+          <h3 hlmCardTitle class="text-lg font-semibold text-gray-800">Severity Breakdown</h3>
+        </div>
+        <div hlmCardContent class="pt-6 relative h-[300px] w-full flex justify-center">
+          <canvas baseChart [data]="doughnutChartData" [options]="doughnutChartOptions" [type]="doughnutChartType"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-3">
+      <div hlmCard class="shadow-sm border-gray-100 lg:col-span-2 overflow-hidden">
+        <div hlmCardHeader class="border-b border-gray-50 pb-4 bg-white z-10 relative">
+          <h3 hlmCardTitle class="text-lg font-semibold text-gray-800">Recent Incident Hotspots</h3>
+        </div>
+        <div id="mini-map" class="h-[350px] w-full z-0 relative"></div>
+      </div>
+
+      <div hlmCard class="shadow-sm border-gray-100 lg:col-span-1 flex flex-col">
+        <div hlmCardHeader class="border-b border-gray-50 pb-4 shrink-0">
+          <h3 hlmCardTitle class="text-lg font-semibold text-gray-800">Recent Activity</h3>
+        </div>
+        <ng-scrollbar hlm class="h-[350px] p-4" appearance="compact">
+          <div class="space-y-4 pr-4">
+            @for (activity of analyticsData()?.recentActivity; track activity._id) {
+              <div class="flex flex-col space-y-2 border-b border-gray-50 pb-4 last:border-0">
+                <div class="flex justify-between items-start">
+                  <h4 class="text-sm font-semibold text-gray-900 leading-tight">{{ activity.title }}</h4>
+                  <span hlmBadge [variant]="activity.severity === 'Critical' ? 'destructive' : activity.severity === 'Medium' ? 'default' : 'secondary'" class="text-[10px] px-1.5 py-0 h-4">
+                    {{ activity.severity }}
+                  </span>
+                </div>
+                <div class="flex items-center text-xs text-gray-500 gap-3">
+                  <span class="flex items-center gap-1"><lucide-icon name="map-pin" size="12"></lucide-icon> Brgy. {{ activity.barangay }}</span>
+                  <span class="flex items-center gap-1"><lucide-icon name="clock" size="12"></lucide-icon> {{ activity.createdAt | date:'shortTime' }}</span>
+                </div>
+              </div>
+            } @empty {
+              <p class="text-sm text-gray-500 text-center py-8">No recent activity found.</p>
+            }
+          </div>
+        </ng-scrollbar>
+      </div>
+    </div>
+  }
+</div>
