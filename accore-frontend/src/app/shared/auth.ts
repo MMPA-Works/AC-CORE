@@ -40,20 +40,6 @@ export class AuthService {
     }
   }
 
-  getUserId(): string | null {
-    const token = this.getToken();
-    if (!token) {
-      return null;
-    }
-
-    try {
-      const decoded: any = jwtDecode(token);
-      return decoded.id || null;
-    } catch (error) {
-      return null;
-    }
-  }
-
   logout(): void {
     localStorage.removeItem('adminToken');
     localStorage.removeItem('token');

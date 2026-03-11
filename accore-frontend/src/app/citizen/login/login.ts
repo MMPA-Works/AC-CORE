@@ -7,8 +7,6 @@ import { SocialAuthService, GoogleSigninButtonModule } from '@abacritt/angularx-
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmInputImports } from '@spartan-ng/helm/input';
 import { HlmLabelImports } from '@spartan-ng/helm/label';
-import { HlmToasterImports } from '@spartan-ng/helm/sonner';
-import { toast } from 'ngx-sonner';
 
 @Component({
   selector: 'app-login',
@@ -20,9 +18,9 @@ import { toast } from 'ngx-sonner';
     HlmButtonImports,
     HlmInputImports,
     HlmLabelImports,
-    HlmToasterImports
   ],
   templateUrl: './login.html',
+  styleUrl: './login.css',
 })
 export class Login implements OnInit {
   private authService = inject(SocialAuthService);
@@ -30,7 +28,8 @@ export class Login implements OnInit {
   private router = inject(Router);
   private fb = inject(FormBuilder);
 
-  isLoading = signal(false);
+  errorMessage = signal<string>('');
+  isLoading = signal<boolean>(false);
 
   loginForm = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
@@ -38,27 +37,30 @@ export class Login implements OnInit {
   });
 
   ngOnInit() {
+    // Clear lingering sessions if no local token exists
     if (!localStorage.getItem('token')) {
       this.authService.signOut().catch(() => {});
     }
 
     this.authService.authState.subscribe((user) => {
-      if (user && user.idToken) this.handleGoogleLogin(user.idToken);
+      if (user && user.idToken) {
+        this.handleGoogleLogin(user.idToken);
+      }
     });
   }
 
   handleGoogleLogin(token: string) {
     this.isLoading.set(true);
+    this.errorMessage.set('');
 
     this.http.post('http://localhost:5000/api/auth/citizen/google', { token }).subscribe({
       next: (response: any) => {
         localStorage.setItem('token', response.token);
-        toast.success('Login successful!', { description: 'Redirecting to your dashboard...' });
         this.router.navigate(['/dashboard']);
       },
-      error: () => {
+      error: (err) => {
+        this.errorMessage.set('Google login failed. Please try again.');
         this.isLoading.set(false);
-        toast.error('Google login failed', { description: 'Please try again.' });
       },
     });
   }
@@ -70,16 +72,18 @@ export class Login implements OnInit {
     }
 
     this.isLoading.set(true);
+    this.errorMessage.set('');
 
-    this.http.post('http://localhost:5000/api/auth/citizen/login', this.loginForm.value).subscribe({
+    const credentials = this.loginForm.value;
+
+    this.http.post('http://localhost:5000/api/auth/citizen/login', credentials).subscribe({
       next: (response: any) => {
         localStorage.setItem('token', response.token);
-        toast.success('Login successful!', { description: 'Redirecting to your dashboard...' });
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
+        this.errorMessage.set(err.error?.message || 'Login failed. Check your credentials.');
         this.isLoading.set(false);
-        toast.error('Login failed', { description: err.error?.message || 'Check your credentials.' });
       },
     });
   }

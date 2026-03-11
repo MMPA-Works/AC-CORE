@@ -8,7 +8,6 @@ export interface IHazardReport extends Document {
   category: string;
   severity: string;
   barangay: string;
-  isPossibleDuplicate: boolean;
   location: {
     type: string;
     coordinates: number[];
@@ -54,11 +53,7 @@ const hazardReportSchema: Schema = new Schema(
     barangay: {
       type: String,
       required: true,
-      enum: ANGELES_CITY_BARANGAYS,
-    },
-    isPossibleDuplicate: {
-      type: Boolean,
-      default: false,
+      enum: ANGELES_CITY_BARANGAYS, // Strictly enforced here
     },
     location: {
       type: {
@@ -74,8 +69,7 @@ const hazardReportSchema: Schema = new Schema(
     status: {
       type: String,
       required: true,
-      // Updated to match the new 4-step tracker
-      enum: ['Reported', 'Under Review', 'In Progress', 'Resolved'],
+      enum: ['Reported', 'Dispatched', 'Resolved'],
       default: 'Reported',
     },
     imageURL: {

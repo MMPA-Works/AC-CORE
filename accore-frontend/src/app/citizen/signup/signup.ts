@@ -4,11 +4,11 @@ import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { SocialAuthService, GoogleSigninButtonModule } from '@abacritt/angularx-social-login';
+
+// Spartan UI Imports
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmInputImports } from '@spartan-ng/helm/input';
 import { HlmLabelImports } from '@spartan-ng/helm/label';
-import { HlmToasterImports } from '@spartan-ng/helm/sonner';
-import { toast } from 'ngx-sonner';
 
 @Component({
   selector: 'app-signup',
@@ -20,7 +20,6 @@ import { toast } from 'ngx-sonner';
     HlmButtonImports,
     HlmInputImports,
     HlmLabelImports,
-    HlmToasterImports
   ],
   templateUrl: './signup.html',
 })
@@ -30,7 +29,8 @@ export class Signup implements OnInit {
   private router = inject(Router);
   private fb = inject(FormBuilder);
 
-  isLoading = signal(false);
+  errorMessage = signal<string>('');
+  isLoading = signal<boolean>(false);
 
   signupForm = this.fb.group({
     firstName: ['', Validators.required],
@@ -41,22 +41,24 @@ export class Signup implements OnInit {
 
   ngOnInit() {
     this.authService.authState.subscribe((user) => {
-      if (user && user.idToken) this.handleGoogleSignup(user.idToken);
+      if (user && user.idToken) {
+        this.handleGoogleSignup(user.idToken);
+      }
     });
   }
 
   handleGoogleSignup(token: string) {
     this.isLoading.set(true);
+    this.errorMessage.set('');
 
     this.http.post('http://localhost:5000/api/auth/citizen/google', { token }).subscribe({
       next: (response: any) => {
         localStorage.setItem('token', response.token);
-        toast.success('Signup successful!', { description: 'Redirecting to dashboard...' });
         this.router.navigate(['/dashboard']);
       },
-      error: () => {
+      error: (err) => {
+        this.errorMessage.set('Google signup failed. Please try again.');
         this.isLoading.set(false);
-        toast.error('Google signup failed', { description: 'Please try again.' });
       },
     });
   }
@@ -68,16 +70,20 @@ export class Signup implements OnInit {
     }
 
     this.isLoading.set(true);
+    this.errorMessage.set('');
 
-    this.http.post('http://localhost:5000/api/auth/citizen/register', this.signupForm.value).subscribe({
+    const newCitizen = this.signupForm.value;
+
+    this.http.post('http://localhost:5000/api/auth/citizen/register', newCitizen).subscribe({
       next: (response: any) => {
-        localStorage.setItem('token', response.token);
-        toast.success('Account created!', { description: 'Redirecting to dashboard...' });
+        if (response.token) {
+          localStorage.setItem('token', response.token);
+        }
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
+        this.errorMessage.set(err.error?.message || 'Registration failed. Please try again.');
         this.isLoading.set(false);
-        toast.error('Signup failed', { description: err.error?.message || 'Please try again.' });
       },
     });
   }
