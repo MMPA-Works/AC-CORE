@@ -2,7 +2,7 @@
   <app-citizen-header></app-citizen-header>
 
   <main class="mx-auto flex max-w-6xl flex-col gap-5 px-4 py-6 md:px-6 md:py-8">
-    <section class="grid gap-4 xl:grid-cols-[minmax(0,1.8fr)_minmax(320px,1fr)]">
+    <section class="space-y-4">
       <section hlmCard class="gap-0 border-border/80 bg-card">
         <div hlmCardHeader class="space-y-3 pb-2">
           <div class="flex flex-wrap items-center gap-2">
@@ -12,38 +12,42 @@
           <h1 hlmCardTitle class="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">My Reports</h1>
         </div>
         <div hlmCardContent class="flex flex-col gap-5 pb-6">
-          <p hlmCardDescription class="max-w-2xl text-sm leading-7 md:text-base">
+          <p hlmCardDescription class="max-w-3xl text-sm leading-7 md:text-base">
             Track the status of every hazard you submitted, review updates from the city team, and confirm the location and photo tied to each report.
           </p>
-          <div class="flex flex-wrap gap-3">
-            <a routerLink="/citizen/report" hlmBtn>Report New Hazard</a>
-            <span class="inline-flex items-center rounded-md border border-border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
-              Reports are already filtered to your citizen account.
-            </span>
+          <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div class="flex flex-wrap gap-3">
+              <a routerLink="/citizen/report" hlmBtn>Report New Hazard</a>
+              <span class="inline-flex items-center rounded-md border border-border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
+                Reports are already filtered to your citizen account.
+              </span>
+            </div>
+            <p class="text-sm text-muted-foreground">
+              {{
+                isLoading()
+                  ? 'Loading your report activity.'
+                  : reports().length
+                    ? 'Showing your most recent submissions and current progress.'
+                    : 'Your report activity will appear here once you start filing hazards.'
+              }}
+            </p>
           </div>
         </div>
       </section>
 
-      <section class="grid auto-rows-fr gap-3 sm:grid-cols-2 xl:grid-cols-2">
+      <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         @for (card of summaryCards(); track card.label) {
-          <article hlmCard class="h-full gap-0 border-border/80 bg-card">
-            <div hlmCardContent class="flex h-full min-h-[132px] flex-col justify-between gap-3 px-5 py-4">
-              <span class="inline-flex w-fit rounded-full px-3 py-1 text-xs font-semibold leading-none" [ngClass]="card.accent">
-                {{ card.label }}
-              </span>
-              <div class="space-y-1.5">
+          <article hlmCard class="gap-0 border-border/80 bg-card transition-all duration-200 ease-out hover:-translate-y-1 hover:border-primary/30 hover:shadow-md">
+            <div hlmCardContent class="flex min-h-[112px] flex-col gap-4 px-5 py-4">
+              <div class="flex items-start justify-between gap-3">
+                <span class="inline-flex w-fit rounded-full px-3 py-1 text-xs font-semibold leading-none" [ngClass]="card.accent">
+                  {{ card.label }}
+                </span>
                 <p class="text-[2rem] font-semibold tracking-tight leading-none" [ngClass]="card.tone">{{ card.value }}</p>
-                <p class="max-w-[14ch] text-sm leading-5 text-muted-foreground">
-                  {{
-                    card.label === 'Resolved'
-                      ? 'Closed reports'
-                      : card.label === 'Critical'
-                        ? 'High-severity'
-                        : card.label === 'Active'
-                          ? 'Still awaiting closure'
-                          : 'Reports submitted'
-                  }}
-                </p>
+              </div>
+              <div class="space-y-1">
+                <p class="text-sm font-medium text-foreground">{{ card.description }}</p>
+                <p class="text-xs leading-5 text-muted-foreground">Live totals based on your submitted hazard reports.</p>
               </div>
             </div>
           </article>
@@ -140,9 +144,9 @@
               </div>
 
               <div class="grid gap-3 sm:grid-cols-2">
-                <button hlmBtn class="w-full" (click)="toggleDetails(report._id)">
-                  {{ isExpanded(report._id) ? 'Hide Details' : 'View Details' }}
-                </button>
+                <a [routerLink]="['/citizen/my-reports', report._id]" hlmBtn class="w-full">
+                  View Details
+                </a>
                 <a
                   hlmBtn
                   variant="outline"
@@ -155,26 +159,6 @@
                   <span>Map</span>
                 </a>
               </div>
-
-              @if (isExpanded(report._id)) {
-                <div class="space-y-3 rounded-xl border border-border/80 bg-background/70 p-4 text-sm text-muted-foreground">
-                  <p class="leading-6">{{ report.description }}</p>
-                  <div class="flex flex-wrap gap-2">
-                    <span class="rounded-full bg-muted px-3 py-1 text-xs font-medium text-foreground">{{ report.category }}</span>
-                    <span class="rounded-full px-3 py-1 text-xs font-medium" [ngClass]="getSeverityClasses(report.severity)">{{ report.severity }}</span>
-                  </div>
-                  <div class="border-t border-border/70 pt-3">
-                    <p>{{ getTrackerNote(report.status) }}</p>
-                    <p class="mt-2">
-                      @if (getLatestAdminName(report); as adminName) {
-                        Last update handled by <span class="font-semibold text-foreground">{{ adminName }}</span>.
-                      } @else {
-                        No staff update has been recorded yet.
-                      }
-                    </p>
-                  </div>
-                </div>
-              }
             </div>
           </article>
         }
