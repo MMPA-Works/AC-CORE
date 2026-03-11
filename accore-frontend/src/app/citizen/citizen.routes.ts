@@ -5,33 +5,38 @@ import { Signup } from './signup/signup';
 import { Dashboard } from './dashboard/dashboard';
 import { Report } from './report/report';
 import { MyReports } from './my-reports/my-reports';
-import { AuthGuard } from '../shared/auth.guard'; 
+import { Directory } from './directory/directory';
+import { AuthGuard } from '../shared/auth.guard';
 
 export const CITIZEN_ROUTES: Routes = [
   {
     path: '',
-    component: Home
+    component: Home,
   },
   {
     path: 'login',
-    component: Login
+    component: Login,
   },
   {
     path: 'signup',
-    component: Signup
+    component: Signup,
   },
   {
     path: 'report',
-    component: Report
+    component: Report,
+  },
+  { 
+    path: 'directory', 
+    component: Directory 
   },
   {
     path: 'dashboard',
     component: Dashboard,
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard],
   },
   {
     path: 'my-reports',
     component: MyReports,
-    canActivate: [AuthGuard]
-  }
+    canActivate: [AuthGuard],
+  },
 ];

@@ -1,0 +1,90 @@
+<div class="min-h-screen bg-slate-50 text-slate-900 font-sans pb-24">
+  
+  <header class="bg-white border-b border-slate-200 shadow-sm relative overflow-hidden">
+    <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary via-yellow-400 to-primary"></div>
+    
+    <div class="max-w-5xl mx-auto px-6 py-12 sm:py-16">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-50 text-yellow-700 text-xs font-bold uppercase tracking-wider mb-5 border border-yellow-200 shadow-sm">
+        <span class="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse"></span>
+        24/7 Response Portal
+      </div>
+      <h1 class="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight mb-4">
+        Emergency Directory
+      </h1>
+      <p class="text-slate-500 text-lg max-w-2xl leading-relaxed">
+        Official contact numbers for Angeles City first responders, medical facilities, and critical utility services.
+      </p>
+    </div>
+  </header>
+
+  <div class="max-w-5xl mx-auto px-6 mt-12 space-y-16">
+    
+    <div class="space-y-12">
+      @for (category of directoryData; track category.categoryName) {
+        <section>
+          <div class="flex items-center gap-3 mb-6">
+            <div class="p-2.5 rounded-xl bg-white border border-slate-200 shadow-sm text-primary">
+              <ng-icon hlm [name]="category.icon" size="sm"></ng-icon>
+            </div>
+            <h2 class="text-2xl font-bold text-slate-800 tracking-tight">{{ category.categoryName }}</h2>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            @for (contact of category.contacts; track contact.name) {
+              <div hlmCard class="bg-white border-slate-200 shadow-sm hover:shadow-md hover:border-yellow-400 transition-all duration-300 rounded-2xl flex flex-col overflow-hidden group">
+                <div class="p-6 flex-1">
+                  <h3 class="text-lg font-bold text-slate-900 group-hover:text-primary transition-colors">{{ contact.name }}</h3>
+                  <p class="text-sm mt-1.5 text-slate-500 leading-relaxed">{{ contact.description }}</p>
+                </div>
+                
+                <div class="px-6 pb-6 flex flex-col gap-3">
+                  @for (hotline of contact.hotlines; track hotline.number) {
+                    <a 
+                      hlmBtn
+                      variant="outline"
+                      class="w-full flex items-center justify-between bg-slate-50 border-slate-200 hover:bg-yellow-50 hover:border-yellow-300 hover:text-yellow-800 text-slate-700 transition-colors h-12 rounded-xl px-4 group/btn shadow-sm hover:shadow" 
+                      [href]="'tel:' + hotline.tel" 
+                      aria-label="Call {{ contact.name }} at {{ hotline.number }}"
+                    >
+                      <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500 group-hover/btn:text-yellow-600 transition-colors">
+                        {{ hotline.label }}
+                      </span>
+                      <div class="flex items-center gap-2 font-bold text-sm">
+                        <ng-icon hlm name="lucidePhone" size="sm" class="text-slate-400 group-hover/btn:text-yellow-600 transition-colors"></ng-icon>
+                        {{ hotline.number }}
+                      </div>
+                    </a>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </section>
+      }
+    </div>
+
+    <section class="bg-white rounded-[2rem] p-8 sm:p-12 border border-slate-200 shadow-sm">
+      <div class="mb-8">
+        <h2 class="text-2xl font-bold text-slate-900">Frequently Asked Questions</h2>
+        <p class="text-slate-500 mt-1">Guide on how to use the portal effectively.</p>
+      </div>
+      
+      <hlm-accordion type="single">
+        @for (faq of faqs; track faq.question) {
+          <hlm-accordion-item>
+            <h3 class="contents">
+              <button hlmAccordionTrigger>
+                {{ faq.question }}
+                <ng-icon hlm name="lucideChevronDown" hlmAccIcon />
+              </button>
+            </h3>
+            <hlm-accordion-content>
+              {{ faq.answer }}
+            </hlm-accordion-content>
+          </hlm-accordion-item>
+        }
+      </hlm-accordion>
+    </section>
+
+  </div>
+</div>
