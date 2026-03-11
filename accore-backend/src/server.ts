@@ -10,6 +10,9 @@ import citizenAuthRoutes from './routes/citizen-auth.routes';
 import barangayRoutes from './routes/barangay.routes';
 
 const app = express();
+
+app.set('trust proxy', 1);
+
 const PORT = process.env.PORT || 5000;
 
 connectDB();
@@ -26,18 +29,10 @@ app.use('/api/reports', hazardReportRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/auth/citizen', citizenAuthRoutes);
-console.log('SUCCESS: The server is reading the new barangay routes!');
 app.use('/api/geospatial', barangayRoutes);
 
-// Industry standard global error handler
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   console.error('GLOBAL EXPRESS ERROR CAUGHT:', err);
-  res.status(500).json({ message: 'A backend error occurred.', error: err.message });
-});
-
-// Industry standard global error handler to catch silent middleware crashes
-app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  console.error('SILENT BACKEND CRASH CAUGHT:', err);
   res.status(500).json({ message: 'A backend error occurred.', error: err.message });
 });
 
