@@ -26,11 +26,11 @@ export const AuthGuard: CanActivateFn = (route, state) => {
 
   if (state.url.startsWith('/admin') && role !== 'admin') {
     console.warn('Access Denied: Not an admin. Redirecting to citizen dashboard.');
-    router.navigate(['/citizen/dashboard']);
+    router.navigate(['/dashboard']);
     return false;
   }
 
-  if (!state.url.startsWith('/admin') && role !== 'citizen') {
+  if (state.url.startsWith('/dashboard') && role !== 'citizen') {
     console.warn('Access Denied: Not a citizen. Redirecting to admin dashboard.');
     router.navigate(['/admin/dashboard']); 
     return false;

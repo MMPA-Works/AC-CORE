@@ -6,8 +6,7 @@ interface AuthRequest extends Request {
 }
 
 export const verifyToken = (req: AuthRequest, res: Response, next: NextFunction): void => {
-  // Using .pop() grabs the token at the end of the array safely
-  const token = req.headers.authorization?.split(' ').pop();
+  const token = req.headers.authorization?.split(' ')[1];
 
   if (!token) {
     res.status(401).json({ message: 'Access denied. No token provided.' });
@@ -20,13 +19,5 @@ export const verifyToken = (req: AuthRequest, res: Response, next: NextFunction)
     next();
   } catch (error) {
     res.status(400).json({ message: 'Invalid token.' });
-  }
-};
-
-export const verifyAdmin = (req: AuthRequest, res: Response, next: NextFunction): void => {
-  if (req.user && req.user.role === 'admin') {
-    next();
-  } else {
-    res.status(403).json({ message: 'Access denied. Admin role required.' });
   }
 };
