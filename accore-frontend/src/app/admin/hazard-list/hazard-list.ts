@@ -1,20 +1,22 @@
-import { Component, OnInit, signal, effect, computed, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
-import * as L from 'leaflet';
+import { Router } from '@angular/router';
 
 import { HazardReportService } from '../../services/hazard-report';
 import { ExportService } from '../../services/export';
-import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
-import { HlmScrollAreaImports } from '@spartan-ng/helm/scroll-area';
-import { HlmSeparatorImports } from '@spartan-ng/helm/separator';
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';
-import { HlmDialogImports } from '@spartan-ng/helm/dialog';
 import { BrnSelectImports } from '@spartan-ng/brain/select';
 import { HlmSelectImports } from '@spartan-ng/helm/select';
+import { HlmTableImports } from '@spartan-ng/helm/table';
+import { HlmPaginationImports } from '@spartan-ng/helm/pagination';
 import { toast } from 'ngx-sonner';
+
+// Custom sorting weights to ensure logical ordering rather than alphabetical
+const SEVERITY_WEIGHT: Record<string, number> = { 'Low': 1, 'Medium': 2, 'Critical': 3 };
+const STATUS_WEIGHT: Record<string, number> = { 'Reported': 1, 'Under Review': 2, 'In Progress': 3, 'Resolved': 4 };
 
 @Component({
   selector: 'app-hazard-list',
@@ -23,14 +25,12 @@ import { toast } from 'ngx-sonner';
     CommonModule,
     FormsModule,
     HttpClientModule,
-    HlmCardImports,
     HlmButtonImports,
-    HlmScrollAreaImports,
-    HlmSeparatorImports,
     HlmBadgeImports,
-    HlmDialogImports,
     BrnSelectImports,
-    HlmSelectImports
+    HlmSelectImports,
+    HlmTableImports,
+    HlmPaginationImports
   ],
   providers: [HazardReportService],
   templateUrl: './hazard-list.html',
@@ -38,17 +38,20 @@ import { toast } from 'ngx-sonner';
 })
 export class HazardList implements OnInit {
   reports = signal<any[]>([]);
-  selectedReport = signal<any>(null);
-  pendingStatus = signal<string>('');
-  private mapInstance: L.Map | undefined;
 
-  // Extracts the ID to a single computed signal to prevent expensive object evaluations in the HTML template
-  selectedReportId = computed(() => this.selectedReport()?._id);
-
+  // Filtering State
   filterBarangay = signal<string>('All');
   filterCategory = signal<string>('All');
   filterSeverity = signal<string>('All');
   filterStatus = signal<string>('All');
+
+  // Sorting State - Added 'createdAt'
+  sortColumn = signal<'severity' | 'status' | 'createdAt' | null>('createdAt');
+  sortDirection = signal<'asc' | 'desc'>('desc'); // Default to newest first
+
+  // Pagination State
+  currentPage = signal<number>(1);
+  itemsPerPage = signal<number>(10);
 
   availableBarangays = computed(() => {
     const all = this.reports().map(r => r.barangay).filter(Boolean);
@@ -60,6 +63,7 @@ export class HazardList implements OnInit {
     return ['All', ...Array.from(new Set(all)).sort()];
   });
 
+  // 1. First apply filters
   filteredReports = computed(() => {
     const brgy = this.filterBarangay();
     const cat = this.filterCategory();
@@ -75,17 +79,53 @@ export class HazardList implements OnInit {
     });
   });
 
+  // 2. Then apply sorting
+  sortedReports = computed(() => {
+    const baseReports = [...this.filteredReports()];
+    const col = this.sortColumn();
+    const dir = this.sortDirection();
+
+    if (!col) return baseReports;
+
+    return baseReports.sort((a, b) => {
+      if (col === 'createdAt') {
+        const dateA = new Date(a.createdAt).getTime();
+        const dateB = new Date(b.createdAt).getTime();
+        if (dateA < dateB) return dir === 'asc' ? -1 : 1;
+        if (dateA > dateB) return dir === 'asc' ? 1 : -1;
+        return 0;
+      }
+
+      let valA = a[col];
+      let valB = b[col];
+
+      if (col === 'severity') {
+        valA = SEVERITY_WEIGHT[valA] || 0;
+        valB = SEVERITY_WEIGHT[valB] || 0;
+      } else if (col === 'status') {
+        valA = STATUS_WEIGHT[valA] || 0;
+        valB = STATUS_WEIGHT[valB] || 0;
+      }
+
+      if (valA < valB) return dir === 'asc' ? -1 : 1;
+      if (valA > valB) return dir === 'asc' ? 1 : -1;
+      return 0;
+    });
+  });
+
+  // 3. Finally apply pagination
+  paginatedReports = computed(() => {
+    const start = (this.currentPage() - 1) * this.itemsPerPage();
+    return this.sortedReports().slice(start, start + this.itemsPerPage());
+  });
+
+  totalPages = computed(() => Math.ceil(this.sortedReports().length / this.itemsPerPage()) || 1);
+
   constructor(
     private hazardService: HazardReportService,
-    private exportService: ExportService
-  ) {
-    effect(() => {
-      const report = this.selectedReport();
-      if (report?.location?.coordinates) {
-        setTimeout(() => this.initializeMap(report), 0);
-      }
-    });
-  }
+    private exportService: ExportService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.fetchAllReports();
@@ -105,87 +145,72 @@ export class HazardList implements OnInit {
   }
 
   viewDetails(id: string): void {
-    const localReport = this.reports().find(r => r._id === id);
-    if (localReport) {
-      this.selectedReport.set(localReport);
-      this.pendingStatus.set(localReport.status);
-    }
-
-    this.hazardService.getReportById(id).subscribe({
-      next: (response: any) => {
-        const data = response.report || response.data || response;
-        this.selectedReport.set(data);
-        this.pendingStatus.set(data.status);
-      },
-      error: (err) => {
-        console.error('Error fetching details:', err);
-        toast.error('Failed to load details');
-      }
-    });
-  }
-
-  saveStatus(): void {
-    const currentReport = this.selectedReport();
-    const newStatus = this.pendingStatus();
-
-    if (currentReport && newStatus !== currentReport.status) {
-      this.hazardService.updateReportStatus(currentReport._id, newStatus).subscribe({
-        next: (updatedReport) => {
-          this.selectedReport.set(updatedReport);
-          this.fetchAllReports();
-          toast.success('Status updated successfully');
-        },
-        error: (err) => {
-          console.error('Error updating status:', err);
-          toast.error('Failed to update status');
-        }
-      });
-    }
+    this.router.navigate(['/admin/hazards', id]);
   }
 
   exportToCSV(): void {
-    this.exportService.exportToCSV(this.filteredReports(), 'hazard_reports.csv');
+    this.exportService.exportToCSV(this.sortedReports(), 'hazard_reports.csv');
   }
 
-  private getMarkerColor(status: string): string {
-    switch (status) {
-      case 'Reported': return 'bg-red-500';
-      case 'Under Review': return 'bg-amber-500';
-      case 'In Progress': return 'bg-blue-500';
-      case 'Resolved': return 'bg-green-500';
-      default: return 'bg-gray-500';
+  // --- Handlers ---
+
+  onFilterChange(type: 'barangay' | 'category' | 'severity' | 'status', value: string): void {
+    if (type === 'barangay') this.filterBarangay.set(value);
+    if (type === 'category') this.filterCategory.set(value);
+    if (type === 'severity') this.filterSeverity.set(value);
+    if (type === 'status') this.filterStatus.set(value);
+    
+    // Reset pagination to page 1 whenever filters change
+    this.currentPage.set(1);
+  }
+
+  toggleSort(column: 'severity' | 'status' | 'createdAt'): void {
+    if (this.sortColumn() === column) {
+      this.sortDirection.set(this.sortDirection() === 'asc' ? 'desc' : 'asc');
+    } else {
+      this.sortColumn.set(column);
+      // Default to descending (newest first) for dates, ascending for text/status
+      this.sortDirection.set(column === 'createdAt' ? 'desc' : 'asc');
     }
   }
 
-  private initializeMap(report: any): void {
-    if (this.mapInstance) this.mapInstance.remove();
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages()) {
+      this.currentPage.set(page);
+    }
+  }
 
-    const lng = report.location.coordinates[0];
-    const lat = report.location.coordinates[1];
+  nextPage(): void {
+    if (this.currentPage() < this.totalPages()) {
+      this.currentPage.set(this.currentPage() + 1);
+    }
+  }
 
-    this.mapInstance = L.map('minimap', { zoomControl: false }).setView([lat, lng], 16);
+  prevPage(): void {
+    if (this.currentPage() > 1) {
+      this.currentPage.set(this.currentPage() - 1);
+    }
+  }
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
-    }).addTo(this.mapInstance);
+  getPageArray(): number[] {
+    const total = this.totalPages();
+    const current = this.currentPage();
+    const pages: number[] = [];
+    
+    // Simple logic to show a maximum of 5 page numbers
+    let start = Math.max(1, current - 2);
+    let end = Math.min(total, current + 2);
+    
+    if (current <= 2) end = Math.min(total, 5);
+    if (current >= total - 1) start = Math.max(1, total - 4);
+    
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    return pages;
+  }
 
-    const markerColor = this.getMarkerColor(report.status);
-    const categoryInitial = report.category ? report.category.charAt(0) : '!';
-
-    const customIcon = L.divIcon({ 
-      className: 'bg-transparent border-0',
-      html: `
-        <div class="relative flex flex-col items-center justify-center transition-transform hover:scale-110">
-          <div class="flex items-center justify-center w-8 h-8 ${markerColor} rounded-full shadow-lg border-2 border-white">
-            <span class="text-white text-xs font-bold">${categoryInitial}</span>
-          </div>
-          <div class="w-2 h-2 ${markerColor} rotate-45 -mt-1 border-r-2 border-b-2 border-white shadow-sm"></div>
-        </div>
-      `,
-      iconSize:[32, 40],
-      iconAnchor:[16, 40],
-    });
-
-    L.marker([lat, lng], { icon: customIcon }).addTo(this.mapInstance);
+  min(a: number, b: number): number {
+    return Math.min(a, b);
   }
 }

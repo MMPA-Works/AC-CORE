@@ -125,7 +125,11 @@ export const getReports = async (
 
 export const getReportById = async (req: Request, res: Response) => {
   try {
-    const report = await HazardReport.findById(req.params.id);
+    // Add .populate() to fetch the citizen's first and last name
+    const report = await HazardReport.findById(req.params.id).populate(
+      "citizenId",
+      "firstName lastName"
+    );
 
     if (!report) {
       return res.status(404).json({ message: "Hazard report not found" });
@@ -137,7 +141,6 @@ export const getReportById = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Server error retrieving the report" });
   }
 };
-
 export const updateReportStatus = async (
   req: AuthRequest,
   res: Response,
