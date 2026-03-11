@@ -5,6 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import * as L from 'leaflet';
 
 import { HazardReportService } from '../../services/hazard-report';
+import { HazardReportStatus } from '../../shared/models/hazard-report';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmDialogImports } from '@spartan-ng/helm/dialog';
 import { BrnSelectImports } from '@spartan-ng/brain/select';
@@ -28,10 +29,10 @@ import { toast } from 'ngx-sonner';
 })
 export class HazardDetails implements OnInit {
   report = signal<any>(null);
-  pendingStatus = signal<string>('');
+  pendingStatus = signal<HazardReportStatus | ''>('');
   private mapInstance: L.Map | undefined;
 
-  readonly STATUS_PIPELINE = ['Reported', 'Under Review', 'In Progress', 'Resolved'];
+  readonly STATUS_PIPELINE: HazardReportStatus[] = ['Reported', 'Under Review', 'In Progress', 'Resolved'];
 
   trackerSteps = computed(() => {
     const rep = this.report();
@@ -100,13 +101,11 @@ export class HazardDetails implements OnInit {
     });
   }
 
-// Inside src/app/admin/hazard-details/hazard-details.ts
-
   saveStatus(): void {
     const currentReport = this.report();
     const newStatus = this.pendingStatus();
 
-    if (currentReport && newStatus !== currentReport.status) {
+    if (currentReport && newStatus && newStatus !== currentReport.status) {
       this.hazardService.updateReportStatus(currentReport._id, newStatus).subscribe({
         next: (updatedReport) => {
           // BUG FIX: The backend returns an unpopulated citizenId string after saving.

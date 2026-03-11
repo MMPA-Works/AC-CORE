@@ -14,7 +14,7 @@ export class HazardReportService {
   private getAuthHeaders(): HttpHeaders {
     const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
     return new HttpHeaders({
-      Authorization: Bearer ${token}
+      Authorization: `Bearer ${token}`
     });
   }
 
@@ -31,19 +31,19 @@ export class HazardReportService {
   }
 
   getAnalytics(): Observable<any> {
-    return this.http.get<any>(${this.apiUrl}/analytics, {
+    return this.http.get<any>(`${this.apiUrl}/analytics`, {
       headers: this.getAuthHeaders()
     });
   }
 
   getReportById(id: string): Observable<HazardReport> {
-    return this.http.get<HazardReport>(${this.apiUrl}/${id}, {
+    return this.http.get<HazardReport>(`${this.apiUrl}/${id}`, {
       headers: this.getAuthHeaders()
     });
   }
 
   updateReportStatus(id: string, status: HazardReportStatus): Observable<HazardReport> {
-    return this.http.put<HazardReport>(${this.apiUrl}/${id}/status, { status }, {
+    return this.http.put<HazardReport>(`${this.apiUrl}/${id}/status`, { status }, {
       headers: this.getAuthHeaders()
     });
   }

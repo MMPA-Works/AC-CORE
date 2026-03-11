@@ -1,50 +1,25 @@
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { HazardReport, HazardReportStatus } from '../shared/models/hazard-report';
+import { HlmCard } from './lib/hlm-card';
+import { HlmCardAction } from './lib/hlm-card-action';
+import { HlmCardContent } from './lib/hlm-card-content';
+import { HlmCardDescription } from './lib/hlm-card-description';
+import { HlmCardFooter } from './lib/hlm-card-footer';
+import { HlmCardHeader } from './lib/hlm-card-header';
+import { HlmCardTitle } from './lib/hlm-card-title';
 
-@Injectable({
-  providedIn: 'root'
-})
-export class HazardReportService {
-  private apiUrl = 'http://localhost:5000/api/reports';
+export * from './lib/hlm-card';
+export * from './lib/hlm-card-action';
+export * from './lib/hlm-card-content';
+export * from './lib/hlm-card-description';
+export * from './lib/hlm-card-footer';
+export * from './lib/hlm-card-header';
+export * from './lib/hlm-card-title';
 
-  constructor(private http: HttpClient) {}
-
-  private getAuthHeaders(): HttpHeaders {
-    const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
-    return new HttpHeaders({
-      Authorization: Bearer ${token}
-    });
-  }
-
-  submitReport(formData: FormData): Observable<HazardReport> {
-    return this.http.post<HazardReport>(this.apiUrl, formData, {
-      headers: this.getAuthHeaders()
-    });
-  }
-
-  getReports(): Observable<HazardReport[]> {
-    return this.http.get<HazardReport[]>(this.apiUrl, {
-      headers: this.getAuthHeaders()
-    });
-  }
-
-  getAnalytics(): Observable<any> {
-    return this.http.get<any>(${this.apiUrl}/analytics, {
-      headers: this.getAuthHeaders()
-    });
-  }
-
-  getReportById(id: string): Observable<HazardReport> {
-    return this.http.get<HazardReport>(${this.apiUrl}/${id}, {
-      headers: this.getAuthHeaders()
-    });
-  }
-
-  updateReportStatus(id: string, status: HazardReportStatus): Observable<HazardReport> {
-    return this.http.put<HazardReport>(${this.apiUrl}/${id}/status, { status }, {
-      headers: this.getAuthHeaders()
-    });
-  }
-}
+export const HlmCardImports = [
+  HlmCard,
+  HlmCardAction,
+  HlmCardContent,
+  HlmCardDescription,
+  HlmCardFooter,
+  HlmCardHeader,
+  HlmCardTitle,
+] as const;
