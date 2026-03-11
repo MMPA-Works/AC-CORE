@@ -5,6 +5,7 @@ import { HlmAccordionImports } from '@spartan-ng/helm/accordion';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmIconImports } from '@spartan-ng/helm/icon';
 import { NgIcon, provideIcons } from '@ng-icons/core';
+import { CitizenHeaderComponent } from '../components/citizen-header/citizen-header';
 import { lucidePhone, lucideInfo, lucideChevronDown, lucideSiren, lucideDroplets, lucideActivity, lucideShield } from '@ng-icons/lucide';
 
 interface Hotline {
@@ -39,7 +40,8 @@ interface FaqItem {
     HlmAccordionImports, 
     HlmButtonImports, 
     HlmIconImports,
-    NgIcon
+    NgIcon,
+    CitizenHeaderComponent
   ],
   providers: [provideIcons({ lucidePhone, lucideInfo, lucideChevronDown, lucideSiren, lucideDroplets, lucideActivity, lucideShield })],
   templateUrl: './directory.html',
