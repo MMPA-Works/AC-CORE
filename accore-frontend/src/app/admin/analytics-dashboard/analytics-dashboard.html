@@ -1,108 +1,174 @@
-<div class="p-8 mx-auto space-y-8 max-w-[1400px]">
-  
+<div class="p-8 mx-auto space-y-8 max-w-[1400px] bg-white">
+
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
     <div>
-      <h2 class="text-3xl font-bold tracking-tight text-gray-900">Analytics Dashboard</h2>
-      <p class="text-sm text-gray-500 mt-1">Real-time overview of municipal hazard reports.</p>
+      <h2 class="text-3xl font-black tracking-tight text-[var(--foreground)]">Analytics Dashboard</h2>
+      <p class="text-sm text-[var(--muted-foreground)] mt-1 font-medium">Real-time municipal hazard intelligence.</p>
     </div>
-    <button hlmBtn variant="outline" (click)="exportData()" class="gap-2 shadow-sm">
+    <button hlmBtn variant="outline" (click)="exportData()" class="gap-2 border-[var(--border)] text-[var(--foreground)] hover:bg-[var(--muted)]">
       <lucide-icon name="upload-cloud" size="16"></lucide-icon>
       Export CSV Report
     </button>
   </div>
 
   @if (isLoading()) {
-    <div class="flex flex-col justify-center items-center h-64 space-y-4">
-      <lucide-icon name="loader-2" class="w-8 h-8 text-primary animate-spin"></lucide-icon>
-      <p class="text-gray-500 font-medium animate-pulse">Aggregating city data...</p>
-    </div>
+  <div class="flex flex-col justify-center items-center h-96 space-y-4">
+    <lucide-icon name="loader-2" class="w-10 h-10 text-[var(--primary)] animate-spin"></lucide-icon>
+    <p class="text-[var(--muted-foreground)] font-bold animate-pulse uppercase tracking-widest text-xs">Aggregating Data...</p>
+  </div>
   } @else {
-    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-      <div hlmCard class="shadow-sm border-gray-100">
-        <div hlmCardHeader class="flex flex-row items-center justify-between pb-2">
-          <h3 hlmCardTitle class="text-sm font-semibold text-gray-600">Active Hazards</h3>
-          <div class="p-2 bg-red-50 rounded-full"><lucide-icon name="alert-triangle" class="h-4 w-4 text-red-600"></lucide-icon></div>
-        </div>
-        <div hlmCardContent>
-          <div class="text-4xl font-bold text-gray-900">{{ analyticsData()?.totalActive || 0 }}</div>
-          <p class="text-xs text-gray-500 mt-2 font-medium uppercase tracking-wider">Requires Attention</p>
+  
+  <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <div hlmCard class="shadow-sm border-none bg-white">
+      <div hlmCardHeader class="flex flex-row items-center justify-between pb-2">
+        <h3 hlmCardTitle class="text-sm font-bold text-[var(--muted-foreground)] uppercase tracking-wider">Active Hazards</h3>
+        <div class="p-2 bg-[var(--primary)]/10 rounded-lg text-[var(--primary)]">
+          <lucide-icon name="alert-triangle" size="16"></lucide-icon>
         </div>
       </div>
-      <div hlmCard class="shadow-sm border-gray-100">
-        <div hlmCardHeader class="flex flex-row items-center justify-between pb-2">
-          <h3 hlmCardTitle class="text-sm font-semibold text-gray-600">In Progress</h3>
-          <div class="p-2 bg-blue-50 rounded-full"><lucide-icon name="clock" class="h-4 w-4 text-blue-600"></lucide-icon></div>
-        </div>
-        <div hlmCardContent>
-          <div class="text-4xl font-bold text-gray-900">{{ getStatusCount('In Progress') }}</div>
-          <p class="text-xs text-gray-500 mt-2 font-medium uppercase tracking-wider">Currently Handled</p>
-        </div>
-      </div>
-      <div hlmCard class="shadow-sm border-gray-100">
-        <div hlmCardHeader class="flex flex-row items-center justify-between pb-2">
-          <h3 hlmCardTitle class="text-sm font-semibold text-gray-600">Resolved Reports</h3>
-          <div class="p-2 bg-green-50 rounded-full"><lucide-icon name="check-circle-2" class="h-4 w-4 text-green-600"></lucide-icon></div>
-        </div>
-        <div hlmCardContent>
-          <div class="text-4xl font-bold text-gray-900">{{ getStatusCount('Resolved') }}</div>
-          <p class="text-xs text-gray-500 mt-2 font-medium uppercase tracking-wider">Successfully Fixed</p>
-        </div>
+      <div hlmCardContent>
+        <div class="text-4xl font-black text-[var(--foreground)]">{{ analyticsData()?.totalActive || 0 }}</div>
+        <p class="text-[10px] text-[var(--primary)] mt-2 font-bold uppercase tracking-widest">Requires Attention</p>
       </div>
     </div>
 
-    <div class="grid gap-6 lg:grid-cols-3">
-      <div hlmCard class="shadow-sm border-gray-100 lg:col-span-2">
-        <div hlmCardHeader class="border-b border-gray-50 pb-4">
-          <h3 hlmCardTitle class="text-lg font-semibold text-gray-800">Reports by Barangay</h3>
-        </div>
-        <div hlmCardContent class="pt-6 relative h-[300px] w-full">
-          <canvas baseChart [data]="barChartData" [options]="barChartOptions" [type]="barChartType"></canvas>
+    <div hlmCard class="shadow-sm border-none bg-white">
+      <div hlmCardHeader class="flex flex-row items-center justify-between pb-2">
+        <h3 hlmCardTitle class="text-sm font-bold text-[var(--muted-foreground)] uppercase tracking-wider">In Progress</h3>
+        <div class="p-2 bg-[var(--secondary)]/10 rounded-lg text-[var(--secondary)]">
+          <lucide-icon name="clock" size="16"></lucide-icon>
         </div>
       </div>
-
-      <div hlmCard class="shadow-sm border-gray-100 lg:col-span-1">
-        <div hlmCardHeader class="border-b border-gray-50 pb-4">
-          <h3 hlmCardTitle class="text-lg font-semibold text-gray-800">Severity Breakdown</h3>
-        </div>
-        <div hlmCardContent class="pt-6 relative h-[300px] w-full flex justify-center">
-          <canvas baseChart [data]="doughnutChartData" [options]="doughnutChartOptions" [type]="doughnutChartType"></canvas>
-        </div>
+      <div hlmCardContent>
+        <div class="text-4xl font-black text-[var(--foreground)]">{{ getStatusCount('In Progress') }}</div>
+        <p class="text-[10px] text-[var(--secondary)] mt-2 font-bold uppercase tracking-widest">Currently Handled</p>
       </div>
     </div>
 
-    <div class="grid gap-6 lg:grid-cols-3">
-      <div hlmCard class="shadow-sm border-gray-100 lg:col-span-2 overflow-hidden">
-        <div hlmCardHeader class="border-b border-gray-50 pb-4 bg-white z-10 relative">
-          <h3 hlmCardTitle class="text-lg font-semibold text-gray-800">Recent Incident Hotspots</h3>
+    <div hlmCard class="shadow-sm border-none bg-white">
+      <div hlmCardHeader class="flex flex-row items-center justify-between pb-2">
+        <h3 hlmCardTitle class="text-sm font-bold text-[var(--muted-foreground)] uppercase tracking-wider">Resolved</h3>
+        <div class="p-2 bg-slate-100 rounded-lg text-slate-600">
+          <lucide-icon name="check-circle-2" size="16"></lucide-icon>
         </div>
-        <div id="mini-map" class="h-[350px] w-full z-0 relative"></div>
       </div>
+      <div hlmCardContent>
+        <div class="text-4xl font-black text-[var(--foreground)]">{{ getStatusCount('Resolved') }}</div>
+        <p class="text-[10px] text-slate-500 mt-2 font-bold uppercase tracking-widest">Successfully Fixed</p>
+      </div>
+    </div>
+  </div>
 
-      <div hlmCard class="shadow-sm border-gray-100 lg:col-span-1 flex flex-col">
-        <div hlmCardHeader class="border-b border-gray-50 pb-4 shrink-0">
-          <h3 hlmCardTitle class="text-lg font-semibold text-gray-800">Recent Activity</h3>
+  <div class="grid gap-6 lg:grid-cols-3">
+    <div hlmCard class="shadow-lg border-none bg-white lg:col-span-2 overflow-hidden flex flex-col">
+      <div hlmCardHeader class="flex flex-row items-center justify-between pb-6 bg-[var(--muted)]/30">
+        <div>
+          <h3 hlmCardTitle class="text-xl font-bold text-[var(--foreground)]">Barangay Hotspots</h3>
+          <p class="text-sm text-[var(--muted-foreground)] font-medium">Top active municipal zones</p>
         </div>
-        <ng-scrollbar hlm class="h-[350px] p-4" appearance="compact">
-          <div class="space-y-4 pr-4">
-            @for (activity of analyticsData()?.recentActivity; track activity._id) {
-              <div class="flex flex-col space-y-2 border-b border-gray-50 pb-4 last:border-0">
-                <div class="flex justify-between items-start">
-                  <h4 class="text-sm font-semibold text-gray-900 leading-tight">{{ activity.title }}</h4>
-                  <span hlmBadge [variant]="activity.severity === 'Critical' ? 'destructive' : activity.severity === 'Medium' ? 'default' : 'secondary'" class="text-[10px] px-1.5 py-0 h-4">
-                    {{ activity.severity }}
-                  </span>
-                </div>
-                <div class="flex items-center text-xs text-gray-500 gap-3">
-                  <span class="flex items-center gap-1"><lucide-icon name="map-pin" size="12"></lucide-icon> Brgy. {{ activity.barangay }}</span>
-                  <span class="flex items-center gap-1"><lucide-icon name="clock" size="12"></lucide-icon> {{ activity.createdAt | date:'shortTime' }}</span>
-                </div>
+        <hlm-badge class="bg-[var(--secondary)] text-[var(--secondary-foreground)] border-none px-3 font-bold">LIVE</hlm-badge>
+      </div>
+      <div hlmCardContent class="pt-6 flex-1 flex flex-col justify-between">
+        <div class="space-y-6">
+          @for (item of topBarangays(); track item._id) {
+          <div class="group">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-sm font-bold text-[var(--foreground)] group-hover:text-[var(--primary)] transition-colors">{{ item._id }}</span>
+              <span class="text-sm font-black text-[var(--foreground)]">{{ item.count }} <span class="text-[10px] text-[var(--muted-foreground)] font-normal ml-1">REPORTS</span></span>
+            </div>
+            <div class="h-2.5 w-full bg-[var(--muted)] rounded-full overflow-hidden">
+              <div class="h-full rounded-full bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] transition-all duration-1000 ease-out"
+                [style.width.%]="(item.count / maxReportCount()) * 100">
               </div>
-            } @empty {
-              <p class="text-sm text-gray-500 text-center py-8">No recent activity found.</p>
-            }
+            </div>
           </div>
-        </ng-scrollbar>
+          }
+        </div>
+        <div class="mt-6 pt-4 border-t border-[var(--border)] flex justify-between items-center">
+          <p class="text-[10px] font-bold text-[var(--muted-foreground)] uppercase">Showing top 6 regions</p>
+          <span class="text-[10px] text-[var(--muted-foreground)] italic font-medium">Use Export for full data</span>
+        </div>
       </div>
     </div>
+
+    <div hlmCard class="shadow-sm border-none bg-white lg:col-span-1 flex flex-col">
+      <div hlmCardHeader class="border-b border-[var(--border)] pb-4">
+        <h3 hlmCardTitle class="text-lg font-bold text-[var(--foreground)]">Severity Profile</h3>
+      </div>
+      <div hlmCardContent class="pt-6 flex-1 flex flex-col">
+        <div class="relative h-[220px] w-full flex justify-center items-center">
+          <canvas baseChart [data]="doughnutChartData" [options]="doughnutChartOptions" [type]="doughnutChartType"></canvas>
+          <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+            <span class="text-3xl font-black text-[var(--foreground)]">{{ totalReports() }}</span>
+            <span class="text-[10px] font-bold text-[var(--muted-foreground)] uppercase tracking-tighter">Total</span>
+          </div>
+        </div>
+        <div class="mt-6 space-y-3 border-t border-[var(--border)] pt-6">
+          @for (item of analyticsData()?.bySeverity; track item._id) {
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full" 
+                [style.backgroundColor]="item._id === 'Critical' ? 'var(--primary)' : item._id === 'Medium' ? 'var(--secondary)' : 'var(--muted-foreground)'"></span>
+              <span class="text-xs font-bold text-[var(--muted-foreground)]">{{ item._id }}</span>
+            </div>
+            <div class="flex items-center gap-3">
+               <span class="text-xs font-black text-[var(--foreground)]">{{ item.count }}</span>
+               <span class="text-[10px] font-medium bg-[var(--muted)] px-2 py-0.5 rounded text-[var(--muted-foreground)]">{{ (item.count / (totalReports() || 1) * 100) | number:'1.0-0' }}%</span>
+            </div>
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid gap-6 lg:grid-cols-3">
+    <div hlmCard class="shadow-lg border-none bg-white lg:col-span-2 overflow-hidden">
+      <div hlmCardHeader class="border-b border-[var(--border)] pb-4 flex flex-row items-center justify-between bg-white z-10 relative">
+        <div class="flex items-center gap-3">
+          <div class="bg-[var(--primary)]/10 p-2 rounded-lg text-[var(--primary)]">
+            <lucide-icon name="navigation" size="20"></lucide-icon>
+          </div>
+          <div>
+            <h3 hlmCardTitle class="text-lg font-bold text-[var(--foreground)]">Geospatial Intelligence</h3>
+            <p class="text-[10px] text-[var(--muted-foreground)] font-black uppercase tracking-widest">Live Incident Mapping</p>
+          </div>
+        </div>
+      </div>
+      <div id="mini-map" class="h-[380px] w-full z-0 relative"></div>
+    </div>
+
+    <div hlmCard class="shadow-sm border-none bg-white lg:col-span-1 flex flex-col">
+      <div hlmCardHeader class="border-b border-[var(--border)] pb-4">
+        <h3 hlmCardTitle class="text-lg font-bold text-[var(--foreground)]">Recent Activity</h3>
+      </div>
+      <ng-scrollbar hlm class="h-[380px] p-4">
+        <div class="space-y-4 pr-4">
+          @for (activity of analyticsData()?.recentActivity; track activity._id) {
+          <div class="flex flex-col space-y-2 border-b border-[var(--border)] pb-4 last:border-0 group">
+            <div class="flex justify-between items-start">
+              <h4 class="text-sm font-bold text-[var(--foreground)] group-hover:text-[var(--primary)] transition-colors leading-tight">{{ activity.title }}</h4>
+              <span hlmBadge 
+                class="text-[9px] px-1.5 py-0 border-none font-black uppercase"
+                [style.backgroundColor]="activity.severity === 'Critical' ? 'var(--primary)' : activity.severity === 'Medium' ? 'var(--secondary)' : 'var(--muted)'"
+                [style.color]="activity.severity === 'Critical' ? 'white' : 'var(--foreground)'">
+                {{ activity.severity }}
+              </span>
+            </div>
+            <div class="flex items-center text-[10px] text-[var(--muted-foreground)] font-bold gap-3 uppercase">
+              <span class="flex items-center gap-1"><lucide-icon name="map-pin" size="10"></lucide-icon> {{ activity.barangay }}</span>
+              <span class="flex items-center gap-1"><lucide-icon name="clock" size="10"></lucide-icon> {{ activity.createdAt | date:'shortTime' }}</span>
+            </div>
+          </div>
+          } @empty {
+          <div class="flex flex-col items-center justify-center py-20 text-[var(--muted-foreground)] opacity-40">
+            <lucide-icon name="history" size="32" class="mb-2"></lucide-icon>
+            <p class="text-xs font-bold uppercase tracking-tighter">No recent activity</p>
+          </div>
+          }
+        </div>
+      </ng-scrollbar>
+    </div>
+  </div>
   }
 </div>

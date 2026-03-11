@@ -3,6 +3,10 @@ import { provideRouter } from '@angular/router';
 import { provideHttpClient, withFetch } from '@angular/common/http';
 import { routes } from './app.routes';
 import { SocialLoginModule, SocialAuthServiceConfig, GoogleLoginProvider } from '@abacritt/angularx-social-login';
+<<<<<<< HEAD
+// Added Download and ShieldCheck to the Lucide imports
+import { LucideAngularModule, LayoutDashboard, Map, Radio, BarChart3, Users, Settings, LogOut, ShieldAlert, MapPin, Clock, AlertTriangle, ChevronDown, CheckCircle2, Loader2, X, Menu, User, UploadCloud, Camera, Navigation, Download, ShieldCheck } from 'lucide-angular';
+=======
 import {
   LucideAngularModule,
   LayoutDashboard,
@@ -30,6 +34,7 @@ import {
   Camera,
   Navigation
 } from 'lucide-angular';
+>>>>>>> origin/dev
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 
 export const APP_CONFIG = {
@@ -62,6 +67,13 @@ export const appConfig: ApplicationConfig = {
     provideCharts(withDefaultRegisterables()),
     importProvidersFrom(
       SocialLoginModule,
+<<<<<<< HEAD
+      LucideAngularModule.pick({ 
+        LayoutDashboard, Map, Radio, BarChart3, Users, Settings, LogOut, 
+        ShieldAlert, MapPin, Clock, AlertTriangle, ChevronDown, CheckCircle2, 
+        Loader2, X, Menu, User, UploadCloud, Camera, Navigation,
+        Download, ShieldCheck // ADDED: Required for the updated UI sections
+=======
       LucideAngularModule.pick({
         LayoutDashboard,
         Map,
@@ -87,6 +99,7 @@ export const appConfig: ApplicationConfig = {
         UploadCloud,
         Camera,
         Navigation
+>>>>>>> origin/dev
       })
     ),
     {
