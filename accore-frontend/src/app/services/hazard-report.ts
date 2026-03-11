@@ -27,14 +27,6 @@ export class HazardReportService {
     return this.http.get<HazardReport[]>(this.apiUrl, { headers: this.getAuthHeaders() });
   }
 
-  getAnalytics(): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/analytics`, { headers: this.getAuthHeaders() });
-  }
-
-  getReportById(id: string): Observable<HazardReport> {
-    return this.http.get<HazardReport>(`${this.apiUrl}/${id}`, { headers: this.getAuthHeaders() });
-  }
-
   updateReportStatus(id: string, status: HazardReportStatus): Observable<HazardReport> {
     return this.http.put<HazardReport>(`${this.apiUrl}/${id}/status`, { status }, { headers: this.getAuthHeaders() });
   }
