@@ -1,4 +1,8 @@
-import { ApplicationConfig, provideZonelessChangeDetection, importProvidersFrom } from '@angular/core';
+import {
+  ApplicationConfig,
+  provideZonelessChangeDetection,
+  importProvidersFrom,
+} from '@angular/core';
 
 import { provideRouter } from '@angular/router';
 
@@ -6,22 +10,46 @@ import { provideHttpClient, withFetch } from '@angular/common/http';
 
 import { routes } from './app.routes';
 
-import { SocialLoginModule, SocialAuthServiceConfig, GoogleLoginProvider } from '@abacritt/angularx-social-login';
+import {
+  SocialLoginModule,
+  SocialAuthServiceConfig,
+  GoogleLoginProvider,
+} from '@abacritt/angularx-social-login';
 
 // Added Download and ShieldCheck to the Lucide imports
 
-import { LucideAngularModule, LayoutDashboard, Map, Radio, BarChart3, Users, Settings, LogOut, ShieldAlert, MapPin, Clock, AlertTriangle, ChevronDown, CheckCircle2, Loader2, X, Menu, User, UploadCloud, Camera, Navigation, Download, ShieldCheck } from 'lucide-angular';
+import {
+  LucideAngularModule,
+  LayoutDashboard,
+  Map,
+  Radio,
+  BarChart3,
+  Users,
+  Settings,
+  LogOut,
+  ShieldAlert,
+  MapPin,
+  Clock,
+  AlertTriangle,
+  ChevronDown,
+  CheckCircle2,
+  Loader2,
+  X,
+  Menu,
+  User,
+  UploadCloud,
+  Camera,
+  Navigation,
+  Download,
+  ShieldCheck,
+} from 'lucide-angular';
 
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 
-
-
 export const APP_CONFIG = {
-
   apiBaseUrl: 'http://localhost:5000/api',
 
   map: {
-
     defaultLat: 15.145,
 
     defaultLng: 120.5887,
@@ -30,21 +58,17 @@ export const APP_CONFIG = {
 
     activeZoom: 16,
 
-    scrollWheel: true
-
+    scrollWheel: true,
   },
 
   image: {
-
     maxSizeMB: 0.5,
 
     maxWidthOrHeight: 1280,
-
   },
 
   severityMapping: {
-
-    'Pothole': 'Medium',
+    Pothole: 'Medium',
 
     'Clogged Drain': 'Medium',
 
@@ -52,18 +76,12 @@ export const APP_CONFIG = {
 
     'Streetlight Out': 'Low',
 
-    'Flooding': 'Critical'
-
-  } as Record<string, string>
-
+    Flooding: 'Critical',
+  } as Record<string, string>,
 };
 
-
-
 export const appConfig: ApplicationConfig = {
-
   providers: [
-
     provideZonelessChangeDetection(),
 
     provideRouter(routes),
@@ -73,53 +91,55 @@ export const appConfig: ApplicationConfig = {
     provideCharts(withDefaultRegisterables()),
 
     importProvidersFrom(
-
       SocialLoginModule,
 
       LucideAngularModule.pick({
+        LayoutDashboard,
+        Map,
+        Radio,
+        BarChart3,
+        Users,
+        Settings,
+        LogOut,
 
-        LayoutDashboard, Map, Radio, BarChart3, Users, Settings, LogOut,
+        ShieldAlert,
+        MapPin,
+        Clock,
+        AlertTriangle,
+        ChevronDown,
+        CheckCircle2,
 
-        ShieldAlert, MapPin, Clock, AlertTriangle, ChevronDown, CheckCircle2,
+        Loader2,
+        X,
+        Menu,
+        User,
+        UploadCloud,
+        Camera,
+        Navigation,
 
-        Loader2, X, Menu, User, UploadCloud, Camera, Navigation,
-
-        Download, ShieldCheck // ADDED: Required for the updated UI sections
-
-      })
-
+        Download,
+        ShieldCheck, // ADDED: Required for the updated UI sections
+      }),
     ),
 
     {
-
       provide: 'SocialAuthServiceConfig',
 
       useValue: {
-
         autoLogin: false,
 
         providers: [
-
           {
-
             id: GoogleLoginProvider.PROVIDER_ID,
 
             provider: new GoogleLoginProvider(
-
               '184337788465-d57oaputgh4s9vvc384sbe6olrvc8ffd.apps.googleusercontent.com',
 
-              { prompt: 'select_account' }
-
-            )
-
-          }
-
+              { prompt: 'select_account' },
+            ),
+          },
         ],
-
       } as SocialAuthServiceConfig,
-
-    }
-
-  ]
-
+    },
+  ],
 };
