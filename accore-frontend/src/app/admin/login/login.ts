@@ -5,17 +5,20 @@ import { Router } from '@angular/router';
 import { HlmInputImports } from '@spartan-ng/helm/input';
 import { HlmLabelImports } from '@spartan-ng/helm/label';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
+import { HlmToasterImports } from '@spartan-ng/helm/sonner';
+import { toast } from 'ngx-sonner';
 import { AuthService } from '../../shared/auth';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [
-    CommonModule, 
-    ReactiveFormsModule, 
-    HlmInputImports, 
-    HlmLabelImports, 
-    HlmButtonImports
+    CommonModule,
+    ReactiveFormsModule,
+    HlmInputImports,
+    HlmLabelImports,
+    HlmButtonImports,
+    HlmToasterImports
   ],
   templateUrl: './login.html',
 })
@@ -25,7 +28,6 @@ export class Login {
   private router = inject(Router);
 
   isLoading = signal(false);
-  errorMessage = signal('');
 
   loginForm = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
@@ -39,16 +41,21 @@ export class Login {
     }
 
     this.isLoading.set(true);
-    this.errorMessage.set('');
 
     this.authService.login(this.loginForm.value).subscribe({
-      next: (response) => {
+      next: () => {
+        this.isLoading.set(false);
+        toast.success('Welcome back!', {
+          description: 'Redirecting to dashboard...'
+        });
         this.router.navigate(['/admin/dashboard']);
       },
-      error: (error) => {
+      error: (err) => {
         this.isLoading.set(false);
-        this.errorMessage.set('Invalid email or password. Please try again.');
-        console.error('Login failed:', error);
+        // The CSS override in styles.css will handle the red icon
+        toast.error('Invalid credentials', {
+          description: 'Email or password is incorrect.'
+        });
       }
     });
   }
