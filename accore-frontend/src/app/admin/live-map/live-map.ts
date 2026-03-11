@@ -92,8 +92,8 @@ export class LiveMap implements OnInit, OnDestroy {
 
     currentReports.forEach((report) => {
       if (report.location && report.location.coordinates) {
-        const lng = report.location.coordinates;
-        const lat = report.location.coordinates;
+        const lng = report.location.coordinates[0];
+        const lat = report.location.coordinates[1];
 
         const markerColor = this.getMarkerColor(report.status);
         const categoryInitial = report.category ? report.category.charAt(0) : '!';
@@ -101,7 +101,7 @@ export class LiveMap implements OnInit, OnDestroy {
         const customIcon = L.divIcon({
           className: 'bg-transparent border-0',
           html: `
-            <div class="relative flex flex-col items-center justify-center transition-transform hover:scale-110">
+            <div class="relative z-50 flex flex-col items-center justify-center transition-transform hover:scale-110">
               <div class="flex items-center justify-center w-8 h-8 ${markerColor} rounded-full shadow-lg border-2 border-white">
                 <span class="text-white text-xs font-bold">${categoryInitial}</span>
               </div>
@@ -185,8 +185,8 @@ export class LiveMap implements OnInit, OnDestroy {
 
   focusOnReport(report: any): void {
     if (this.map && report.location && report.location.coordinates) {
-      const lng = report.location.coordinates;
-      const lat = report.location.coordinates;
+      const lng = report.location.coordinates[0];
+      const lat = report.location.coordinates[1];
       this.map.flyTo([lat, lng], 17, { duration: 1.5 });
       if (window.innerWidth < 1024) {
         this.isPanelOpen.set(false);
