@@ -176,3 +176,55 @@
   transform: scale(1.08) !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
 }
+
+/* 
+Sonner 
+*/
+/* Sonner Error Icon Color */
+[data-sonner-toast][data-type='error'] [data-icon] {
+  color: #dc2626 !important;
+}
+
+/* Toast Container: control spacing between multiple toasts */
+[data-sonner-toaster] {
+  --toast-close-button-start: 0;
+  --toast-close-button-end: unset;
+  --gap: 1px; /* Reduce the gap between stacked toasts */
+}
+
+/* Toast Card Styling: remove extra spacing inside cards */
+[data-sonner-toast] {
+  margin: 0 !important;       /* Remove extra margin around card */
+  padding: 0.5rem !important; /* Tighten padding inside card */
+  line-height: 1;
+}
+
+/* Optional: tighten description spacing */
+[data-sonner-toast] [data-description] {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+/* Optional: tighten action button spacing */
+[data-sonner-toast] [data-action] {
+  margin-top: 0.25rem;
+}
+
+/* Optional: lighten error toast background */
+[data-sonner-toast][data-type='error'] {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+/* Sonner Success Icon Color */
+[data-sonner-toast][data-type='success'] [data-icon] {
+  color: #16a34a !important; /* A clean Tailwind-style green-600 */
+}
+
+/* Optional: success toast background and border to match the error style */
+[data-sonner-toast][data-type='success'] {
+  background: #f0fdf4; /* green-50 */
+  border-color: #bbf7d0; /* green-200 */
+  color: #166534; /* green-800 */
+}

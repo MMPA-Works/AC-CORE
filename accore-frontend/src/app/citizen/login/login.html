@@ -1,4 +1,7 @@
-<div class="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
+<main class="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
+  <!-- Sonner Toaster -->
+  <hlm-toaster class="z-50" [richColors]="true" [expand]="false"></hlm-toaster>
+
   <div class="w-full max-w-md p-8 bg-white rounded-lg shadow-sm border border-gray-200">
     <div class="text-center space-y-2 mb-8">
       <h2 class="text-3xl font-bold tracking-tight">Citizen Login</h2>
@@ -15,25 +18,15 @@
       <div class="flex-grow border-t border-gray-200"></div>
     </div>
 
-    <div *ngIf="errorMessage()" class="p-3 mb-4 text-sm text-red-600 bg-red-50 rounded-md">
-      {{ errorMessage() }}
-    </div>
-
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-4">
       <div class="space-y-1">
         <label hlmLabel for="email">Email Address</label>
         <input hlmInput id="email" type="email" formControlName="email" placeholder="juan@example.com" class="w-full" />
-        <div *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.invalid" class="text-xs text-red-500 mt-1">
-          Please enter a valid email address.
-        </div>
       </div>
 
       <div class="space-y-1">
         <label hlmLabel for="password">Password</label>
         <input hlmInput id="password" type="password" formControlName="password" placeholder="Enter your password" class="w-full" />
-        <div *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.invalid" class="text-xs text-red-500 mt-1">
-          Password is required.
-        </div>
       </div>
 
       <button hlmBtn type="submit" class="w-full mt-6" [disabled]="isLoading()">
@@ -46,4 +39,4 @@
       Do not have an account? <a href="/citizen/signup" class="text-blue-600 hover:underline">Sign up here</a>.
     </p>
   </div>
-</div>
+</main>
