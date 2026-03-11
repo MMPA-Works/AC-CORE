@@ -31,7 +31,8 @@
       "@spartan-ng/helm/separator": ["./libs/ui/separator/src/index.ts"],
       "@spartan-ng/helm/dialog": ["./libs/ui/dialog/src/index.ts"],
       "@spartan-ng/helm/table": ["./libs/ui/table/src/index.ts"],
-      "@spartan-ng/helm/pagination": ["./libs/ui/pagination/src/index.ts"]
+      "@spartan-ng/helm/pagination": ["./libs/ui/pagination/src/index.ts"],
+      "@spartan-ng/helm/accordion": ["./libs/ui/accordion/src/index.ts"]
     }
   },
   "angularCompilerOptions": {
