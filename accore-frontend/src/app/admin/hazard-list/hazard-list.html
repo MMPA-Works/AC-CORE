@@ -1,20 +1,73 @@
 <div class="flex h-screen w-full gap-6 p-6 bg-slate-50 text-slate-900 font-sans overflow-hidden box-border">
 
-  <!-- Sidebar: Incident Reports List -->
   <div class="w-80 shrink-0 flex flex-col bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden h-full">
     <div class="p-5 border-b border-slate-100 flex items-center justify-between">
       <div>
         <h2 class="text-lg font-bold">Incident Reports</h2>
         <p class="text-xs text-slate-500 mt-1">Select an item to view details</p>
       </div>
-      <!-- Export Data Button -->
       <button hlmBtn class="ml-2" (click)="exportToCSV()">Export Data</button>
+    </div>
+
+    <div class="p-3 border-b border-slate-100 bg-slate-50 flex flex-col gap-2">
+      <div class="flex gap-2">
+        <brn-select class="w-full" [ngModel]="filterBarangay()" (ngModelChange)="filterBarangay.set($event)">
+          <hlm-select-trigger class="w-full bg-white border-slate-200 h-9 text-xs">
+            <hlm-select-value placeholder="All Barangays" />
+          </hlm-select-trigger>
+          <hlm-select-content class="bg-white border-slate-200 shadow-lg">
+            <hlm-option *ngFor="let b of availableBarangays()" [value]="b">{{ b }}</hlm-option>
+          </hlm-select-content>
+        </brn-select>
+
+        <brn-select class="w-full" [ngModel]="filterCategory()" (ngModelChange)="filterCategory.set($event)">
+          <hlm-select-trigger class="w-full bg-white border-slate-200 h-9 text-xs">
+            <hlm-select-value placeholder="All Categories" />
+          </hlm-select-trigger>
+          <hlm-select-content class="bg-white border-slate-200 shadow-lg">
+            <hlm-option *ngFor="let c of availableCategories()" [value]="c">{{ c }}</hlm-option>
+          </hlm-select-content>
+        </brn-select>
+      </div>
+
+      <div class="flex gap-2">
+        <brn-select class="w-full" [ngModel]="filterSeverity()" (ngModelChange)="filterSeverity.set($event)">
+          <hlm-select-trigger class="w-full bg-white border-slate-200 h-9 text-xs">
+            <hlm-select-value placeholder="All Severities" />
+          </hlm-select-trigger>
+          <hlm-select-content class="bg-white border-slate-200 shadow-lg">
+            <hlm-option value="All">All Severities</hlm-option>
+            <hlm-option value="Critical">Critical</hlm-option>
+            <hlm-option value="High">High</hlm-option>
+            <hlm-option value="Medium">Medium</hlm-option>
+            <hlm-option value="Low">Low</hlm-option>
+          </hlm-select-content>
+        </brn-select>
+
+        <brn-select class="w-full" [ngModel]="filterStatus()" (ngModelChange)="filterStatus.set($event)">
+          <hlm-select-trigger class="w-full bg-white border-slate-200 h-9 text-xs">
+            <hlm-select-value placeholder="All Statuses" />
+          </hlm-select-trigger>
+          <hlm-select-content class="bg-white border-slate-200 shadow-lg">
+            <hlm-option value="All">All Statuses</hlm-option>
+            <hlm-option value="Reported">Reported</hlm-option>
+            <hlm-option value="Under Review">Under Review</hlm-option>
+            <hlm-option value="In Progress">In Progress</hlm-option>
+            <hlm-option value="Resolved">Resolved</hlm-option>
+          </hlm-select-content>
+        </brn-select>
+      </div>
     </div>
 
     <ng-scrollbar hlm class="flex-1" appearance="compact">
       <div class="flex flex-col p-3 gap-2">
+        
+        <div *ngIf="filteredReports().length === 0" class="text-center p-6 text-sm text-slate-500 font-medium">
+          No reports match your selected filters.
+        </div>
+
         <div
-          *ngFor="let report of reports()"
+          *ngFor="let report of filteredReports()"
           (click)="viewDetails(report._id)"
           class="p-4 rounded-lg cursor-pointer transition-colors border flex flex-col gap-1.5"
           [ngClass]="selectedReport()?._id === report._id ? 'bg-slate-100 border-slate-300 shadow-sm' : 'bg-white border-transparent hover:bg-slate-50 hover:border-slate-200'"
@@ -30,10 +83,8 @@
     </ng-scrollbar>
   </div>
 
-  <!-- Main Panel: Selected Report Details -->
   <div class="flex-1 flex flex-col bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden h-full min-h-0" *ngIf="selectedReport()">
     
-    <!-- Header with title, category, severity -->
     <div class="p-6 border-b border-slate-100 shrink-0 flex justify-between items-start">
       <div class="flex flex-col gap-1">
         <h2 class="text-2xl font-bold text-slate-900">{{ selectedReport().title || selectedReport().category }}</h2>
@@ -54,14 +105,11 @@
       <span class="text-xs text-slate-400 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">ID: {{ selectedReport()._id | slice:-6 }}</span>
     </div>
 
-    <!-- Body: Visual Evidence + Description + Tracker + Activity Log -->
     <div class="p-6 flex-1 overflow-y-auto bg-slate-50/50">
       <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
 
-        <!-- Left Column -->
         <div class="flex flex-col gap-6">
 
-          <!-- Visual Evidence -->
           <section>
             <h3 class="text-sm font-semibold text-slate-900 mb-2">Visual Evidence</h3>
             <hlm-dialog>
@@ -91,19 +139,16 @@
             </hlm-dialog>
           </section>
 
-          <!-- Specific Location -->
           <section>
             <h3 class="text-sm font-semibold text-slate-900 mb-2">Specific Location</h3>
             <div id="minimap" class="w-full h-64 bg-slate-200 rounded-xl border border-slate-200 overflow-hidden z-0"></div>
-            <p class="text-[11px] text-slate-400 mt-2 text-right">Coordinates: {{ selectedReport().location.coordinates[1] | number:'1.6-6' }}, {{ selectedReport().location.coordinates[0] | number:'1.6-6' }}</p>
+            <p class="text-[11px] text-slate-400 mt-2 text-right">Coordinates: {{ selectedReport().location.coordinates | number:'1.6-6' }}, {{ selectedReport().location.coordinates | number:'1.6-6' }}</p>
           </section>
 
         </div>
 
-        <!-- Right Column -->
         <div class="flex flex-col gap-6">
 
-          <!-- Description -->
           <section>
             <h3 class="text-sm font-semibold text-slate-900 mb-2">Description</h3>
             <div class="p-4 bg-white rounded-xl border border-slate-200 text-sm text-slate-700 leading-relaxed shadow-sm min-h-[100px]">
@@ -111,7 +156,6 @@
             </div>
           </section>
 
-          <!-- Update Tracker Status -->
           <section class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
             <h3 class="text-sm font-semibold text-slate-900 mb-1">Update Tracker Status</h3>
             <p class="text-xs text-slate-500 mb-4">Update the phase to keep the citizen pizza-tracker informed.</p>
@@ -139,7 +183,6 @@
             </div>
           </section>
 
-          <!-- Activity Log -->
           <section class="flex flex-col flex-1 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden min-h-[200px]">
             <div class="p-4 border-b border-slate-100 bg-slate-50/50">
               <h3 class="text-sm font-semibold text-slate-900">Activity Log</h3>
@@ -166,7 +209,6 @@
     </div>
   </div>
 
-  <!-- Placeholder if no report selected -->
   <div class="flex-1 flex flex-col items-center justify-center bg-white rounded-xl border border-slate-200 shadow-sm text-center p-12" *ngIf="!selectedReport()">
     <h3 class="text-lg font-semibold text-slate-900">Awaiting Selection</h3>
     <p class="text-sm text-slate-500 mt-1 max-w-sm">Choose a hazard report from the list to view the evidence, location, and update its current status.</p>
