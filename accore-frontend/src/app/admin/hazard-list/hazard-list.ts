@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, effect } from '@angular/core';
+import { Component, OnInit, signal, effect, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
@@ -41,6 +41,36 @@ export class HazardList implements OnInit {
   pendingStatus = signal<string>('');
   private mapInstance: L.Map | undefined;
 
+  filterBarangay = signal<string>('All');
+  filterCategory = signal<string>('All');
+  filterSeverity = signal<string>('All');
+  filterStatus = signal<string>('All');
+
+  availableBarangays = computed(() => {
+    const all = this.reports().map(r => r.barangay).filter(Boolean);
+    return ['All', ...Array.from(new Set(all)).sort()];
+  });
+
+  availableCategories = computed(() => {
+    const all = this.reports().map(r => r.category).filter(Boolean);
+    return ['All', ...Array.from(new Set(all)).sort()];
+  });
+
+  filteredReports = computed(() => {
+    const brgy = this.filterBarangay();
+    const cat = this.filterCategory();
+    const sev = this.filterSeverity();
+    const stat = this.filterStatus();
+
+    return this.reports().filter(report => {
+      const matchBrgy = brgy === 'All' || report.barangay === brgy;
+      const matchCat = cat === 'All' || report.category === cat;
+      const matchSev = sev === 'All' || report.severity === sev;
+      const matchStat = stat === 'All' || report.status === stat;
+      return matchBrgy && matchCat && matchSev && matchStat;
+    });
+  });
+
   constructor(
     private hazardService: HazardReportService,
     private exportService: ExportService
@@ -71,6 +101,14 @@ export class HazardList implements OnInit {
   }
 
   viewDetails(id: string): void {
+    // Optimistic UI Update for instant rendering
+    const localReport = this.reports().find(r => r._id === id);
+    if (localReport) {
+      this.selectedReport.set(localReport);
+      this.pendingStatus.set(localReport.status);
+    }
+
+    // Fetch fresh data in the background
     this.hazardService.getReportById(id).subscribe({
       next: (response: any) => {
         const data = response.report || response.data || response;
@@ -103,9 +141,8 @@ export class HazardList implements OnInit {
     }
   }
 
-  // ✅ New Export Data Method
   exportToCSV(): void {
-    this.exportService.exportToCSV(this.reports(), 'hazard_reports.csv');
+    this.exportService.exportToCSV(this.filteredReports(), 'hazard_reports.csv');
   }
 
   private getMarkerColor(status: string): string {
@@ -121,8 +158,8 @@ export class HazardList implements OnInit {
   private initializeMap(report: any): void {
     if (this.mapInstance) this.mapInstance.remove();
 
-    const lat = report.location.coordinates[1];
-    const lng = report.location.coordinates[0];
+    const lat = report.location.coordinates[0];
+    const lng = report.location.coordinates[1];
 
     this.mapInstance = L.map('minimap', { zoomControl: false }).setView([lat, lng], 16);
 
@@ -133,7 +170,7 @@ export class HazardList implements OnInit {
     const markerColor = this.getMarkerColor(report.status);
     const categoryInitial = report.category ? report.category.charAt(0) : '!';
 
-    const customIcon = L.divIcon({
+    const customIcon = L.divIcon({ 
       className: 'bg-transparent border-0',
       html: `
         <div class="relative flex flex-col items-center justify-center transition-transform hover:scale-110">
@@ -143,8 +180,8 @@ export class HazardList implements OnInit {
           <div class="w-2 h-2 ${markerColor} rotate-45 -mt-1 border-r-2 border-b-2 border-white shadow-sm"></div>
         </div>
       `,
-      iconSize: [32, 40],
-      iconAnchor: [16, 40],
+      iconSize:[32, 40],
+      iconAnchor:[16, 40],
     });
 
     L.marker([lat, lng], { icon: customIcon }).addTo(this.mapInstance);
