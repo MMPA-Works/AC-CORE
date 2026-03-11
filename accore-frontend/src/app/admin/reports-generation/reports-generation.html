@@ -1,0 +1,78 @@
+<div class="p-6 max-w-5xl mx-auto bg-slate-50 text-foreground font-sans rounded-xl shadow-sm">
+  <h2 class="text-2xl font-bold text-primary mb-6">Historical Reports Generation</h2>
+
+  <form [formGroup]="reportForm" (ngSubmit)="onFilterReports()" class="grid gap-4 md:grid-cols-2 mb-4">
+    <div>
+      <label class="block font-medium text-muted-foreground mb-1">Start Date:</label>
+      <input type="date" formControlName="startDate"
+             class="w-full border border-border rounded p-2 focus:ring-2 focus:ring-yellow-500 focus:outline-none"/>
+    </div>
+
+    <div>
+      <label class="block font-medium text-muted-foreground mb-1">End Date:</label>
+      <input type="date" formControlName="endDate"
+             class="w-full border border-border rounded p-2 focus:ring-2 focus:ring-yellow-500 focus:outline-none"/>
+    </div>
+
+    <div>
+      <label class="block font-medium text-muted-foreground mb-1">Barangay:</label>
+      <input type="text" formControlName="barangay" list="barangayOptions"
+             class="w-full border border-border rounded p-2 focus:ring-2 focus:ring-yellow-500 focus:outline-none"
+             placeholder="Type Barangay or 'All'"/>
+      <datalist id="barangayOptions">
+        <option value="All"></option>
+        <option *ngFor="let b of (filteredBarangays$ | async)" [value]="b"></option>
+      </datalist>
+    </div>
+
+    <div>
+      <label class="block font-medium text-muted-foreground mb-1">Category:</label>
+      <select formControlName="category"
+              class="w-full border border-border rounded p-2 focus:ring-2 focus:ring-yellow-500 focus:outline-none">
+        <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
+      </select>
+    </div>
+
+    <div class="md:col-span-2 flex gap-2 mt-2">
+      <button type="submit"
+              class="bg-primary text-white px-6 py-2 rounded hover:bg-blue-700 transition-colors">
+        Filter Reports
+      </button>
+      <button type="button"
+              (click)="exportToCSV()"
+              [disabled]="reports.length === 0"
+              class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 disabled:bg-gray-400 transition-colors">
+        Export CSV
+      </button>
+    </div>
+  </form>
+
+  <div class="mt-6 border border-border rounded bg-card overflow-hidden shadow-sm">
+    <div class="bg-gray-100 p-3 border-b border-border font-bold flex justify-between">
+      <span>Filtered Results</span>
+      <span class="text-sm font-normal">{{ reports.length }} reports found</span>
+    </div>
+
+    <div id="report-content" class="max-h-[60vh] overflow-y-auto">
+      <div *ngIf="reports.length === 0" class="p-8 text-center text-muted-foreground">
+        No reports found. Adjust your filters and click "Filter Reports".
+      </div>
+
+      <div *ngFor="let r of reports" class="p-4 border-b border-border last:border-0 hover:bg-gray-50 transition-colors">
+        <div class="flex justify-between items-start">
+          <strong class="text-primary text-lg">{{ r.title || r.category }}</strong>
+          <span class="text-xs bg-gray-200 px-2 py-1 rounded">{{ r.status }}</span>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2 text-sm text-muted-foreground">
+          <div><strong>Barangay:</strong> {{ r.barangay }}</div>
+          <div><strong>Category:</strong> {{ r.category }}</div>
+          <div><strong>Date:</strong> {{ r.createdAt | date:'medium' }}</div>
+          <div *ngIf="r.location?.coordinates"><strong>Latitude:</strong> {{ r.location.coordinates[1] }}</div>
+          <div *ngIf="r.location?.coordinates"><strong>Longitude:</strong> {{ r.location.coordinates[0] }}</div>
+          <div><strong>Resolved By:</strong> {{ getResolvedBy(r) }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

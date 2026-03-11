@@ -1,10 +1,40 @@
-import { ApplicationConfig, provideZonelessChangeDetection, importProvidersFrom } from '@angular/core';
+ import { ApplicationConfig, provideZonelessChangeDetection, importProvidersFrom } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withFetch } from '@angular/common/http';
 import { routes } from './app.routes';
 import { SocialLoginModule, SocialAuthServiceConfig, GoogleLoginProvider } from '@abacritt/angularx-social-login';
+<<<<<<< HEAD
 // Added Download and ShieldCheck to the Lucide imports
 import { LucideAngularModule, LayoutDashboard, Map, Radio, BarChart3, Users, Settings, LogOut, ShieldAlert, MapPin, Clock, AlertTriangle, ChevronDown, CheckCircle2, Loader2, X, Menu, User, UploadCloud, Camera, Navigation, Download, ShieldCheck } from 'lucide-angular';
+=======
+import {
+  LucideAngularModule,
+  LayoutDashboard,
+  Map,
+  Radio,
+  BarChart3,
+  Users,
+  Settings,
+  LogOut,
+  ShieldAlert,
+  MapPin,
+  Clock,
+  AlertTriangle,
+  ChevronDown,
+  CheckCircle2,
+  Loader2,
+  X,
+  Menu,
+  User,
+  ImageOff,
+  CalendarDays,
+  Tag,
+  Check,
+  UploadCloud,
+  Camera,
+  Navigation
+} from 'lucide-angular';
+>>>>>>> origin/dev
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 
 export const APP_CONFIG = {
@@ -14,7 +44,7 @@ export const APP_CONFIG = {
     defaultLng: 120.5887,
     defaultZoom: 13,
     activeZoom: 16,
-    scrollWheel: true 
+    scrollWheel: true
   },
   image: {
     maxSizeMB: 0.5,
@@ -37,11 +67,39 @@ export const appConfig: ApplicationConfig = {
     provideCharts(withDefaultRegisterables()),
     importProvidersFrom(
       SocialLoginModule,
+<<<<<<< HEAD
       LucideAngularModule.pick({ 
         LayoutDashboard, Map, Radio, BarChart3, Users, Settings, LogOut, 
         ShieldAlert, MapPin, Clock, AlertTriangle, ChevronDown, CheckCircle2, 
         Loader2, X, Menu, User, UploadCloud, Camera, Navigation,
         Download, ShieldCheck // ADDED: Required for the updated UI sections
+=======
+      LucideAngularModule.pick({
+        LayoutDashboard,
+        Map,
+        Radio,
+        BarChart3,
+        Users,
+        Settings,
+        LogOut,
+        ShieldAlert,
+        MapPin,
+        Clock,
+        AlertTriangle,
+        ChevronDown,
+        CheckCircle2,
+        Loader2,
+        X,
+        Menu,
+        User,
+        ImageOff,
+        CalendarDays,
+        Tag,
+        Check,
+        UploadCloud,
+        Camera,
+        Navigation
+>>>>>>> origin/dev
       })
     ),
     {
