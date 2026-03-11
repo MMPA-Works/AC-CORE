@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy, signal, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, signal, ChangeDetectorRef, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -31,6 +31,7 @@ import * as L from 'leaflet';
 export class Report implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private cdr = inject(ChangeDetectorRef);
+  private ngZone = inject(NgZone);
   private hazardService = inject(HazardReportService);
   private barangayService = inject(BarangayService);
 
@@ -57,7 +58,6 @@ export class Report implements OnInit, OnDestroy {
   });
 
   ngOnInit() {
-    // Ensures the map container exists before initializing
     setTimeout(() => {
       this.initMap();
       this.setupAutoSuggest();
@@ -80,7 +80,6 @@ export class Report implements OnInit, OnDestroy {
       attribution: '© OpenStreetMap'
     }).addTo(this.map);
 
-    // Restored Original Teardrop Pin Shape
     const teardropPin = L.divIcon({
       className: 'bg-transparent border-0',
       html: `
@@ -98,10 +97,13 @@ export class Report implements OnInit, OnDestroy {
 
     this.marker = L.marker(start, { draggable: true, icon: teardropPin }).addTo(this.map);
 
-    this.marker.on('dragend', () => this.handlePinMovement());
+    this.marker.on('dragend', () => {
+      this.ngZone.run(() => this.handlePinMovement());
+    });
+    
     this.map.on('click', (e) => {
       this.marker?.setLatLng(e.latlng);
-      this.handlePinMovement();
+      this.ngZone.run(() => this.handlePinMovement());
     });
 
     this.locateUser();
@@ -113,7 +115,7 @@ export class Report implements OnInit, OnDestroy {
         const coords: [number, number] = [pos.coords.latitude, pos.coords.longitude];
         this.map?.flyTo(coords, APP_CONFIG.map.activeZoom);
         this.marker?.setLatLng(coords);
-        this.handlePinMovement();
+        this.ngZone.run(() => this.handlePinMovement());
       });
     }
   }
@@ -124,9 +126,8 @@ export class Report implements OnInit, OnDestroy {
 
     this.reportForm.patchValue({ latitude: pos.lat, longitude: pos.lng });
     this.isLocating.set(true);
-    this.cdr.detectChanges(); // Fixes ExpressionChangedAfterItHasBeenCheckedError
+    this.cdr.detectChanges(); 
 
-    // Calls your Backend Controller: getNearestBarangay(longitude, latitude)
     this.barangayService.getNearestBarangay(pos.lng, pos.lat).subscribe({
       next: (res) => {
         const name = res?.data?.name;
@@ -134,12 +135,14 @@ export class Report implements OnInit, OnDestroy {
         this.isError.set(!name);
         this.statusMessage.set(name ? '' : 'Please move the pin inside Angeles City territory.');
         this.isLocating.set(false);
+        this.cdr.detectChanges();
       },
       error: () => {
         this.reportForm.patchValue({ barangay: '' });
         this.isError.set(true);
         this.statusMessage.set('Location not recognized. Pin within city boundaries.');
         this.isLocating.set(false);
+        this.cdr.detectChanges();
       }
     });
   }
@@ -153,8 +156,18 @@ export class Report implements OnInit, OnDestroy {
   }
 
   async onFileSelected(event: Event) {
-    const file = (event.target as HTMLInputElement).files?.[0];
-    if (!file) return;
+    const input = event.target as HTMLInputElement;
+    
+    if (!input.files || input.files.length === 0) {
+      return;
+    }
+    
+    // Using .item(0) avoids formatting issues with square brackets
+    const file = input.files.item(0);
+
+    if (!file) {
+      return;
+    }
 
     this.isCompressing.set(true);
     try {
