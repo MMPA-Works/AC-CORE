@@ -5,6 +5,7 @@ import { HttpClientModule } from '@angular/common/http';
 import * as L from 'leaflet';
 
 import { HazardReportService } from '../../services/hazard-report';
+import { ExportService } from '../../services/export.service';
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmScrollAreaImports } from '@spartan-ng/helm/scroll-area';
@@ -40,8 +41,10 @@ export class HazardList implements OnInit {
   pendingStatus = signal<string>('');
   private mapInstance: L.Map | undefined;
 
-  constructor(private hazardService: HazardReportService) {
-    // Automatically render map when a report is selected
+  constructor(
+    private hazardService: HazardReportService,
+    private exportService: ExportService
+  ) {
     effect(() => {
       const report = this.selectedReport();
       if (report?.location?.coordinates) {
@@ -84,7 +87,7 @@ export class HazardList implements OnInit {
   saveStatus(): void {
     const currentReport = this.selectedReport();
     const newStatus = this.pendingStatus();
-    
+
     if (currentReport && newStatus !== currentReport.status) {
       this.hazardService.updateReportStatus(currentReport._id, newStatus).subscribe({
         next: (updatedReport) => {
@@ -100,6 +103,11 @@ export class HazardList implements OnInit {
     }
   }
 
+  // ✅ New Export Data Method
+  exportToCSV(): void {
+    this.exportService.exportToCSV(this.reports(), 'hazard_reports.csv');
+  }
+
   private getMarkerColor(status: string): string {
     switch (status) {
       case 'Reported': return 'bg-red-500';
@@ -111,21 +119,17 @@ export class HazardList implements OnInit {
   }
 
   private initializeMap(report: any): void {
-    if (this.mapInstance) {
-      this.mapInstance.remove();
-    }
-    
+    if (this.mapInstance) this.mapInstance.remove();
+
     const lat = report.location.coordinates[1];
     const lng = report.location.coordinates[0];
 
-    // Initialize map
     this.mapInstance = L.map('minimap', { zoomControl: false }).setView([lat, lng], 16);
-    
+
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
     }).addTo(this.mapInstance);
-    
-    // Create Custom Pin (Copied from LiveMap component)
+
     const markerColor = this.getMarkerColor(report.status);
     const categoryInitial = report.category ? report.category.charAt(0) : '!';
 
