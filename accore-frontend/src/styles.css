@@ -228,8 +228,3 @@ Sonner
   border-color: #bbf7d0; /* green-200 */
   color: #166534; /* green-800 */
 }
-
-html {
-  /* Forces the vertical scrollbar to always show, preventing layout shifts */
-  overflow-y: scroll; 
-}
