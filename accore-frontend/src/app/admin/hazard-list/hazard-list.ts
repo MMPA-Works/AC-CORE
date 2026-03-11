@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, effect, computed } from '@angular/core';
+import { Component, OnInit, signal, effect, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
@@ -33,13 +33,17 @@ import { toast } from 'ngx-sonner';
     HlmSelectImports
   ],
   providers: [HazardReportService],
-  templateUrl: './hazard-list.html'
+  templateUrl: './hazard-list.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HazardList implements OnInit {
   reports = signal<any[]>([]);
   selectedReport = signal<any>(null);
   pendingStatus = signal<string>('');
   private mapInstance: L.Map | undefined;
+
+  // Extracts the ID to a single computed signal to prevent expensive object evaluations in the HTML template
+  selectedReportId = computed(() => this.selectedReport()?._id);
 
   filterBarangay = signal<string>('All');
   filterCategory = signal<string>('All');
@@ -101,14 +105,12 @@ export class HazardList implements OnInit {
   }
 
   viewDetails(id: string): void {
-    // Optimistic UI Update for instant rendering
     const localReport = this.reports().find(r => r._id === id);
     if (localReport) {
       this.selectedReport.set(localReport);
       this.pendingStatus.set(localReport.status);
     }
 
-    // Fetch fresh data in the background
     this.hazardService.getReportById(id).subscribe({
       next: (response: any) => {
         const data = response.report || response.data || response;
@@ -158,8 +160,8 @@ export class HazardList implements OnInit {
   private initializeMap(report: any): void {
     if (this.mapInstance) this.mapInstance.remove();
 
-    const lat = report.location.coordinates[0];
-    const lng = report.location.coordinates[1];
+    const lng = report.location.coordinates[0];
+    const lat = report.location.coordinates[1];
 
     this.mapInstance = L.map('minimap', { zoomControl: false }).setView([lat, lng], 16);
 
