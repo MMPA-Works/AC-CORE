@@ -7,40 +7,41 @@ export class ExportService {
 
   constructor() { }
 
-  exportToCSV(data: any[], filename: string = 'hazard_reports.csv'): void {
+  exportToCSV(data: any[], filename: string = 'hazard_reports'): void {
     if (!data || !data.length) return;
 
-    // CSV headers
-    const headers = ['Title', 'Category', 'Barangay', 'Status', 'Created At', 'Latitude', 'Longitude', 'Resolved By'];
-    const csvRows = [headers.join(',')];
+    // 1. Get headers dynamically from the first object keys
+    // This makes the service reusable for any component
+    const headers = Object.keys(data[0]);
+    const csvRows = [];
 
-    // Loop through data and extract required fields
-    data.forEach(report => {
-      const title = report.title || report.category || '';
-      const category = report.category || '';
-      const barangay = report.barangay || '';
-      const status = report.status || '';
-      const createdAt = report.createdAt || '';
-      const latitude = report.location?.coordinates?.[1] || '';
-      const longitude = report.location?.coordinates?.[0] || '';
+    // 2. Add Header row (Capitalize first letters for professional look)
+    csvRows.push(headers.map(h => `"${h.toUpperCase()}"`).join(','));
 
-      // Find admin who resolved the issue
-      let resolvedBy = '';
-      if (report.statusHistory?.length) {
-        const resolvedEntry = report.statusHistory.find((h: any) => h.status === 'Resolved');
-        resolvedBy = resolvedEntry?.adminName || '';
-      }
+    // 3. Add Data rows
+    for (const row of data) {
+      const values = headers.map(header => {
+        const escaped = ('' + row[header]).replace(/"/g, '""'); // Escape double quotes
+        return `"${escaped}"`;
+      });
+      csvRows.push(values.join(','));
+    }
 
-      const row = [title, category, barangay, status, createdAt, latitude, longitude, resolvedBy];
-      csvRows.push(row.map(v => `"${v}"`).join(',')); // wrap values in quotes
-    });
-
-    // Create CSV Blob and trigger download
+    // 4. Create Blob and trigger download
     const csvString = csvRows.join('\r\n');
-    const blob = new Blob([csvString], { type: 'text/csv' });
+    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    
     const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = filename;
+    link.setAttribute('href', url);
+    link.setAttribute('download', `${filename}.csv`);
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
     link.click();
+    document.body.removeChild(link);
+    
+    // Clean up
+    window.URL.revokeObjectURL(url);
   }
 }
