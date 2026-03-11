@@ -123,9 +123,15 @@ export const getReports = async (
   }
 };
 
-export const getReportById = async (req: Request, res: Response) => {
+export const getReportById = async (req: AuthRequest, res: Response) => {
   try {
-    // Add .populate() to fetch the citizen's first and last name
+    const userId = req.user?.id;
+    const userRole = req.user?.role;
+
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized. Please log in." });
+    }
+
     const report = await HazardReport.findById(req.params.id).populate(
       "citizenId",
       "firstName lastName"
@@ -135,9 +141,17 @@ export const getReportById = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Hazard report not found" });
     }
 
+    const ownerId =
+      typeof report.citizenId === "object" && report.citizenId !== null && "_id" in report.citizenId
+        ? String((report.citizenId as any)._id)
+        : String(report.citizenId);
+
+    if (userRole !== "admin" && ownerId !== userId) {
+      return res.status(403).json({ message: "Forbidden. You can only view your own reports." });
+    }
+
     res.status(200).json(report);
   } catch (error) {
-    // Catch invalid ObjectId formats or database connection issues
     res.status(500).json({ message: "Server error retrieving the report" });
   }
 };

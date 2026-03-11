@@ -15,7 +15,7 @@ const router = Router();
 router.get("/analytics", verifyToken, verifyAdmin, getAnalytics);
 router.post("/", verifyToken, reportLimiter, upload.single("image"), createReport);
 router.get("/", verifyToken, getReports);
-router.get("/:id", getReportById);
+router.get("/:id", verifyToken, getReportById);
 router.put("/:id/status", verifyToken, verifyAdmin, updateReportStatus);
 
 export default router;
