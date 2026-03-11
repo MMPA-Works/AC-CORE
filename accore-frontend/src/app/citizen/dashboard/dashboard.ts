@@ -1,24 +1,23 @@
 import { Component, inject, OnInit, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HazardReportService } from '../../services/hazard-report';
-import { AuthService } from '../../shared/auth'; 
+import { HazardReport } from '../../shared/models/hazard-report';
+import { CitizenHeaderComponent } from '../components/citizen-header/citizen-header';
 
 @Component({
   selector: 'app-citizen-dashboard',
   standalone: true,
-  imports: [RouterModule, CommonModule, HlmButtonImports],
+  imports: [RouterModule, CommonModule, HlmButtonImports, CitizenHeaderComponent],
   templateUrl: './dashboard.html',
 })
 export class Dashboard implements OnInit {
-  private router = inject(Router);
   private hazardReportService = inject(HazardReportService);
   private platformId = inject(PLATFORM_ID);
   private cdr = inject(ChangeDetectorRef);
-  private authService = inject(AuthService); 
 
-  myReports: any[] = [];
+  myReports: HazardReport[] = [];
   isLoading = true;
   errorMessage = '';
 
@@ -31,7 +30,7 @@ export class Dashboard implements OnInit {
   fetchReports() {
     this.hazardReportService.getReports().subscribe({
       next: (data) => {
-        this.myReports = data;
+        this.myReports = data.slice(0, 3);
         this.isLoading = false;
         this.cdr.detectChanges();
       },
@@ -44,10 +43,4 @@ export class Dashboard implements OnInit {
     });
   }
 
-  onLogout() {
-    // Rely on the service to handle tokens and Google sessions
-    this.authService.logout();
-    sessionStorage.clear(); 
-    this.router.navigate(['/']);
-  }
 }
