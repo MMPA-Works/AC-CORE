@@ -1,10 +1,11 @@
-import { Component, OnInit, OnDestroy, inject, signal, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, PLATFORM_ID, computed } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { HazardReportService } from '../../services/hazard-report';
 import { ExportService } from '../../services/export';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartType } from 'chart.js';
 import * as L from 'leaflet';
+
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';
@@ -15,10 +16,10 @@ import { LucideAngularModule } from 'lucide-angular';
   selector: 'app-analytics-dashboard',
   standalone: true,
   imports: [
-    CommonModule, 
-    BaseChartDirective, 
-    HlmCardImports, 
-    HlmButtonImports, 
+    CommonModule,
+    BaseChartDirective,
+    HlmCardImports,
+    HlmButtonImports,
     HlmBadgeImports,
     HlmScrollAreaImports,
     LucideAngularModule
@@ -30,21 +31,25 @@ export class AnalyticsDashboard implements OnInit, OnDestroy {
   private exportService = inject(ExportService);
   private platformId = inject(PLATFORM_ID);
 
+  maxReportCount = signal<number>(1);
+  totalReports = signal<number>(0);
   isLoading = signal<boolean>(true);
   analyticsData = signal<any>(null);
+
+  // Limit to top 6 barangays to keep the dashboard height consistent
+  topBarangays = computed(() => {
+    const data = this.analyticsData()?.byBarangay || [];
+    return data.slice(0, 6);
+  });
+  
   private map: L.Map | undefined;
 
-  public barChartOptions: ChartConfiguration['options'] = {
-    responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { display: false } },
-    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
-  };
-  public barChartType: ChartType = 'bar';
-  public barChartData: ChartConfiguration['data'] = { labels: [], datasets: [] };
-
   public doughnutChartOptions: ChartConfiguration['options'] = {
-    responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { position: 'right' } }
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false }
+    },
   };
   public doughnutChartType: ChartType = 'doughnut';
   public doughnutChartData: ChartConfiguration['data'] = { labels: [], datasets: [] };
@@ -64,23 +69,27 @@ export class AnalyticsDashboard implements OnInit, OnDestroy {
         this.analyticsData.set(data);
         
         if (data?.byBarangay) {
-          this.barChartData = {
-            labels: data.byBarangay.map((item: any) => item._id),
-            datasets: [{ 
-              data: data.byBarangay.map((item: any) => item.count), 
-              label: 'Hazards', backgroundColor: '#3b82f6', borderRadius: 6 
-            }]
-          };
+          const counts = data.byBarangay.map((item: any) => item.count);
+          this.maxReportCount.set(Math.max(...counts, 1));
         }
 
         if (data?.bySeverity) {
-          const colors: Record<string, string> = { 'Critical': '#ef4444', 'Medium': '#f59e0b', 'Low': '#3b82f6' };
+          const themeColors: Record<string, string> = {
+            'Critical': '#822a22',
+            'Medium': '#c49a3f',  
+            'Low': '#cbd5e1'      
+          };
+
+          const counts = data.bySeverity.map((item: any) => item.count);
+          this.totalReports.set(counts.reduce((a: number, b: number) => a + b, 0));
+
           this.doughnutChartData = {
             labels: data.bySeverity.map((item: any) => item._id),
-            datasets: [{ 
-              data: data.bySeverity.map((item: any) => item.count),
-              backgroundColor: data.bySeverity.map((item: any) => colors[item._id] || '#9ca3af'),
-              borderWidth: 0
+            datasets: [{
+              data: counts,
+              backgroundColor: data.bySeverity.map((item: any) => themeColors[item._id] || '#9ca3af'),
+              borderWidth: 0,
+              hoverOffset: 12
             }]
           };
         }
@@ -104,26 +113,29 @@ export class AnalyticsDashboard implements OnInit, OnDestroy {
 
     hotspots.forEach(report => {
       if (report.location?.coordinates?.length >= 2) {
-        const lng = report.location.coordinates[0];
-        const lat = report.location.coordinates[1];
+        const [lng, lat] = report.location.coordinates;
+        const colors: Record<string, string> = { 'Critical': '#822a22', 'Medium': '#c49a3f', 'Low': '#64748b' };
+        const pinColor = colors[report.severity] || colors['Medium'];
 
-        let pinColor = '#3b82f6'; 
-        if (report.severity === 'Critical') pinColor = '#ef4444'; 
-        if (report.severity === 'Medium') pinColor = '#f59e0b'; 
-        
-        L.circleMarker([lat, lng], {
-          radius: 7,
-          fillColor: pinColor,
-          color: '#ffffff',
-          weight: 2,
-          opacity: 1,
-          fillOpacity: 0.9
-        }).addTo(this.map!).bindTooltip(`
-          <div style="text-align: center;">
-            <strong>${report.title}</strong><br/>
-            <span style="color: ${pinColor}; font-weight: bold;">${report.severity}</span>
-          </div>
-        `);
+        const pulseStyle = report.severity === 'Critical'
+          ? `<div style="position: absolute; width: 40px; height: 40px; background: ${pinColor}; border-radius: 50%; opacity: 0.4; animation: mapPulse 2s infinite ease-out;"></div>`
+          : '';
+
+        const customIcon = L.divIcon({
+          className: '',
+          html: `<div style="position: relative; display: flex; justify-content: center; align-items: center; width: 32px; height: 32px;">
+                  ${pulseStyle}
+                  <div style="width: 24px; height: 24px; background-color: ${pinColor}; border: 2px solid white; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); box-shadow: 0 3px 6px rgba(0,0,0,0.3); display: flex; justify-content: center; align-items: center; z-index: 10;">
+                    <div style="width: 8px; height: 8px; background: white; border-radius: 50%; transform: rotate(45deg);"></div>
+                  </div>
+                </div>`,
+          iconSize: [32, 32],
+          iconAnchor: [16, 32]
+        });
+
+        L.marker([lat, lng], { icon: customIcon })
+          .addTo(this.map!)
+          .bindTooltip(`<b>${report.title}</b><br><span style="color:${pinColor}">${report.severity}</span>`, { direction: 'top', offset: [0, -30] });
       }
     });
   }
@@ -131,15 +143,11 @@ export class AnalyticsDashboard implements OnInit, OnDestroy {
   exportData() {
     if (!this.analyticsData()) return;
     const data = this.analyticsData();
-    
     const csvRows = ['Category,Name,Count'];
-    
     data.byBarangay.forEach((b: any) => csvRows.push(`"Barangay","${b._id}","${b.count}"`));
     data.byStatus.forEach((s: any) => csvRows.push(`"Status","${s._id}","${s.count}"`));
     data.bySeverity.forEach((s: any) => csvRows.push(`"Severity","${s._id}","${s.count}"`));
-
-    const csvString = csvRows.join('\r\n');
-    const blob = new Blob([csvString], { type: 'text/csv' });
+    const blob = new Blob([csvRows.join('\r\n')], { type: 'text/csv' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = 'angeles_hazard_analytics.csv';
