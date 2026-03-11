@@ -34,6 +34,12 @@ export class CitizenHeaderComponent {
       aliases: ['/my-reports', '/citizen/my-reports'],
       icon: 'clock',
     },
+    {
+      label: 'Directory',
+      route: '/directory',
+      aliases: ['/directory', '/citizen/directory'],
+      icon: 'users',
+    },
   ] as const;
 
   isActive(aliases: readonly string[]): boolean {

@@ -49,15 +49,18 @@ export class PizzaTrackerComponent {
   }
 
   getStepCaption(index: number): string {
-    if (this.isCurrent(index)) {
-      return '';
+    switch (index) {
+      case 0:
+        return 'Received';
+      case 1:
+        return 'Queued';
+      case 2:
+        return 'Work Ongoing';
+      case 3:
+        return 'Closed';
+      default:
+        return '';
     }
-
-    if (this.isComplete(index)) {
-      return '';
-    }
-
-    return '';
   }
 
   showCompletedIcon(index: number): boolean {

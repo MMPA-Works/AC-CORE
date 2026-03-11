@@ -33,7 +33,6 @@ export class MyReports implements OnInit {
   readonly isLoading = signal(true);
   readonly errorMessage = signal('');
   readonly brokenImageIds = signal<Record<string, boolean>>({});
-  readonly expandedReportId = signal<string | null>(null);
   readonly summaryCards = computed(() => {
     const reports = this.reports();
     const total = reports.length;
@@ -44,24 +43,28 @@ export class MyReports implements OnInit {
     return [
       {
         label: 'Total Reports',
+        description: 'Reports submitted',
         value: total,
         tone: 'text-foreground',
         accent: 'bg-primary/10 text-primary',
       },
       {
         label: 'Active',
+        description: 'Still awaiting closure',
         value: active,
         tone: 'text-foreground',
         accent: 'bg-secondary/20 text-foreground',
       },
       {
         label: 'Resolved',
+        description: 'Closed reports',
         value: resolved,
         tone: 'text-green-700',
         accent: 'bg-green-500/10 text-green-700',
       },
       {
         label: 'Critical',
+        description: 'High-severity',
         value: critical,
         tone: 'text-foreground',
         accent: 'bg-destructive/10 text-destructive',
@@ -146,14 +149,6 @@ export class MyReports implements OnInit {
       default:
         return 'Your report is queued and waiting for staff review.';
     }
-  }
-
-  toggleDetails(reportId: string): void {
-    this.expandedReportId.update((current) => (current === reportId ? null : reportId));
-  }
-
-  isExpanded(reportId: string): boolean {
-    return this.expandedReportId() === reportId;
   }
 
   getMapUrl(report: HazardReport): string {

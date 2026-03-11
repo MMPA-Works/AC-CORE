@@ -1,15 +1,13 @@
-<div class="space-y-5">
-  <p class="text-[1.05rem] font-medium text-foreground">Progress Status</p>
-
-  <div class="relative pt-2">
-    <div class="absolute left-10 right-10 top-7 h-0.5 bg-border"></div>
-    <div class="absolute left-10 top-7 h-0.5 bg-primary transition-all duration-300" [style.width]="progressWidth()"></div>
+<div class="space-y-4">
+  <div class="relative rounded-xl bg-muted/25 px-3 py-4 md:px-5">
+    <div class="absolute left-10 right-10 top-8 h-0.5 bg-border md:left-14 md:right-14"></div>
+    <div class="absolute left-10 top-8 h-0.5 bg-primary transition-all duration-300 md:left-14" [style.width]="progressWidth()"></div>
 
     <ol class="relative grid grid-cols-4 gap-2">
       @for (step of steps; track step; let index = $index) {
-        <li class="flex flex-col items-center gap-3 text-center">
+        <li class="flex flex-col items-center gap-2 text-center">
           <span
-            class="flex h-9 w-9 items-center justify-center rounded-full border text-sm font-semibold transition-colors shadow-sm"
+            class="flex h-9 w-9 items-center justify-center rounded-full border text-sm font-semibold transition-colors shadow-sm md:h-10 md:w-10"
             [ngClass]="{
               'border-primary bg-primary text-primary-foreground': isComplete(index) || isCurrent(index),
               'border-border bg-card text-muted-foreground': !isComplete(index) && !isCurrent(index)
@@ -21,7 +19,18 @@
               {{ index + 1 }}
             }
           </span>
-          <p class="text-[11px] font-semibold leading-4 text-foreground">{{ step }}</p>
+          <div class="space-y-0.5">
+            <p class="text-[11px] font-semibold leading-4 text-foreground md:text-xs">{{ step }}</p>
+            <p
+              class="text-[10px] leading-4"
+              [ngClass]="{
+                'text-primary': isCurrent(index) || isComplete(index),
+                'text-muted-foreground': !isCurrent(index) && !isComplete(index)
+              }"
+            >
+              {{ getStepCaption(index) }}
+            </p>
+          </div>
         </li>
       }
     </ol>
