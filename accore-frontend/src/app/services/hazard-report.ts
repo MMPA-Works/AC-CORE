@@ -6,12 +6,12 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class HazardReportService {
-  private apiUrl = 'http://localhost:5000/api/reports';
+  private apiUrl = 'http://localhost:5000/api/reports'; // Adjusted backend route
 
   constructor(private http: HttpClient) {}
 
   private getAuthHeaders(): HttpHeaders {
-    // Check for the admin token first, then fall back to the citizen token
+    // Correct token retrieval: Admin uses adminToken, fallback to citizen token
     const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
     return new HttpHeaders({
       'Authorization': `Bearer ${token}`
@@ -24,6 +24,10 @@ export class HazardReportService {
 
   getReports(): Observable<any[]> {
     return this.http.get<any[]>(this.apiUrl, { headers: this.getAuthHeaders() });
+  }
+
+  getReportById(id: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/${id}`, { headers: this.getAuthHeaders() });
   }
 
   updateReportStatus(id: string, status: string): Observable<any> {

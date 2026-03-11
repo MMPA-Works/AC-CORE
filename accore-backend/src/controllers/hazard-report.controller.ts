@@ -105,6 +105,21 @@ export const getReports = async (req: AuthRequest, res: Response): Promise<void>
   }
 };
 
+export const getReportById = async (req: Request, res: Response) => {
+  try {
+    const report = await HazardReport.findById(req.params.id);
+    
+    if (!report) {
+      return res.status(404).json({ message: 'Hazard report not found' });
+    }
+    
+    res.status(200).json(report);
+  } catch (error) {
+    // Catch invalid ObjectId formats or database connection issues
+    res.status(500).json({ message: 'Server error retrieving the report' });
+  }
+};
+
 export const updateReportStatus = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
@@ -116,10 +131,11 @@ export const updateReportStatus = async (req: AuthRequest, res: Response): Promi
       return;
     }
 
-    const validStatuses = ['Reported', 'Dispatched', 'Resolved'];
+    // Updated validation array
+    const validStatuses = ['Reported', 'Under Review', 'In Progress', 'Resolved'];
     
     if (!validStatuses.includes(status)) {
-      res.status(400).json({ message: 'Invalid status. Must be Reported, Dispatched, or Resolved.' });
+      res.status(400).json({ message: 'Invalid status provided.' });
       return;
     }
 

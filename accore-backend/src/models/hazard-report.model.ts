@@ -53,7 +53,7 @@ const hazardReportSchema: Schema = new Schema(
     barangay: {
       type: String,
       required: true,
-      enum: ANGELES_CITY_BARANGAYS, // Strictly enforced here
+      enum: ANGELES_CITY_BARANGAYS,
     },
     location: {
       type: {
@@ -69,7 +69,8 @@ const hazardReportSchema: Schema = new Schema(
     status: {
       type: String,
       required: true,
-      enum: ['Reported', 'Dispatched', 'Resolved'],
+      // Updated to match the new 4-step tracker
+      enum: ['Reported', 'Under Review', 'In Progress', 'Resolved'],
       default: 'Reported',
     },
     imageURL: {
