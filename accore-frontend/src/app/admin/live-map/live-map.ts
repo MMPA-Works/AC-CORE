@@ -7,7 +7,7 @@ import { HlmScrollAreaImports } from '@spartan-ng/helm/scroll-area';
 import { HlmSkeletonImports } from '@spartan-ng/helm/skeleton';
 
 @Component({
-  selector: 'app-live-map', // Updated selector name
+  selector: 'app-live-map',
   standalone: true,
   imports: [
     CommonModule,
@@ -49,8 +49,9 @@ export class LiveMap implements OnInit, OnDestroy {
   fetchReports() {
     this.isLoading.set(true);
     this.hazardReportService.getReports().subscribe({
-      next: (data) => {
-        this.reports.set(data);
+      next: (data: any) => {
+        const actualData = Array.isArray(data) ? data : (data.reports || []);
+        this.reports.set(actualData);
         this.isLoading.set(false);
         setTimeout(() => this.initMap(), 0);
       },
@@ -91,8 +92,8 @@ export class LiveMap implements OnInit, OnDestroy {
 
     currentReports.forEach((report) => {
       if (report.location && report.location.coordinates) {
-        const lng = report.location.coordinates[0];
-        const lat = report.location.coordinates[1];
+        const lng = report.location.coordinates;
+        const lat = report.location.coordinates;
 
         const markerColor = this.getMarkerColor(report.status);
         const categoryInitial = report.category ? report.category.charAt(0) : '!';
@@ -107,8 +108,8 @@ export class LiveMap implements OnInit, OnDestroy {
               <div class="w-2 h-2 ${markerColor} rotate-45 -mt-1 border-r-2 border-b-2 border-white shadow-sm"></div>
             </div>
           `,
-          iconSize: [32, 40],
-          iconAnchor: [16, 40],
+          iconSize:,
+          iconAnchor:,
           popupAnchor: [0, -42], 
         });
 
@@ -119,9 +120,12 @@ export class LiveMap implements OnInit, OnDestroy {
         if (report.status === 'Reported') {
           dotColor = 'bg-red-500';
           glowShadow = 'shadow-[0_0_8px_rgba(239,68,68,0.8)]';
-        } else if (report.status === 'Dispatched') {
+        } else if (report.status === 'Under Review') {
           dotColor = 'bg-amber-500';
           glowShadow = 'shadow-[0_0_8px_rgba(245,158,11,0.8)]';
+        } else if (report.status === 'In Progress') {
+          dotColor = 'bg-blue-500';
+          glowShadow = 'shadow-[0_0_8px_rgba(59,130,246,0.8)]';
         } else if (report.status === 'Resolved') {
           dotColor = 'bg-green-500';
           glowShadow = 'shadow-[0_0_8px_rgba(34,197,94,0.8)]';
@@ -174,9 +178,11 @@ export class LiveMap implements OnInit, OnDestroy {
   private getMarkerColor(status: string): string {
     switch (status) {
       case 'Reported':
-        return 'bg-primary';
-      case 'Dispatched':
-        return 'bg-secondary';
+        return 'bg-red-500';
+      case 'Under Review':
+        return 'bg-amber-500';
+      case 'In Progress':
+        return 'bg-blue-500';
       case 'Resolved':
         return 'bg-green-500';
       default:
@@ -186,8 +192,8 @@ export class LiveMap implements OnInit, OnDestroy {
 
   focusOnReport(report: any): void {
     if (this.map && report.location && report.location.coordinates) {
-      const lng = report.location.coordinates[0];
-      const lat = report.location.coordinates[1];
+      const lng = report.location.coordinates;
+      const lat = report.location.coordinates;
 
       this.map.flyTo([lat, lng], 17, { duration: 1.5 });
 
