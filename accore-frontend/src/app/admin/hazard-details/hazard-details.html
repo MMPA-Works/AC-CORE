@@ -1,0 +1,205 @@
+<div class="p-6 bg-slate-50 min-h-screen text-slate-900 font-sans">
+  <button hlmBtn variant="ghost" class="mb-4 pl-0 hover:bg-transparent hover:text-primary transition-colors" (click)="goBack()">
+    <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+    Back to Reports
+  </button>
+
+  @if (report(); as reportData) {
+    <div class="flex flex-col gap-6 max-w-7xl mx-auto">
+      
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-t-4 border-t-primary">
+        <div class="flex flex-col gap-2">
+          <div class="flex items-center gap-3">
+            <h2 class="text-2xl font-bold text-slate-900">{{ reportData.title || reportData.category }}</h2>
+            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-primary/10 border border-primary/20 text-primary">
+              {{ reportData.status }}
+            </span>
+          </div>
+          <div class="flex items-center gap-2 text-sm text-slate-500 font-medium flex-wrap">
+            <span class="flex items-center gap-1 text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md">
+              <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+              {{ reportData.barangay }}
+            </span>
+            <span class="text-slate-300">•</span>
+            <span>{{ reportData.category }}</span>
+            <span class="text-slate-300">•</span>
+            <span [class.text-primary]="reportData.severity === 'High'" [class.text-secondary]="reportData.severity === 'Medium'" [class.font-bold]="reportData.severity !== 'Low'">
+              {{ reportData.severity }} Priority
+            </span>
+          </div>
+        </div>
+        <div class="text-right flex flex-col items-end gap-1">
+          <span class="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded border border-slate-200 font-mono">
+            ID: {{ reportData._id | slice: -8 }}
+          </span>
+          <p class="text-xs text-slate-400 font-medium mt-1">
+            Reported: {{ reportData.createdAt | date: 'MMM d, y, h:mm a' }}
+          </p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <div class="lg:col-span-8 flex flex-col gap-6">
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+              <div class="px-4 py-3 border-b border-slate-100 bg-slate-50/80 flex items-center gap-2">
+                <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                <h3 class="text-sm font-semibold text-slate-800">Visual Evidence</h3>
+              </div>
+              <hlm-dialog>
+                <div hlmDialogTrigger class="w-full h-64 bg-slate-100 relative cursor-zoom-in group flex items-center justify-center p-2">
+                  <img [src]="reportData.imageURL || 'assets/placeholder.png'" alt="Visual evidence" class="max-w-full max-h-full object-contain drop-shadow-sm transition-transform duration-300 group-hover:scale-[1.03]" />
+                  <div class="absolute inset-0 bg-slate-900/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                    <span class="bg-primary text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded shadow-sm">Expand</span>
+                  </div>
+                </div>
+                <hlm-dialog-content *hlmDialogPortal="let ctx" class="sm:max-w-[90vw] sm:max-h-[90vh] bg-transparent border-none shadow-none flex flex-col items-center justify-center p-0">
+                  <div class="w-full flex justify-end mb-4">
+                    <button hlmDialogClose class="bg-white/20 hover:bg-white/40 text-white p-2.5 rounded-full backdrop-blur-md transition-colors">
+                      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                  </div>
+                  <img [src]="reportData.imageURL || 'assets/placeholder.png'" class="max-w-full max-h-[80vh] object-contain rounded-xl shadow-2xl bg-black/60 backdrop-blur-sm" />
+                </hlm-dialog-content>
+              </hlm-dialog>
+            </div>
+
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+              <div class="px-4 py-3 border-b border-slate-100 bg-slate-50/80 flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                  <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
+                  <h3 class="text-sm font-semibold text-slate-800">Location</h3>
+                </div>
+              </div>
+              <div id="details-minimap" class="w-full h-64 bg-slate-200 z-0"></div>
+            </div>
+
+          </div>
+
+          <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex-1 flex flex-col">
+            <div class="px-4 py-3 border-b border-slate-100 bg-slate-50/80 flex items-center gap-2">
+              <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              <h3 class="text-sm font-semibold text-slate-800">Resolution Pipeline</h3>
+            </div>
+            
+            <div class="p-6 md:p-8 overflow-x-auto">
+              <div class="flex justify-between items-start w-full min-w-[500px] relative">
+                @for (step of trackerSteps(); track step.status; let last = $last) {
+                  
+                  <div class="flex-1 flex flex-col items-center relative">
+                    
+                    @if (!last) {
+                      <div class="absolute top-4 left-1/2 w-full h-[4px] -z-10 transition-colors duration-500 rounded-full"
+                           [class.bg-primary]="step.isActive"
+                           [class.bg-slate-200]="!step.isActive">
+                      </div>
+                    }
+
+                    <div class="relative z-10 w-8 h-8 rounded-full border-2 flex items-center justify-center shrink-0 transition-all duration-500 shadow-sm bg-white"
+                         [class.border-primary]="step.isActive"
+                         [class.border-slate-300]="!step.isActive">
+                      @if (step.isActive) {
+                        <div class="w-full h-full rounded-full bg-primary flex items-center justify-center">
+                          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                          </svg>
+                        </div>
+                      } @else {
+                        <div class="w-2.5 h-2.5 rounded-full bg-slate-200"></div>
+                      }
+                    </div>
+
+                    <div class="mt-4 flex flex-col items-center text-center px-2">
+                      <h4 class="text-sm font-bold transition-colors duration-300 whitespace-nowrap"
+                          [class.text-primary]="step.isActive"
+                          [class.text-slate-400]="!step.isActive">
+                        {{ step.status }}
+                      </h4>
+                      
+                      @if (step.history) {
+                        <div class="mt-1 flex flex-col items-center gap-0.5">
+                          <span class="text-[11px] text-slate-500 font-medium whitespace-nowrap">
+                            {{ step.history.updatedAt | date: 'MMM d, h:mm a' }}
+                          </span>
+                          <span class="text-[10px] text-slate-400 flex items-center gap-1 whitespace-nowrap">
+                            By {{ step.history.adminName || 'Admin' }}
+                          </span>
+                        </div>
+                      } @else {
+                        <span class="text-[11px] text-slate-400 mt-1 italic">Pending</span>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-4 flex flex-col gap-6">
+          
+          <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="px-4 py-3 border-b border-slate-100 bg-slate-50/80">
+               <h3 class="text-sm font-semibold text-slate-800">Report Details</h3>
+            </div>
+            
+            <div class="p-5">
+              <div class="flex items-center gap-3 mb-5 pb-5 border-b border-slate-100">
+                <div class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm border border-primary/20 shrink-0">
+                  {{ reportData.citizenId?.firstName ? reportData.citizenId.firstName.charAt(0) : 'C' }}
+                </div>
+                <div class="flex flex-col overflow-hidden">
+                  <span class="font-semibold text-slate-900 text-sm truncate">
+                    {{ reportData.citizenId?.firstName ? (reportData.citizenId.firstName + ' ' + reportData.citizenId.lastName) : 'Citizen Reporter' }}
+                  </span>
+                  <span class="text-[11px] text-slate-500 truncate">Reported via Citizen Portal</span>
+                </div>
+              </div>
+
+              <div>
+                <h4 class="text-xs font-semibold text-primary uppercase tracking-wider mb-2">Description provided</h4>
+                <div class="p-4 bg-slate-50 rounded-lg border border-slate-100 text-sm text-slate-700 leading-relaxed whitespace-pre-wrap min-h-[120px]">
+                  {{ reportData.description || 'No detailed description was provided by the citizen.' }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden border-t-4 border-t-primary">
+            <div class="p-5">
+              <h3 class="text-sm font-semibold text-slate-900 mb-1">Update Status</h3>
+              <p class="text-xs text-slate-500 mb-4">Advance this report to the next phase.</p>
+              
+              <div class="flex flex-col gap-3">
+                <brn-select class="w-full" placeholder="Select Status" [ngModel]="pendingStatus()" (ngModelChange)="pendingStatus.set($event)">
+                  <hlm-select-trigger class="w-full bg-white border-slate-200 hover:bg-slate-50 transition-colors">
+                    <hlm-select-value />
+                  </hlm-select-trigger>
+                  <hlm-select-content class="w-full bg-white border-slate-200 shadow-lg rounded-lg">
+                    <hlm-option value="Reported">Reported</hlm-option>
+                    <hlm-option value="Under Review">Under Review</hlm-option>
+                    <hlm-option value="In Progress">In Progress</hlm-option>
+                    <hlm-option value="Resolved">Resolved</hlm-option>
+                  </hlm-select-content>
+                </brn-select>
+                
+                <button hlmBtn class="w-full font-medium bg-primary hover:bg-primary/90 text-primary-foreground" (click)="saveStatus()" [disabled]="pendingStatus() === reportData.status">
+                  Apply Update
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  } @else {
+    <div class="flex flex-col items-center justify-center p-24 gap-4">
+      <div class="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+      <p class="text-sm text-slate-500 font-medium animate-pulse">Loading secure case file...</p>
+    </div>
+  }
+</div>
