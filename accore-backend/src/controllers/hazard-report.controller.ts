@@ -204,22 +204,12 @@ export const getAnalytics = async (
     const analyticsData = await HazardReport.aggregate([
       {
         $facet: {
-          totalActive: [
-            {
-              $match: {
-                status: { $in: ["Reported", "Under Review", "In Progress"] },
-              },
-            },
-            { $count: "count" },
-          ],
           byStatus: [{ $group: { _id: "$status", count: { $sum: 1 } } }],
           byBarangay: [
             { $group: { _id: "$barangay", count: { $sum: 1 } } },
             { $sort: { count: -1 } },
           ],
-          // NEW: Group by Severity for the Doughnut Chart
           bySeverity: [{ $group: { _id: "$severity", count: { $sum: 1 } } }],
-          // NEW: Get the 5 most recent reports for the Activity Feed
           recentActivity: [
             { $sort: { createdAt: -1 } },
             { $limit: 5 },
@@ -234,18 +224,28 @@ export const getAnalytics = async (
               },
             },
           ],
+          activeHotspots: [
+            { $match: { status: { $in: ["Reported", "Under Review", "In Progress"] } } },
+            { $project: { title: 1, severity: 1, location: 1 } }
+          ]
         },
       },
     ]);
 
     const [data] = analyticsData;
 
+    const activeStatuses = ["Reported", "Under Review", "In Progress"];
+    const totalActive = data?.byStatus
+      .filter((s: any) => activeStatuses.includes(s._id))
+      .reduce((sum: number, s: any) => sum + s.count, 0) || 0;
+
     const result = {
-      totalActive: data?.totalActive[0]?.count || 0,
+      totalActive,
       byStatus: data?.byStatus || [],
       byBarangay: data?.byBarangay || [],
       bySeverity: data?.bySeverity || [],
       recentActivity: data?.recentActivity || [],
+      activeHotspots: data?.activeHotspots || [],
     };
 
     res.status(200).json(result);
