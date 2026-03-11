@@ -1,0 +1,33 @@
+<nav class="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/90">
+  <div class="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-4 md:flex-row md:items-center md:justify-between md:px-6">
+    <a routerLink="/citizen/dashboard" class="flex items-center gap-3">
+      <img src="assets/favicon.ico" alt="AC-CORE logo" class="h-9 w-9 rounded-lg border border-border bg-card p-1.5 shadow-sm">
+      <div>
+        <p class="text-sm font-semibold text-foreground">AC-CORE Citizen</p>
+        <p class="text-xs text-muted-foreground">Hazard reporting and tracking</p>
+      </div>
+    </a>
+
+    <div class="flex flex-col gap-3 md:flex-row md:items-center">
+      <div class="flex flex-wrap items-center gap-2">
+        @for (item of navItems; track item.route) {
+          <a
+            [routerLink]="item.route"
+            class="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors"
+            [ngClass]="isActive(item.aliases)
+              ? 'bg-primary/10 text-primary'
+              : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'"
+          >
+            <lucide-icon [name]="item.icon" class="h-4 w-4"></lucide-icon>
+            <span>{{ item.label }}</span>
+          </a>
+        }
+      </div>
+
+      <button hlmBtn variant="outline" size="sm" class="justify-center md:justify-start" (click)="onLogout()">
+        <lucide-icon name="log-out" class="h-4 w-4"></lucide-icon>
+        <span>Logout</span>
+      </button>
+    </div>
+  </div>
+</nav>

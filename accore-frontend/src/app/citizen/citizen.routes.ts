@@ -4,6 +4,7 @@ import { Login } from './login/login';
 import { Signup } from './signup/signup';
 import { Dashboard } from './dashboard/dashboard';
 import { Report } from './report/report';
+import { MyReports } from './my-reports/my-reports';
 import { AuthGuard } from '../shared/auth.guard'; 
 
 export const CITIZEN_ROUTES: Routes = [
@@ -26,6 +27,11 @@ export const CITIZEN_ROUTES: Routes = [
   {
     path: 'dashboard',
     component: Dashboard,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'my-reports',
+    component: MyReports,
     canActivate: [AuthGuard]
   }
 ];

@@ -1,0 +1,184 @@
+<div class="min-h-screen bg-muted/30">
+  <app-citizen-header></app-citizen-header>
+
+  <main class="mx-auto flex max-w-6xl flex-col gap-5 px-4 py-6 md:px-6 md:py-8">
+    <section class="grid gap-4 xl:grid-cols-[minmax(0,1.8fr)_minmax(320px,1fr)]">
+      <section hlmCard class="gap-0 border-border/80 bg-card">
+        <div hlmCardHeader class="space-y-3 pb-2">
+          <div class="flex flex-wrap items-center gap-2">
+            <p class="text-sm font-semibold uppercase tracking-[0.2em] text-primary">Citizen Portal</p>
+            <span class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">Personal Tracking Dashboard</span>
+          </div>
+          <h1 hlmCardTitle class="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">My Reports</h1>
+        </div>
+        <div hlmCardContent class="flex flex-col gap-5 pb-6">
+          <p hlmCardDescription class="max-w-2xl text-sm leading-7 md:text-base">
+            Track the status of every hazard you submitted, review updates from the city team, and confirm the location and photo tied to each report.
+          </p>
+          <div class="flex flex-wrap gap-3">
+            <a routerLink="/citizen/report" hlmBtn>Report New Hazard</a>
+            <span class="inline-flex items-center rounded-md border border-border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
+              Reports are already filtered to your citizen account.
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <section class="grid auto-rows-fr gap-3 sm:grid-cols-2 xl:grid-cols-2">
+        @for (card of summaryCards(); track card.label) {
+          <article hlmCard class="h-full gap-0 border-border/80 bg-card">
+            <div hlmCardContent class="flex h-full min-h-[132px] flex-col justify-between gap-3 px-5 py-4">
+              <span class="inline-flex w-fit rounded-full px-3 py-1 text-xs font-semibold leading-none" [ngClass]="card.accent">
+                {{ card.label }}
+              </span>
+              <div class="space-y-1.5">
+                <p class="text-[2rem] font-semibold tracking-tight leading-none" [ngClass]="card.tone">{{ card.value }}</p>
+                <p class="max-w-[14ch] text-sm leading-5 text-muted-foreground">
+                  {{
+                    card.label === 'Resolved'
+                      ? 'Closed reports'
+                      : card.label === 'Critical'
+                        ? 'High-severity'
+                        : card.label === 'Active'
+                          ? 'Still awaiting closure'
+                          : 'Reports submitted'
+                  }}
+                </p>
+              </div>
+            </div>
+          </article>
+        }
+      </section>
+    </section>
+
+    @if (isLoading()) {
+      <section hlmCard class="items-center justify-center gap-3 py-12 text-center">
+        <hlm-spinner class="h-6 w-6 text-primary"></hlm-spinner>
+        <p class="text-sm text-muted-foreground">Loading your submitted hazard reports...</p>
+      </section>
+    } @else if (errorMessage()) {
+      <section hlmCard class="border-destructive/20 bg-destructive/5">
+        <div hlmCardContent class="flex flex-col gap-4 py-6 text-sm text-destructive md:flex-row md:items-center md:justify-between">
+          <div class="flex items-start gap-3">
+            <lucide-icon name="alert-triangle" class="mt-0.5 h-5 w-5 shrink-0"></lucide-icon>
+            <p>{{ errorMessage() }}</p>
+          </div>
+          <button hlmBtn variant="outline" (click)="fetchReports()">Try Again</button>
+        </div>
+      </section>
+    } @else if (!reports().length) {
+      <section hlmCard class="items-center justify-center gap-4 py-12 text-center">
+        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+          <lucide-icon name="clock" class="h-5 w-5"></lucide-icon>
+        </div>
+        <div class="space-y-1">
+          <h2 class="text-lg font-semibold text-foreground">No reports yet</h2>
+          <p class="text-sm text-muted-foreground">Your submitted hazards will appear here as soon as you file one.</p>
+        </div>
+        <a routerLink="/citizen/report" hlmBtn>Report a New Hazard</a>
+      </section>
+    } @else {
+      <section class="grid gap-5 md:grid-cols-2 xl:grid-cols-2">
+        @for (report of reports(); track report._id; let index = $index) {
+          <article hlmCard class="gap-0 overflow-hidden border-border/80 bg-card">
+            <div class="relative overflow-hidden border-b border-border bg-muted/50">
+              @if (report.imageURL && !hasBrokenImage(report._id)) {
+                <img
+                  [src]="report.imageURL"
+                  [alt]="report.title + ' thumbnail'"
+                  class="h-64 w-full object-cover"
+                  loading="lazy"
+                  (error)="markImageAsBroken(report._id)"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent"></div>
+              } @else {
+                <div class="flex h-64 flex-col items-center justify-center gap-2 bg-muted text-sm text-muted-foreground">
+                  <lucide-icon name="image-off" class="h-5 w-5"></lucide-icon>
+                  <span>Photo unavailable</span>
+                </div>
+              }
+
+              <div class="absolute left-4 right-4 top-4 flex items-start justify-between gap-3">
+                <span class="rounded-xl bg-white/95 px-3 py-2 text-sm font-medium text-foreground shadow-sm">#{{ index + 1 }}</span>
+                <span class="inline-flex w-fit rounded-full px-3.5 py-1.5 text-sm font-medium shadow-sm" [ngClass]="getStatusClasses(report.status)">
+                  {{ report.status === 'Dispatched' ? 'In Progress' : report.status }}
+                </span>
+              </div>
+            </div>
+
+            <div hlmCardContent class="flex flex-col gap-5 px-5 py-5">
+              <div class="space-y-2">
+                <h2 class="text-[2rem] font-semibold tracking-tight leading-tight text-foreground">{{ report.title }}</h2>
+              </div>
+
+              <dl class="grid gap-4 sm:grid-cols-3">
+                <div class="space-y-1">
+                  <dt class="flex items-center gap-2 text-sm text-muted-foreground">
+                    <lucide-icon name="map-pin" class="h-4 w-4 text-primary"></lucide-icon>
+                    <span>Location</span>
+                  </dt>
+                  <dd class="text-sm font-semibold text-foreground">{{ report.barangay }}</dd>
+                </div>
+                <div class="space-y-1">
+                  <dt class="flex items-center gap-2 text-sm text-muted-foreground">
+                    <lucide-icon name="calendar-days" class="h-4 w-4 text-primary"></lucide-icon>
+                    <span>Submitted</span>
+                  </dt>
+                  <dd class="text-sm font-semibold text-foreground">{{ report.createdAt | date: 'MMMM d, y' }}</dd>
+                </div>
+                <div class="space-y-1">
+                  <dt class="flex items-center gap-2 text-sm text-muted-foreground">
+                    <lucide-icon name="tag" class="h-4 w-4 text-primary"></lucide-icon>
+                    <span>Category</span>
+                  </dt>
+                  <dd class="text-sm font-semibold text-foreground">{{ report.category }}</dd>
+                </div>
+              </dl>
+
+              <div class="border-t border-border/80 pt-5">
+                <app-pizza-tracker [status]="report.status"></app-pizza-tracker>
+              </div>
+
+              <div class="grid gap-3 sm:grid-cols-2">
+                <button hlmBtn class="w-full" (click)="toggleDetails(report._id)">
+                  {{ isExpanded(report._id) ? 'Hide Details' : 'View Details' }}
+                </button>
+                <a
+                  hlmBtn
+                  variant="outline"
+                  class="w-full"
+                  [href]="getMapUrl(report)"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <lucide-icon name="map-pin" class="h-4 w-4"></lucide-icon>
+                  <span>Map</span>
+                </a>
+              </div>
+
+              @if (isExpanded(report._id)) {
+                <div class="space-y-3 rounded-xl border border-border/80 bg-background/70 p-4 text-sm text-muted-foreground">
+                  <p class="leading-6">{{ report.description }}</p>
+                  <div class="flex flex-wrap gap-2">
+                    <span class="rounded-full bg-muted px-3 py-1 text-xs font-medium text-foreground">{{ report.category }}</span>
+                    <span class="rounded-full px-3 py-1 text-xs font-medium" [ngClass]="getSeverityClasses(report.severity)">{{ report.severity }}</span>
+                  </div>
+                  <div class="border-t border-border/70 pt-3">
+                    <p>{{ getTrackerNote(report.status) }}</p>
+                    <p class="mt-2">
+                      @if (getLatestAdminName(report); as adminName) {
+                        Last update handled by <span class="font-semibold text-foreground">{{ adminName }}</span>.
+                      } @else {
+                        No staff update has been recorded yet.
+                      }
+                    </p>
+                  </div>
+                </div>
+              }
+            </div>
+          </article>
+        }
+      </section>
+    }
+  </main>
+</div>
