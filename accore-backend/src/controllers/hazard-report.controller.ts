@@ -50,6 +50,24 @@ export const createReport = async (
       longitude,
     } = req.body;
 
+    const parsedLatitude = parseFloat(latitude);
+    const parsedLongitude = parseFloat(longitude);
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+    const possibleDuplicate = await HazardReport.findOne({
+      category,
+      createdAt: { $gte: twentyFourHoursAgo },
+      location: {
+        $near: {
+          $geometry: {
+            type: "Point",
+            coordinates: [parsedLongitude, parsedLatitude],
+          },
+          $maxDistance: 50,
+        },
+      },
+    }).select("_id");
+
     const newReport = new HazardReport({
       citizenId,
       title,
@@ -57,9 +75,10 @@ export const createReport = async (
       category,
       severity,
       barangay,
+      isPossibleDuplicate: !!possibleDuplicate,
       location: {
         type: "Point",
-        coordinates: [parseFloat(longitude), parseFloat(latitude)],
+        coordinates: [parsedLongitude, parsedLatitude],
       },
       imageURL: uploadResponse.secure_url,
       status: "Reported",
