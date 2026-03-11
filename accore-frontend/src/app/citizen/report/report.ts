@@ -12,6 +12,7 @@ import { BrnSelectImports } from '@spartan-ng/brain/select';
 import { HlmSelectImports } from '@spartan-ng/helm/select';
 import { HlmTextareaImports } from '@spartan-ng/helm/textarea';
 import { HlmSpinnerImports } from '@spartan-ng/helm/spinner';
+import { CitizenHeaderComponent } from '../components/citizen-header/citizen-header';
 
 import { HazardReportService } from '../../services/hazard-report';
 import { BarangayService } from '../../services/barangay';
@@ -24,7 +25,7 @@ import * as L from 'leaflet';
   imports: [
     CommonModule, ReactiveFormsModule, RouterModule, LucideAngularModule,
     HlmButtonImports, HlmInputImports, HlmLabelImports,
-    BrnSelectImports, HlmSelectImports, HlmTextareaImports, HlmSpinnerImports,
+    BrnSelectImports, HlmSelectImports, HlmTextareaImports, HlmSpinnerImports, CitizenHeaderComponent
   ],
   templateUrl: './report.html',
 })
