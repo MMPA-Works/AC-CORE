@@ -87,7 +87,7 @@ export class AnalyticsDashboard implements OnInit, OnDestroy {
         
         this.isLoading.set(false);
         if (isPlatformBrowser(this.platformId)) {
-          setTimeout(() => this.initMiniMap(data?.recentActivity || []), 100);
+          setTimeout(() => this.initMiniMap(data?.activeHotspots || []), 100);
         }
       },
       error: (err) => {
@@ -97,25 +97,33 @@ export class AnalyticsDashboard implements OnInit, OnDestroy {
     });
   }
 
-  private initMiniMap(recentReports: any[]) {
+  private initMiniMap(hotspots: any[]) {
     if (this.map) this.map.remove();
-    this.map = L.map('mini-map', { zoomControl: false }).setView([15.145, 120.5887], 12);
+    this.map = L.map('mini-map', { zoomControl: false }).setView([15.145, 120.5887], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(this.map);
 
-    recentReports.forEach(report => {
+    hotspots.forEach(report => {
       if (report.location?.coordinates?.length >= 2) {
-        // Access array indexes to prevent leaflet rendering failures
-        const lng = report.location.coordinates;
-        const lat = report.location.coordinates;
+        const lng = report.location.coordinates[0];
+        const lat = report.location.coordinates[1];
+
+        let pinColor = '#3b82f6'; 
+        if (report.severity === 'Critical') pinColor = '#ef4444'; 
+        if (report.severity === 'Medium') pinColor = '#f59e0b'; 
         
         L.circleMarker([lat, lng], {
-          radius: 6,
-          fillColor: '#ef4444',
+          radius: 7,
+          fillColor: pinColor,
           color: '#ffffff',
           weight: 2,
           opacity: 1,
-          fillOpacity: 0.8
-        }).addTo(this.map!).bindTooltip(report.title);
+          fillOpacity: 0.9
+        }).addTo(this.map!).bindTooltip(`
+          <div style="text-align: center;">
+            <strong>${report.title}</strong><br/>
+            <span style="color: ${pinColor}; font-weight: bold;">${report.severity}</span>
+          </div>
+        `);
       }
     });
   }
@@ -124,8 +132,6 @@ export class AnalyticsDashboard implements OnInit, OnDestroy {
     if (!this.analyticsData()) return;
     const data = this.analyticsData();
     
-    // We generate the CSV blob directly here because the ExportService 
-    // expects a specific report model, not grouped analytics data.
     const csvRows = ['Category,Name,Count'];
     
     data.byBarangay.forEach((b: any) => csvRows.push(`"Barangay","${b._id}","${b.count}"`));
