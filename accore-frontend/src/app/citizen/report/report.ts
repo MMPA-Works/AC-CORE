@@ -106,18 +106,56 @@ export class Report implements OnInit, OnDestroy {
       this.ngZone.run(() => this.handlePinMovement());
     });
 
-    this.locateUser();
+    // Auto-locate on load
+    this.locateUserManual();
   }
 
-  private locateUser() {
-    if ('geolocation' in navigator) {
-      navigator.geolocation.getCurrentPosition((pos) => {
-        const coords: [number, number] = [pos.coords.latitude, pos.coords.longitude];
-        this.map?.flyTo(coords, APP_CONFIG.map.activeZoom);
-        this.marker?.setLatLng(coords);
-        this.ngZone.run(() => this.handlePinMovement());
-      });
+  locateUserManual() {
+    if (this.isLocating()) return; // Prevent spamming
+    
+    if (!('geolocation' in navigator)) {
+      this.statusMessage.set('GPS is not supported by your browser.');
+      this.isError.set(true);
+      return;
     }
+
+    this.isLocating.set(true);
+    this.statusMessage.set(''); // Clear any previous errors
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const coords: [number, number] = [pos.coords.latitude, pos.coords.longitude];
+        
+        // Visual feedback: Fly to location
+        this.map?.flyTo(coords, APP_CONFIG.map.activeZoom, {
+          animate: true,
+          duration: 1.5
+        });
+
+        this.marker?.setLatLng(coords);
+        
+        // Trigger the backend call for Barangay detection
+        this.ngZone.run(() => this.handlePinMovement());
+      },
+      (err) => {
+        this.isLocating.set(false);
+        this.isError.set(true);
+        
+        const errorMessages: Record<number, string> = {
+          1: 'Permission denied. Please allow location access.',
+          2: 'Position unavailable. Check your signal.',
+          3: 'GPS request timed out.'
+        };
+        
+        this.statusMessage.set(errorMessages[err.code] || 'Could not find your location.');
+        this.cdr.detectChanges();
+      },
+      { 
+        enableHighAccuracy: true, 
+        timeout: 8000, 
+        maximumAge: 0 
+      }
+    );
   }
 
   private handlePinMovement() {
@@ -157,17 +195,10 @@ export class Report implements OnInit, OnDestroy {
 
   async onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
     
-    if (!input.files || input.files.length === 0) {
-      return;
-    }
-    
-    // Using .item(0) avoids formatting issues with square brackets
     const file = input.files.item(0);
-
-    if (!file) {
-      return;
-    }
+    if (!file) return;
 
     this.isCompressing.set(true);
     try {
