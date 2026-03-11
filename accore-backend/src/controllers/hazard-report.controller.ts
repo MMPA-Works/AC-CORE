@@ -70,12 +70,10 @@ export const createReport = async (
     res.status(201).json(savedReport);
   } catch (error: any) {
     console.error("CRITICAL ERROR SAVING REPORT:", error);
-    res
-      .status(500)
-      .json({
-        message: "Failed to create hazard report",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Failed to create hazard report",
+      error: error.message,
+    });
   }
 };
 
@@ -191,12 +189,10 @@ export const updateReportStatus = async (
 
     res.status(200).json(updatedReport);
   } catch (error: any) {
-    res
-      .status(500)
-      .json({
-        message: "Failed to update report status",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Failed to update report status",
+      error: error.message,
+    });
   }
 };
 
@@ -205,7 +201,6 @@ export const getAnalytics = async (
   res: Response,
 ): Promise<void> => {
   try {
-    // $facet allows multiple parallel aggregations in one query for performance optimization
     const analyticsData = await HazardReport.aggregate([
       {
         $facet: {
@@ -222,19 +217,35 @@ export const getAnalytics = async (
             { $group: { _id: "$barangay", count: { $sum: 1 } } },
             { $sort: { count: -1 } },
           ],
+          // NEW: Group by Severity for the Doughnut Chart
+          bySeverity: [{ $group: { _id: "$severity", count: { $sum: 1 } } }],
+          // NEW: Get the 5 most recent reports for the Activity Feed
+          recentActivity: [
+            { $sort: { createdAt: -1 } },
+            { $limit: 5 },
+            {
+              $project: {
+                title: 1,
+                barangay: 1,
+                status: 1,
+                severity: 1,
+                createdAt: 1,
+                location: 1,
+              },
+            },
+          ],
         },
       },
     ]);
 
-    // The result of a facet aggregation is an array with a single document.
-    // We use array destructuring to safely extract it.
     const [data] = analyticsData;
 
     const result = {
-      // The 'totalActive' facet returns an array that either contains one object with a count or is empty.
       totalActive: data?.totalActive[0]?.count || 0,
       byStatus: data?.byStatus || [],
       byBarangay: data?.byBarangay || [],
+      bySeverity: data?.bySeverity || [],
+      recentActivity: data?.recentActivity || [],
     };
 
     res.status(200).json(result);

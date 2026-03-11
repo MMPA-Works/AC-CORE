@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class HazardReportService {
-  private apiUrl = 'http://localhost:5000/api/reports'; // Adjusted backend route
+  private apiUrl = 'http://localhost:5000/api/reports'; 
 
   constructor(private http: HttpClient) {}
 
@@ -24,6 +24,10 @@ export class HazardReportService {
 
   getReports(): Observable<any[]> {
     return this.http.get<any[]>(this.apiUrl, { headers: this.getAuthHeaders() });
+  }
+
+  getAnalytics(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/analytics`, { headers: this.getAuthHeaders() });
   }
 
   getReportById(id: string): Observable<any> {

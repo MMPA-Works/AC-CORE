@@ -5,7 +5,7 @@ import { HttpClientModule } from '@angular/common/http';
 import * as L from 'leaflet';
 
 import { HazardReportService } from '../../services/hazard-report';
-import { ExportService } from '../../services/export.service';
+import { ExportService } from '../../services/export';
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmScrollAreaImports } from '@spartan-ng/helm/scroll-area';
