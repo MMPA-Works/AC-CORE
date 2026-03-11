@@ -41,7 +41,7 @@
   <ng-scrollbar hlm class="flex-1 relative z-10" appearance="compact">
     <div class="p-4 space-y-3">
       @if (isLoading()) {
-        @for (i of; track i) {
+        @for (i of [1, 2, 3, 4]; track i) {
           <div
             class="p-4 rounded-[16px] border border-white/60 bg-white/50 shadow-sm backdrop-blur-md"
           >
@@ -86,7 +86,7 @@
                 [ngClass]="{
                   'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]': report.status === 'Reported',
                   'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]': report.status === 'Under Review',
-                  'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]': report.status === 'In Progress',
+                  'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]': report.status === 'In Progress' || report.status === 'Dispatched',
                   'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]': report.status === 'Resolved'
                 }"
               ></span>

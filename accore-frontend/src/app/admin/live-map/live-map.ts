@@ -108,8 +108,8 @@ export class LiveMap implements OnInit, OnDestroy {
               <div class="w-2 h-2 ${markerColor} rotate-45 -mt-1 border-r-2 border-b-2 border-white shadow-sm"></div>
             </div>
           `,
-          iconSize:,
-          iconAnchor:,
+          iconSize: [32, 40],
+          iconAnchor: [16, 40],
           popupAnchor: [0, -42], 
         });
 
@@ -117,13 +117,14 @@ export class LiveMap implements OnInit, OnDestroy {
 
         let dotColor = 'bg-gray-500';
         let glowShadow = '';
+        
         if (report.status === 'Reported') {
           dotColor = 'bg-red-500';
           glowShadow = 'shadow-[0_0_8px_rgba(239,68,68,0.8)]';
         } else if (report.status === 'Under Review') {
           dotColor = 'bg-amber-500';
           glowShadow = 'shadow-[0_0_8px_rgba(245,158,11,0.8)]';
-        } else if (report.status === 'In Progress') {
+        } else if (report.status === 'In Progress' || report.status === 'Dispatched') {
           dotColor = 'bg-blue-500';
           glowShadow = 'shadow-[0_0_8px_rgba(59,130,246,0.8)]';
         } else if (report.status === 'Resolved') {
@@ -139,25 +140,21 @@ export class LiveMap implements OnInit, OnDestroy {
               <div class="relative w-full h-36 mb-4 rounded-[14px] overflow-hidden shadow-sm group">
                 <img src="${report.imageURL}" alt="Hazard" loading="lazy" class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-                
                 <div class="absolute bottom-2.5 left-2.5 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/95 backdrop-blur-md shadow-sm">
                    <span class="w-1.5 h-1.5 rounded-full ${dotColor} ${glowShadow}"></span>
                    <span class="text-[9px] font-bold uppercase tracking-wider text-gray-800">${report.status}</span>
                 </div>
               </div>
-            `
-                : `
+            ` : `
               <div class="flex items-center gap-1.5 px-2.5 py-1 mb-3 inline-flex rounded-full bg-gray-100 shadow-sm">
                  <span class="w-1.5 h-1.5 rounded-full ${dotColor} ${glowShadow}"></span>
                  <span class="text-[9px] font-bold uppercase tracking-wider text-gray-700">${report.status}</span>
               </div>
             `
             }
-            
             <div class="px-1">
               <h3 class="font-bold text-gray-900 text-[16px] leading-snug mb-1.5 tracking-tight">${report.title}</h3>
-              <p class="text-[13px] text-gray-500 mb-4 leading-relaxed line-clamp-3">${report.description || 'No additional details provided for this incident.'}</p>
-              
+              <p class="text-[13px] text-gray-500 mb-4 leading-relaxed line-clamp-3">${report.description || 'No additional details provided.'}</p>
               <div class="flex items-center justify-between text-[11px] text-gray-400 border-t border-gray-100/80 pt-3">
                 <span class="flex items-center font-medium text-gray-600 truncate max-w-[140px]">
                   <svg class="w-3.5 h-3.5 mr-1.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> 
@@ -177,16 +174,12 @@ export class LiveMap implements OnInit, OnDestroy {
 
   private getMarkerColor(status: string): string {
     switch (status) {
-      case 'Reported':
-        return 'bg-red-500';
-      case 'Under Review':
-        return 'bg-amber-500';
-      case 'In Progress':
-        return 'bg-blue-500';
-      case 'Resolved':
-        return 'bg-green-500';
-      default:
-        return 'bg-gray-500';
+      case 'Reported': return 'bg-red-500';
+      case 'Under Review': return 'bg-amber-500';
+      case 'In Progress': 
+      case 'Dispatched': return 'bg-blue-500';
+      case 'Resolved': return 'bg-green-500';
+      default: return 'bg-gray-500';
     }
   }
 
@@ -194,9 +187,7 @@ export class LiveMap implements OnInit, OnDestroy {
     if (this.map && report.location && report.location.coordinates) {
       const lng = report.location.coordinates;
       const lat = report.location.coordinates;
-
       this.map.flyTo([lat, lng], 17, { duration: 1.5 });
-
       if (window.innerWidth < 1024) {
         this.isPanelOpen.set(false);
       }
