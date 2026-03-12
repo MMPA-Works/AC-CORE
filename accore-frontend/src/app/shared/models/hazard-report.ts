@@ -27,6 +27,7 @@ export interface HazardReport {
   barangay: string;
   location: HazardReportLocation;
   status: HazardReportStatus;
+  isArchived?: boolean;
   imageURL: string;
   statusHistory: HazardReportStatusHistoryEntry[];
   createdAt: string;
@@ -52,6 +53,8 @@ export interface PaginatedHazardReportResponse {
 export interface HazardReportPageQuery {
   page: number;
   limit: number;
+  archived?: 'true' | 'false';
+  search?: string;
   barangay?: string;
   category?: string;
   severity?: string;

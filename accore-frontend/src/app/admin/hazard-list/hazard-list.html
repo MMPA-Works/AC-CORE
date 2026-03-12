@@ -19,6 +19,49 @@
     </div>
 
     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col overflow-hidden">
+      <div class="flex flex-col gap-4 px-5 pt-5 pb-1 lg:flex-row lg:items-end lg:justify-between">
+        <div class="inline-flex self-start rounded-xl border border-gray-200 bg-gray-50 p-1">
+          <button
+            hlmBtn
+            variant="ghost"
+            class="h-9 rounded-lg px-4 text-sm font-medium transition-colors"
+            [class.bg-white]="!isArchivedView()"
+            [class.text-gray-900]="!isArchivedView()"
+            [class.shadow-sm]="!isArchivedView()"
+            [class.text-gray-500]="isArchivedView()"
+            (click)="setArchiveView('active')"
+          >
+            Active Reports
+          </button>
+          <button
+            hlmBtn
+            variant="ghost"
+            class="h-9 rounded-lg px-4 text-sm font-medium transition-colors"
+            [class.bg-white]="isArchivedView()"
+            [class.text-gray-900]="isArchivedView()"
+            [class.shadow-sm]="isArchivedView()"
+            [class.text-gray-500]="!isArchivedView()"
+            (click)="setArchiveView('archived')"
+          >
+            Archived Reports
+          </button>
+        </div>
+
+        <div class="flex w-full max-w-2xl flex-col gap-1.5 lg:ml-auto">
+          <div class="relative">
+            <svg class="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-4.35-4.35m1.85-5.15a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"></path>
+            </svg>
+            <input
+              type="text"
+              class="h-11 w-full rounded-xl border border-gray-200 bg-gray-50 pl-11 pr-4 text-sm text-gray-900 shadow-none outline-none transition-colors placeholder:text-gray-400 focus:border-primary focus:bg-white"
+              placeholder="Search by title, category, barangay, status, severity, or report ID"
+              [ngModel]="searchDraft()"
+              (ngModelChange)="onSearchDraftChange($event)"
+            />
+          </div>
+        </div>
+      </div>
       
       <div class="p-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 bg-white border-b border-gray-100">
         
@@ -196,7 +239,7 @@
                         <div class="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center">
                           <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
                         </div>
-                        <p class="font-medium">No reports found matching your criteria.</p>
+                        <p class="font-medium">{{ isArchivedView() ? 'No archived reports found matching your criteria.' : 'No reports found matching your criteria.' }}</p>
                       </div>
                     }
                   </td>

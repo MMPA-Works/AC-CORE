@@ -4,6 +4,7 @@ import {
   getReports,
   getReportById,
   updateReportStatus,
+  archiveReport,
   getAnalytics,
 } from "../controllers/hazard-report.controller";
 import { upload } from "../middlewares/upload.middleware";
@@ -17,5 +18,6 @@ router.post("/", verifyToken, reportLimiter, upload.single("image"), createRepor
 router.get("/", verifyToken, getReports);
 router.get("/:id", verifyToken, getReportById);
 router.put("/:id/status", verifyToken, verifyAdmin, updateReportStatus);
+router.put("/:id/archive", verifyToken, verifyAdmin, archiveReport);
 
 export default router;

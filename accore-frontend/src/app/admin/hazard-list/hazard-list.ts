@@ -1,12 +1,13 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { EMPTY, Subject, catchError, debounceTime, distinctUntilChanged, map, merge, switchMap, takeUntil, tap } from 'rxjs';
 
 import { HazardReportService } from '../../services/hazard-report';
 import { ExportService } from '../../services/export';
-import { HazardReport } from '../../shared/models/hazard-report';
+import { HazardReport, HazardReportPageQuery, PaginatedHazardReportResponse } from '../../shared/models/hazard-report';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';
 import { BrnSelectImports } from '@spartan-ng/brain/select';
@@ -35,13 +36,16 @@ import { toast } from 'ngx-sonner';
   templateUrl: './hazard-list.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class HazardList implements OnInit {
+export class HazardList implements OnInit, OnDestroy {
   reports = signal<HazardReport[]>([]);
   isLoading = signal<boolean>(false);
   totalReports = signal<number>(0);
   totalPages = signal<number>(1);
   barangays = signal<string[]>([]);
   categories = signal<string[]>([]);
+  archiveView = signal<'active' | 'archived'>('active');
+  searchDraft = signal<string>('');
+  searchTerm = signal<string>('');
 
   filterBarangay = signal<string>('All');
   filterCategory = signal<string>('All');
@@ -54,8 +58,13 @@ export class HazardList implements OnInit {
   currentPage = signal<number>(1);
   itemsPerPage = signal<number>(10);
 
+  private readonly destroy$ = new Subject<void>();
+  private readonly reload$ = new Subject<void>();
+  private readonly searchInput$ = new Subject<string>();
+
   availableBarangays = computed(() => ['All', ...this.barangays()]);
   availableCategories = computed(() => ['All', ...this.categories()]);
+  isArchivedView = computed(() => this.archiveView() === 'archived');
 
   rangeStart = computed(() => {
     if (this.totalReports() === 0) {
@@ -80,41 +89,79 @@ export class HazardList implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadReportsPage();
+    const searchReload$ = this.searchInput$.pipe(
+      map((value) => value.trim()),
+      debounceTime(350),
+      distinctUntilChanged(),
+      tap((search) => {
+        this.searchTerm.set(search);
+        this.currentPage.set(1);
+      }),
+      map(() => void 0)
+    );
+
+    merge(this.reload$, searchReload$).pipe(
+      tap(() => this.isLoading.set(true)),
+      switchMap(() =>
+        this.hazardService.getReportsPage(this.buildPageQuery()).pipe(
+          catchError((err) => {
+            this.handleLoadError(err);
+            return EMPTY;
+          })
+        )
+      ),
+      takeUntil(this.destroy$)
+    ).subscribe((response) => {
+      this.applyResponse(response);
+    });
+
+    this.reload$.next();
   }
 
-  loadReportsPage(): void {
-    this.isLoading.set(true);
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.reload$.complete();
+    this.searchInput$.complete();
+  }
 
-    this.hazardService.getReportsPage({
+  private buildPageQuery(): HazardReportPageQuery {
+    return {
       page: this.currentPage(),
       limit: this.itemsPerPage(),
+      archived: this.isArchivedView() ? 'true' : 'false',
+      search: this.searchTerm(),
       barangay: this.filterBarangay(),
       category: this.filterCategory(),
       severity: this.filterSeverity(),
       status: this.filterStatus(),
       sortColumn: this.sortColumn(),
       sortDirection: this.sortDirection(),
-    }).subscribe({
-      next: (response) => {
-        this.reports.set(response.reports || []);
-        this.totalReports.set(response.pagination?.total || 0);
-        this.totalPages.set(response.pagination?.totalPages || 1);
-        this.barangays.set(response.filters?.barangays || []);
-        this.categories.set(response.filters?.categories || []);
-        this.isLoading.set(false);
-      },
-      error: (err) => {
-        console.error('Error fetching reports:', err);
-        toast.error('Failed to load reports');
-        this.reports.set([]);
-        this.totalReports.set(0);
-        this.totalPages.set(1);
-        this.barangays.set([]);
-        this.categories.set([]);
-        this.isLoading.set(false);
-      }
-    });
+    };
+  }
+
+  private applyResponse(response: PaginatedHazardReportResponse): void {
+    this.reports.set(response.reports || []);
+    this.totalReports.set(response.pagination?.total || 0);
+    this.totalPages.set(response.pagination?.totalPages || 1);
+    this.barangays.set(response.filters?.barangays || []);
+    this.categories.set(response.filters?.categories || []);
+    this.isLoading.set(false);
+  }
+
+  private handleLoadError(err: unknown): void {
+    console.error('Error fetching reports:', err);
+    toast.error('Failed to load reports');
+    this.reports.set([]);
+    this.totalReports.set(0);
+    this.totalPages.set(1);
+    this.barangays.set([]);
+    this.categories.set([]);
+    this.isLoading.set(false);
+  }
+
+  private requestReload(): void {
+    this.reload$.next();
   }
 
   viewDetails(id: string): void {
@@ -122,7 +169,24 @@ export class HazardList implements OnInit {
   }
 
   exportToCSV(): void {
-    this.exportService.exportToCSV(this.reports(), `hazard_reports_page_${this.currentPage()}.csv`);
+    const prefix = this.isArchivedView() ? 'archived_hazard_reports' : 'hazard_reports';
+    this.exportService.exportToCSV(this.reports(), `${prefix}_page_${this.currentPage()}.csv`);
+  }
+
+  setArchiveView(view: 'active' | 'archived'): void {
+    if (this.archiveView() === view) {
+      return;
+    }
+
+    this.archiveView.set(view);
+    this.currentPage.set(1);
+    this.searchDraft.set('');
+    this.searchTerm.set('');
+    this.filterBarangay.set('All');
+    this.filterCategory.set('All');
+    this.filterSeverity.set('All');
+    this.filterStatus.set('All');
+    this.requestReload();
   }
 
   onFilterChange(type: 'barangay' | 'category' | 'severity' | 'status', value: string): void {
@@ -132,7 +196,12 @@ export class HazardList implements OnInit {
     if (type === 'status') this.filterStatus.set(value);
 
     this.currentPage.set(1);
-    this.loadReportsPage();
+    this.requestReload();
+  }
+
+  onSearchDraftChange(value: string): void {
+    this.searchDraft.set(value);
+    this.searchInput$.next(value);
   }
 
   toggleSort(column: 'severity' | 'status' | 'createdAt'): void {
@@ -144,27 +213,27 @@ export class HazardList implements OnInit {
     }
 
     this.currentPage.set(1);
-    this.loadReportsPage();
+    this.requestReload();
   }
 
   goToPage(page: number): void {
     if (page >= 1 && page <= this.totalPages() && page !== this.currentPage()) {
       this.currentPage.set(page);
-      this.loadReportsPage();
+      this.requestReload();
     }
   }
 
   nextPage(): void {
     if (this.currentPage() < this.totalPages()) {
       this.currentPage.set(this.currentPage() + 1);
-      this.loadReportsPage();
+      this.requestReload();
     }
   }
 
   prevPage(): void {
     if (this.currentPage() > 1) {
       this.currentPage.set(this.currentPage() - 1);
-      this.loadReportsPage();
+      this.requestReload();
     }
   }
 
