@@ -6,6 +6,7 @@ import {
   updateReportStatus,
   archiveReport,
   getAnalytics,
+  getPublicReports
 } from "../controllers/hazard-report.controller";
 import { upload } from "../middlewares/upload.middleware";
 import { verifyToken, verifyAdmin } from "../middlewares/auth.middleware";
@@ -19,5 +20,6 @@ router.get("/", verifyToken, getReports);
 router.get("/:id", verifyToken, getReportById);
 router.put("/:id/status", verifyToken, verifyAdmin, updateReportStatus);
 router.put("/:id/archive", verifyToken, verifyAdmin, archiveReport);
+router.get("/public", verifyToken, getPublicReports);
 
 export default router;
