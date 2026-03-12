@@ -12,9 +12,9 @@ import { BrnSelectImports } from '@spartan-ng/brain/select';
 import { HlmSelectImports } from '@spartan-ng/helm/select';
 import { HlmTableImports } from '@spartan-ng/helm/table';
 import { HlmPaginationImports } from '@spartan-ng/helm/pagination';
+import { HlmScrollAreaImports } from '@spartan-ng/helm/scroll-area';
 import { toast } from 'ngx-sonner';
 
-// Custom sorting weights to ensure logical ordering rather than alphabetical
 const SEVERITY_WEIGHT: Record<string, number> = { 'Low': 1, 'Medium': 2, 'Critical': 3 };
 const STATUS_WEIGHT: Record<string, number> = { 'Reported': 1, 'Under Review': 2, 'In Progress': 3, 'Resolved': 4 };
 
@@ -30,7 +30,8 @@ const STATUS_WEIGHT: Record<string, number> = { 'Reported': 1, 'Under Review': 2
     BrnSelectImports,
     HlmSelectImports,
     HlmTableImports,
-    HlmPaginationImports
+    HlmPaginationImports,
+    HlmScrollAreaImports
   ],
   providers: [HazardReportService],
   templateUrl: './hazard-list.html',
@@ -39,19 +40,18 @@ const STATUS_WEIGHT: Record<string, number> = { 'Reported': 1, 'Under Review': 2
 export class HazardList implements OnInit {
   reports = signal<any[]>([]);
 
-  // Filtering State
   filterBarangay = signal<string>('All');
   filterCategory = signal<string>('All');
   filterSeverity = signal<string>('All');
   filterStatus = signal<string>('All');
 
-  // Sorting State - Added 'createdAt'
   sortColumn = signal<'severity' | 'status' | 'createdAt' | null>('createdAt');
-  sortDirection = signal<'asc' | 'desc'>('desc'); // Default to newest first
+  sortDirection = signal<'asc' | 'desc'>('desc');
 
-  // Pagination State
   currentPage = signal<number>(1);
-  itemsPerPage = signal<number>(10);
+  
+  // Set back to 10 entries per page
+  itemsPerPage = signal<number>(10); 
 
   availableBarangays = computed(() => {
     const all = this.reports().map(r => r.barangay).filter(Boolean);
@@ -63,7 +63,6 @@ export class HazardList implements OnInit {
     return ['All', ...Array.from(new Set(all)).sort()];
   });
 
-  // 1. First apply filters
   filteredReports = computed(() => {
     const brgy = this.filterBarangay();
     const cat = this.filterCategory();
@@ -79,7 +78,6 @@ export class HazardList implements OnInit {
     });
   });
 
-  // 2. Then apply sorting
   sortedReports = computed(() => {
     const baseReports = [...this.filteredReports()];
     const col = this.sortColumn();
@@ -113,7 +111,6 @@ export class HazardList implements OnInit {
     });
   });
 
-  // 3. Finally apply pagination
   paginatedReports = computed(() => {
     const start = (this.currentPage() - 1) * this.itemsPerPage();
     return this.sortedReports().slice(start, start + this.itemsPerPage());
@@ -152,15 +149,12 @@ export class HazardList implements OnInit {
     this.exportService.exportToCSV(this.sortedReports(), 'hazard_reports.csv');
   }
 
-  // --- Handlers ---
-
   onFilterChange(type: 'barangay' | 'category' | 'severity' | 'status', value: string): void {
     if (type === 'barangay') this.filterBarangay.set(value);
     if (type === 'category') this.filterCategory.set(value);
     if (type === 'severity') this.filterSeverity.set(value);
     if (type === 'status') this.filterStatus.set(value);
     
-    // Reset pagination to page 1 whenever filters change
     this.currentPage.set(1);
   }
 
@@ -169,7 +163,6 @@ export class HazardList implements OnInit {
       this.sortDirection.set(this.sortDirection() === 'asc' ? 'desc' : 'asc');
     } else {
       this.sortColumn.set(column);
-      // Default to descending (newest first) for dates, ascending for text/status
       this.sortDirection.set(column === 'createdAt' ? 'desc' : 'asc');
     }
   }
@@ -197,7 +190,6 @@ export class HazardList implements OnInit {
     const current = this.currentPage();
     const pages: number[] = [];
     
-    // Simple logic to show a maximum of 5 page numbers
     let start = Math.max(1, current - 2);
     let end = Math.min(total, current + 2);
     
