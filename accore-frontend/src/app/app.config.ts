@@ -12,6 +12,7 @@ import { routes } from './app.routes';
 
 import {
   SocialLoginModule,
+  SOCIAL_AUTH_CONFIG,
   SocialAuthServiceConfig,
   GoogleLoginProvider,
 } from '@abacritt/angularx-social-login';
@@ -31,8 +32,12 @@ import {
   MapPin,
   Clock,
   AlertTriangle,
+  CalendarDays,
   ChevronDown,
+  Check,
   CheckCircle2,
+  History,
+  ImageOff,
   Loader2,
   X,
   Menu,
@@ -42,6 +47,7 @@ import {
   Navigation,
   Download,
   ShieldCheck,
+  Tag,
 } from 'lucide-angular';
 
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
@@ -106,8 +112,12 @@ export const appConfig: ApplicationConfig = {
         MapPin,
         Clock,
         AlertTriangle,
+        CalendarDays,
         ChevronDown,
+        Check,
         CheckCircle2,
+        History,
+        ImageOff,
 
         Loader2,
         X,
@@ -119,11 +129,12 @@ export const appConfig: ApplicationConfig = {
 
         Download,
         ShieldCheck, // ADDED: Required for the updated UI sections
+        Tag,
       }),
     ),
 
     {
-      provide: 'SocialAuthServiceConfig',
+      provide: SOCIAL_AUTH_CONFIG,
 
       useValue: {
         autoLogin: false,

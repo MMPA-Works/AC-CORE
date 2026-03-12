@@ -1,0 +1,49 @@
+{
+  "name": "accore-frontend",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test"
+  },
+  "dependencies": {
+    "@abacritt/angularx-social-login": "latest",
+    "@angular/cdk": "21.2.1",
+    "@angular/common": "21.2.1",
+    "@angular/compiler": "21.2.1",
+    "@angular/core": "21.2.1",
+    "@angular/forms": "21.2.1",
+    "@angular/platform-browser": "21.2.1",
+    "@angular/router": "21.2.1",
+    "@ng-icons/core": "latest",
+    "@ng-icons/lucide": "latest",
+    "@spartan-ng/brain": "latest",
+    "browser-image-compression": "latest",
+    "chart.js": "latest",
+    "class-variance-authority": "latest",
+    "clsx": "latest",
+    "jwt-decode": "latest",
+    "leaflet": "latest",
+    "lucide-angular": "latest",
+    "ng2-charts": "latest",
+    "ngx-sonner": "latest",
+    "rxjs": "^7.8.2",
+    "tailwind-merge": "latest",
+    "tw-animate-css": "latest",
+    "tslib": "^2.8.1"
+  },
+  "devDependencies": {
+    "@angular/build": "21.2.1",
+    "@angular/cli": "21.2.1",
+    "@angular/compiler-cli": "21.2.1",
+    "@tailwindcss/postcss": "latest",
+    "@types/leaflet": "latest",
+    "@types/node": "latest",
+    "postcss": "latest",
+    "tailwindcss": "latest",
+    "typescript": "~5.9.2"
+  }
+}
