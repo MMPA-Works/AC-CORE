@@ -1,6 +1,4 @@
 <main class="flex items-center justify-center min-h-screen bg-gray-50 p-4">
-  <hlm-toaster class="z-50" [richColors]="true" [expand]="false" />
-
   <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-md border border-gray-200">
     <div class="flex flex-col items-center text-center">
       <img
@@ -10,6 +8,13 @@
       />
       <h1 class="text-2xl font-bold text-gray-900">Admin Command Center</h1>
       <p class="text-sm text-gray-500 mt-2">Sign in to access the secure LGU dashboard</p>
+    </div>
+
+    <div
+      *ngIf="errorMessage()"
+      class="p-3 mb-4 text-sm text-red-700 bg-red-100 rounded-md border border-red-200"
+    >
+      {{ errorMessage() }}
     </div>
 
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-4">
@@ -41,10 +46,9 @@
         hlmBtn
         type="submit"
         class="w-full bg-red-700 hover:bg-red-800 text-white mt-6 disabled:opacity-50"
-        [disabled]="loginForm.invalid || isLoading()"
+        [disabled]="loginForm.invalid"
       >
-        <span *ngIf="!isLoading()">Sign In</span>
-        <span *ngIf="isLoading()">Authenticating...</span>
+        Sign In
       </button>
     </form>
   </div>

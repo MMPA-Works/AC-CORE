@@ -25,6 +25,7 @@ import { LucideAngularModule } from 'lucide-angular';
     LucideAngularModule
   ],
   templateUrl: './analytics-dashboard.html',
+  styleUrl: './analytics-dashboard.css',
 })
 export class AnalyticsDashboard implements OnInit, OnDestroy {
   private hazardService = inject(HazardReportService);

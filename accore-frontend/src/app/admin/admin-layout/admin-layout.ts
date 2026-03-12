@@ -12,7 +12,7 @@ import { SidebarComponent } from '../sidebar/sidebar';
       
       <app-sidebar></app-sidebar>
 
-      <main class="flex-1 relative z-0 overflow-auto">
+      <main class="flex-1 relative z-0 overflow-hidden">
         <router-outlet></router-outlet>
       </main>
 
