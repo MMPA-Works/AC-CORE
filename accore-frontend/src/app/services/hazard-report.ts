@@ -40,6 +40,14 @@ export class HazardReportService {
       .set('page', query.page.toString())
       .set('limit', query.limit.toString());
 
+    if (query.archived) {
+      params = params.set('archived', query.archived);
+    }
+
+    if (query.search) {
+      params = params.set('search', query.search);
+    }
+
     if (query.barangay && query.barangay !== 'All') {
       params = params.set('barangay', query.barangay);
     }
@@ -84,6 +92,12 @@ export class HazardReportService {
 
   updateReportStatus(id: string, status: HazardReportStatus): Observable<HazardReport> {
     return this.http.put<HazardReport>(`${this.apiUrl}/${id}/status`, { status }, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
+  archiveReport(id: string): Observable<HazardReport> {
+    return this.http.put<HazardReport>(`${this.apiUrl}/${id}/archive`, {}, {
       headers: this.getAuthHeaders()
     });
   }
