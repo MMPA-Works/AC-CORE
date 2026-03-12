@@ -1,8 +1,7 @@
-import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormsModule } from '@angular/forms';
 import { HazardReportService } from '../../services/hazard-report';
-import { BarangayService } from '../../services/barangay';
 import { HazardReport } from '../../shared/models/hazard-report';
 import { toast } from 'ngx-sonner';
 
@@ -12,9 +11,9 @@ import { HlmSelectImports } from '@spartan-ng/helm/select';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmTableImports } from '@spartan-ng/helm/table';
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';
-import { HlmScrollAreaImports } from '@spartan-ng/helm/scroll-area';
 import { HlmDatePicker } from '@spartan-ng/helm/date-picker';
 import { HlmLabel } from '@spartan-ng/helm/label';
+import { HlmPaginationImports } from '@spartan-ng/helm/pagination';
 
 @Component({
   selector: 'app-reports-generation',
@@ -28,9 +27,9 @@ import { HlmLabel } from '@spartan-ng/helm/label';
     HlmButtonImports,
     HlmTableImports,
     HlmBadgeImports,
-    HlmScrollAreaImports,
     HlmDatePicker,
-    HlmLabel
+    HlmLabel,
+    HlmPaginationImports
   ],
   templateUrl: './reports-generation.html',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -41,7 +40,34 @@ export class ReportsGeneration implements OnInit {
 
   isLoading = false;
   allReports: HazardReport[] = [];
-  reports: HazardReport[] = [];
+  
+  // Signals for Table Data, Search & Pagination
+  reports = signal<HazardReport[]>([]);
+  searchQuery = signal<string>('');
+  currentPage = signal<number>(1);
+  itemsPerPage = signal<number>(5);
+
+  // Computed signal that filters generated reports based on the search bar
+  displayReports = computed(() => {
+    const query = this.searchQuery().toLowerCase().trim();
+    if (!query) return this.reports();
+
+    return this.reports().filter(r => {
+      const title = (r.title || '').toLowerCase();
+      const category = (r.category || '').toLowerCase();
+      const barangay = (r.barangay || '').toLowerCase();
+      const status = (r.status || '').toLowerCase();
+
+      return title.includes(query) || category.includes(query) || barangay.includes(query) || status.includes(query);
+    });
+  });
+
+  paginatedReports = computed(() => {
+    const start = (this.currentPage() - 1) * this.itemsPerPage();
+    return this.displayReports().slice(start, start + this.itemsPerPage());
+  });
+
+  totalPages = computed(() => Math.ceil(this.displayReports().length / this.itemsPerPage()) || 1);
 
   categories: string[] = ['All', 'Pothole', 'Clogged Drain', 'Fallen Tree', 'Streetlight Out', 'Flooding'];
   barangays: string[] = [];
@@ -105,7 +131,7 @@ export class ReportsGeneration implements OnInit {
     const searchBarangay = (barangay || 'All').trim().toLowerCase();
     const searchCategory = (category || 'All').toLowerCase();
 
-    this.reports = this.allReports.filter((r: HazardReport) => {
+    const filtered = this.allReports.filter((r: HazardReport) => {
       const reportDate = new Date(r.createdAt || new Date());
       if (reportDate < start || reportDate > end) return false;
       if (searchBarangay !== 'all' && !r.barangay?.toLowerCase().includes(searchBarangay)) return false;
@@ -113,7 +139,49 @@ export class ReportsGeneration implements OnInit {
       return true;
     });
 
-    toast.success(`Found ${this.reports.length} reports`);
+    this.reports.set(filtered);
+    this.searchQuery.set(''); // Reset search query when new reports are generated
+    this.currentPage.set(1);
+    toast.success(`Generated ${filtered.length} reports`);
+  }
+
+  onSearch(query: string) {
+    this.searchQuery.set(query);
+    this.currentPage.set(1);
+  }
+
+  // Pagination Controls
+  nextPage(): void {
+    if (this.currentPage() < this.totalPages()) this.currentPage.set(this.currentPage() + 1);
+  }
+
+  prevPage(): void {
+    if (this.currentPage() > 1) this.currentPage.set(this.currentPage() - 1);
+  }
+
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages()) this.currentPage.set(page);
+  }
+
+  getPageArray(): number[] {
+    const total = this.totalPages();
+    const current = this.currentPage();
+    const pages: number[] = [];
+    
+    let start = Math.max(1, current - 2);
+    let end = Math.min(total, current + 2);
+    
+    if (current <= 2) end = Math.min(total, 5);
+    if (current >= total - 1) start = Math.max(1, total - 4);
+    
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    return pages;
+  }
+
+  min(a: number, b: number): number {
+    return Math.min(a, b);
   }
 
   getResolvedBy(report: HazardReport): string {
@@ -121,10 +189,13 @@ export class ReportsGeneration implements OnInit {
   }
 
   exportToCSV(): void {
-    if (!this.reports.length) return;
+    // We export the actively displayed/searched reports
+    const currentReports = this.displayReports();
+    if (!currentReports.length) return;
+    
     const csvContent = [
       ['Title', 'Category', 'Barangay', 'Status', 'Date', 'Lat', 'Lng', 'Resolved By'].join(','),
-      ...this.reports.map(r => [
+      ...currentReports.map(r => [
         `"${r.title || r.category}"`, r.category, r.barangay, r.status,
         new Date(r.createdAt!).toLocaleString(), r.location.coordinates[1],
         r.location.coordinates[0], this.getResolvedBy(r)
