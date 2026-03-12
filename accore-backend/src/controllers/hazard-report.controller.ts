@@ -25,6 +25,13 @@ const STATUS_WEIGHT: Record<string, number> = {
   Resolved: 4,
 };
 
+const ACTIVE_PUBLIC_STATUSES = [
+  "Reported",
+  "Under Review",
+  "Dispatched",
+  "In Progress",
+];
+
 const parsePositiveInt = (value: unknown, fallback: number, max = 100): number => {
   const parsed = Number.parseInt(String(value ?? ""), 10);
 
@@ -518,7 +525,10 @@ export const getPublicReports = async (
   res: Response,
 ): Promise<void> => {
   try {
-    const reports = await HazardReport.find({ isArchived: { $ne: true } })
+    const reports = await HazardReport.find({
+      isArchived: { $ne: true },
+      status: { $in: ACTIVE_PUBLIC_STATUSES },
+    })
       .select("title description category severity barangay location status createdAt")
       .sort({ createdAt: -1 });
       
