@@ -512,3 +512,21 @@ export const getAnalytics = async (
     });
   }
 };
+
+export const getPublicReports = async (
+  req: AuthRequest,
+  res: Response,
+): Promise<void> => {
+  try {
+    const reports = await HazardReport.find({ isArchived: { $ne: true } })
+      .select("title description category severity barangay location status createdAt")
+      .sort({ createdAt: -1 });
+      
+    res.status(200).json(reports);
+  } catch (error: any) {
+    res.status(500).json({
+      message: "Failed to fetch public reports",
+      error: error.message,
+    });
+  }
+};

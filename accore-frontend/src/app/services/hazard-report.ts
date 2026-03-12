@@ -35,6 +35,13 @@ export class HazardReportService {
     });
   }
 
+  // Fetches public map markers without requiring admin privileges
+  getAllPublicReports(): Observable<HazardReport[]> {
+    return this.http.get<HazardReport[]>(`${this.apiUrl}/public`, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
   getReportsPage(query: HazardReportPageQuery): Observable<PaginatedHazardReportResponse> {
     let params = new HttpParams()
       .set('page', query.page.toString())
