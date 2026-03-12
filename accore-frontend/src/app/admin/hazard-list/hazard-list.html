@@ -86,7 +86,7 @@
         </div>
       </div>
 
-      <div class="overflow-x-auto">
+      <div class="overflow-x-auto" [class.opacity-60]="isLoading()">
         <div hlmTableContainer class="min-w-[800px] w-full">
           <table hlmTable class="w-full">
             <thead hlmTHead>
@@ -137,7 +137,7 @@
               </tr>
             </thead>
             <tbody hlmTBody>
-              @for (report of paginatedReports(); track report._id) {
+              @for (report of reports(); track report._id) {
                 <tr hlmTr class="transition-colors hover:bg-gray-50/80 border-b border-gray-100 group/row">
                   <td hlmTd class="py-4 pl-5">
                     <div class="font-semibold text-gray-900 truncate max-w-[200px] sm:max-w-[250px] md:max-w-[300px] lg:max-w-[400px]" [title]="report.title || report.category">
@@ -186,12 +186,19 @@
               } @empty {
                 <tr hlmTr>
                   <td hlmTd colspan="6" class="justify-center py-16 text-gray-400">
-                    <div class="flex flex-col items-center justify-center gap-3 w-full">
-                      <div class="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center">
-                        <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
+                    @if (isLoading()) {
+                      <div class="flex flex-col items-center justify-center gap-3 w-full">
+                        <div class="w-10 h-10 rounded-full border-2 border-primary/20 border-t-primary animate-spin"></div>
+                        <p class="font-medium text-gray-500">Loading reports...</p>
                       </div>
-                      <p class="font-medium">No reports found matching your criteria.</p>
-                    </div>
+                    } @else {
+                      <div class="flex flex-col items-center justify-center gap-3 w-full">
+                        <div class="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center">
+                          <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
+                        </div>
+                        <p class="font-medium">No reports found matching your criteria.</p>
+                      </div>
+                    }
                   </td>
                 </tr>
               }
@@ -204,7 +211,7 @@
         <div class="p-4 sm:px-6 border-t border-gray-200 bg-white grid grid-cols-1 lg:grid-cols-3 gap-4 items-center">
           
           <div class="text-sm font-medium text-gray-500 text-center lg:text-left order-2 lg:order-1">
-            Showing <span class="text-gray-900">{{ ((currentPage() - 1) * itemsPerPage()) + 1 }}</span> to <span class="text-gray-900">{{ min((currentPage() * itemsPerPage()), sortedReports().length) }}</span> of <span class="text-gray-900">{{ sortedReports().length }}</span> entries
+            Showing <span class="text-gray-900">{{ rangeStart() }}</span> to <span class="text-gray-900">{{ rangeEnd() }}</span> of <span class="text-gray-900">{{ totalReports() }}</span> entries
           </div>
           
           <div class="flex justify-center order-1 lg:order-2">
