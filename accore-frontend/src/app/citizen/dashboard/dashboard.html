@@ -26,10 +26,9 @@
       <div class="absolute bottom-6 left-6 z-10 bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-lg border border-neutral-100 pointer-events-auto">
         <h3 class="text-xs font-extrabold text-neutral-500 mb-3 uppercase tracking-wider">Severity Legend</h3>
         <div class="flex flex-col gap-2.5">
-          <div class="flex items-center gap-3"><span class="w-3.5 h-3.5 rounded-full bg-red-700 shadow-sm"></span><span class="text-sm font-medium text-neutral-700">Critical</span></div>
-          <div class="flex items-center gap-3"><span class="w-3.5 h-3.5 rounded-full bg-orange-500 shadow-sm"></span><span class="text-sm font-medium text-neutral-700">High</span></div>
-          <div class="flex items-center gap-3"><span class="w-3.5 h-3.5 rounded-full bg-yellow-400 shadow-sm"></span><span class="text-sm font-medium text-neutral-700">Medium</span></div>
-          <div class="flex items-center gap-3"><span class="w-3.5 h-3.5 rounded-full bg-blue-500 shadow-sm"></span><span class="text-sm font-medium text-neutral-700">Low</span></div>
+          <div class="flex items-center gap-3"><span class="w-3.5 h-3.5 rounded-full bg-red-600 shadow-sm border border-neutral-200"></span><span class="text-sm font-medium text-neutral-700">Critical</span></div>
+          <div class="flex items-center gap-3"><span class="w-3.5 h-3.5 rounded-full bg-yellow-500 shadow-sm border border-neutral-200"></span><span class="text-sm font-medium text-neutral-700">Medium</span></div>
+          <div class="flex items-center gap-3"><span class="w-3.5 h-3.5 rounded-full bg-neutral-500 shadow-sm border border-neutral-200"></span><span class="text-sm font-medium text-neutral-700">Low</span></div>
         </div>
       </div>
     </section>
@@ -90,12 +89,31 @@
 
           <div *ngFor="let insight of cityInsights" class="flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <div class="flex h-10 w-10 items-center justify-center rounded-full bg-neutral-100 text-neutral-600">
-                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              <div [ngSwitch]="insight.category.toLowerCase()" class="flex h-10 w-10 items-center justify-center rounded-full bg-neutral-100 text-neutral-600">
+                <svg *ngSwitchCase="'fallen tree'" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="m17 14 3 3.32C20.46 17.85 20.12 18 19.5 18H4.5c-.62 0-.96-.15-.5-.68L7 14"/>
+                  <path d="m15 9 3 3.48c.45.51.1 1.02-.5 1.02H6.5c-.6 0-.95-.51-.5-1.02L9 9"/>
+                  <path d="m12.5 3 3 3.96C15.96 7.49 15.6 8 15 8H9c-.6 0-.96-.51-.5-1.04L11.5 3c.28-.36.72-.36 1 0Z"/>
+                  <path d="M12 22v-4"/>
+                </svg>
+                <svg *ngSwitchCase="'clogged drain'" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M2 6c.6 0 1.2-.2 1.8-.6.6-.4 1.2-.6 1.8-.6.6 0 1.2.2 1.8.6.6.4 1.2.6 1.8.6.6 0 1.2-.2 1.8-.6.6-.4 1.2-.6 1.8-.6.6 0 1.2.2 1.8.6.6.4 1.2.6 1.8.6.6 0 1.2-.2 1.8-.6.6-.4 1.2-.6 1.8-.6v14c-.6 0-1.2.2-1.8.6-.6.4-1.2.6-1.8.6-.6 0-1.2-.2-1.8-.6-.6-.4-1.2-.6-1.8-.6-.6 0-1.2.2-1.8.6-.6.4-1.2.6-1.8.6-.6 0-1.2-.2-1.8-.6-.6-.4-1.2-.6-1.8-.6-.6 0-1.2.2-1.8.6-.6.4-1.2.6-1.8.6Z"/>
+                </svg>
+                <svg *ngSwitchCase="'pothole'" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="m20.9 18.55-8-15.98a1 1 0 0 0-1.8 0l-8 15.98"/>
+                  <path d="M4 14h16"/>
+                  <path d="M3 20h18"/>
+                </svg>
+                <svg *ngSwitchCase="'flooding'" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 22a8 8 0 0 0 8-8c0-2-3-9-7-12a1 1 0 0 0-2 0c-4 3-7 10-7 12a8 8 0 0 0 8 8z"/>
+                </svg>
+                <svg *ngSwitchDefault class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+                  <line x1="12" y1="9" x2="12" y2="13"/>
+                  <line x1="12" y1="17" x2="12.01" y2="17"/>
                 </svg>
               </div>
-              <span class="font-semibold text-neutral-700">{{ insight.category }}</span>
+              <span class="font-semibold text-neutral-700 capitalize">{{ insight.category }}</span>
             </div>
             <span class="text-sm font-bold text-neutral-900">{{ insight.percentage }}%</span>
           </div>
@@ -130,7 +148,7 @@
                 class="inline-flex items-center justify-center rounded-lg px-3 py-1.5 text-xs font-bold uppercase tracking-wider"
                 [ngClass]="{
                   'bg-neutral-100 text-neutral-600': report.status === 'Reported',
-                  'bg-blue-50 text-blue-700': report.status === 'Dispatched',
+                  'bg-blue-50 text-blue-700': report.status === 'Dispatched' || report.status === 'In Progress' || report.status === 'Under Review',
                   'bg-green-50 text-green-700': report.status === 'Resolved'
                 }"
               >
@@ -141,7 +159,7 @@
 
           <div *ngIf="!isRecentLoading && myReports.length === 0" class="flex h-full flex-col items-center justify-center px-6 py-12 text-center text-neutral-400">
             <div class="flex h-12 w-12 items-center justify-center rounded-full bg-neutral-100 mb-3">
-               <svg class="h-6 w-6 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+               <svg class="h-6 w-6 text-neutral-400" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
