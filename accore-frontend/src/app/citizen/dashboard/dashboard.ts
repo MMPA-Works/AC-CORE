@@ -120,7 +120,7 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
   resolvedReports = 0;
   impactTitle = 'Civic Starter';
   firstName = 'Citizen';
-  cityInsights: { category: string, percentage: number }[] = [];
+  cityInsights: { category: string, count: number, weeklyCount: number, percentage: number }[] = [];
 
   ngOnInit() {
     if (isPlatformBrowser(this.platformId)) {
@@ -187,22 +187,37 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    const counts: Record<string, number> = {};
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+    const counts: Record<string, { count: number; weeklyCount: number }> = {};
 
     reports.forEach((report) => {
       const category = report.category || 'Other';
-      counts[category] = (counts[category] || 0) + 1;
+      const createdAt = report.createdAt ? new Date(report.createdAt) : null;
+
+      if (!counts[category]) {
+        counts[category] = { count: 0, weeklyCount: 0 };
+      }
+
+      counts[category].count += 1;
+
+      if (createdAt && !Number.isNaN(createdAt.getTime()) && createdAt >= oneWeekAgo) {
+        counts[category].weeklyCount += 1;
+      }
     });
 
     const total = reports.length;
 
     this.cityInsights = Object.entries(counts)
-      .map(([category, count]) => ({
+      .map(([category, values]) => ({
         category,
-        percentage: Math.round((count / total) * 100)
+        count: values.count,
+        weeklyCount: values.weeklyCount,
+        percentage: Math.round((values.count / total) * 100)
       }))
-      .sort((a, b) => b.percentage - a.percentage)
-      .slice(0, 3);
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 4);
   }
 
   calculateImpactRank(count: number) {
