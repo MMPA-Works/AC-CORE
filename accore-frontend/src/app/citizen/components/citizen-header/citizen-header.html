@@ -1,10 +1,11 @@
-<nav class="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/90">
+<nav class="sticky top-0 z-50 w-full border-b border-neutral-200 bg-white/90 backdrop-blur-md">
   <div class="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-4 md:flex-row md:items-center md:justify-between md:px-6">
-    <a routerLink="/citizen/dashboard" class="flex items-center gap-3">
-      <img src="assets/favicon.ico" alt="AC-CORE logo" class="h-9 w-9 rounded-lg border border-border bg-card p-1.5 shadow-sm">
+    
+    <a routerLink="/citizen/dashboard" class="flex items-center gap-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2 transition-opacity hover:opacity-80">
+      <img src="logo.svg" alt="Angeles Fix-It Logo" class="h-9 w-9 object-contain">
       <div>
-        <p class="text-sm font-semibold text-foreground">AC-CORE Citizen</p>
-        <p class="text-xs text-muted-foreground">Hazard reporting and tracking</p>
+        <p class="text-sm font-bold tracking-tight text-neutral-900">AC-CORE</p>
+        <p class="text-[10px] font-medium uppercase tracking-wider text-neutral-500">Citizen Portal</p>
       </div>
     </a>
 
@@ -13,10 +14,10 @@
         @for (item of navItems; track item.route) {
           <a
             [routerLink]="item.route"
-            class="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors"
+            class="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2"
             [ngClass]="isActive(item.aliases)
-              ? 'bg-primary/10 text-primary'
-              : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'"
+              ? 'bg-red-50 text-red-700' 
+              : 'text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900'"
           >
             <lucide-icon [name]="item.icon" class="h-4 w-4"></lucide-icon>
             <span>{{ item.label }}</span>
@@ -24,7 +25,12 @@
         }
       </div>
 
-      <button hlmBtn variant="outline" size="sm" class="justify-center md:justify-start" (click)="onLogout()">
+      <div class="hidden h-6 w-px bg-neutral-200 md:block"></div>
+
+      <button 
+        class="inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-neutral-600 transition-colors hover:bg-red-50 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2 md:justify-start" 
+        (click)="onLogout()"
+      >
         <lucide-icon name="log-out" class="h-4 w-4"></lucide-icon>
         <span>Logout</span>
       </button>
