@@ -1,88 +1,136 @@
-<div class="p-6 max-w-6xl mx-auto font-sans">
-  <h2 class="text-3xl font-extrabold text-slate-900 mb-6">Historical Reports</h2>
-
-  <form [formGroup]="reportForm" (ngSubmit)="onFilterReports()" class="grid gap-4 md:grid-cols-4 items-end mb-6">
-    <div class="flex flex-col">
-      <label class="font-medium text-slate-600 mb-1">Start Date</label>
-      <input type="date" formControlName="startDate" class="w-full border border-border rounded px-4 py-2 focus:ring-2 focus:ring-ring focus:outline-none"/>
+<div class="min-h-screen bg-slate-50/50 text-foreground font-sans p-4 sm:p-6 lg:p-8 pb-24 flex flex-col">
+  <div class="w-full max-w-[1400px] mx-auto flex flex-col gap-6">
+    
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 px-1">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shrink-0 shadow-sm">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+        </div>
+        <div>
+          <h2 class="text-3xl font-extrabold tracking-tight text-gray-900">Historical Reports</h2>
+          <p class="text-base text-gray-500 mt-0.5">Filter and export municipal hazard records.</p>
+        </div>
+      </div>
     </div>
 
-    <div class="flex flex-col">
-      <label class="font-medium text-slate-600 mb-1">End Date</label>
-      <input type="date" formControlName="endDate" class="w-full border border-border rounded px-4 py-2 focus:ring-2 focus:ring-ring focus:outline-none"/>
-    </div>
+    <form [formGroup]="reportForm" (ngSubmit)="onFilterReports()" class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 flex flex-col gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        
+        <div class="flex flex-col gap-2">
+          <label hlmLabel for="startDate" class="text-xs font-bold text-gray-500 uppercase tracking-wider">Start Date</label>
+          <hlm-date-picker id="startDate" [(date)]="startDate" [min]="minDate" [max]="maxDate">
+            <span class="text-sm">Select start date</span>
+          </hlm-date-picker>
+        </div>
 
-    <div class="flex flex-col">
-      <label class="font-medium text-slate-600 mb-1">Barangay</label>
-      <input type="text" formControlName="barangay" list="barangayOptions" class="w-full border border-border rounded px-4 py-2 focus:ring-2 focus:ring-ring focus:outline-none" placeholder="Type Barangay or 'All'"/>
-      <datalist id="barangayOptions">
-        <option value="All"></option>
-        <option *ngFor="let b of filteredBarangays" [value]="b"></option>
-      </datalist>
-    </div>
+        <div class="flex flex-col gap-2">
+          <label hlmLabel for="endDate" class="text-xs font-bold text-gray-500 uppercase tracking-wider">End Date</label>
+          <hlm-date-picker id="endDate" [(date)]="endDate" [min]="minDate" [max]="maxDate">
+            <span class="text-sm">Select end date</span>
+          </hlm-date-picker>
+        </div>
 
-    <div class="flex flex-col">
-      <label class="font-medium text-slate-600 mb-1">Category</label>
-      <select formControlName="category" class="w-full border border-border rounded px-4 py-2 focus:ring-2 focus:ring-ring focus:outline-none">
-        <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
-      </select>
-    </div>
+        <div class="flex flex-col gap-2">
+          <label hlmLabel class="text-xs font-bold text-gray-500 uppercase tracking-wider">Barangay</label>
+          <brn-select class="w-full" formControlName="barangay">
+            <hlm-select-trigger class="w-full bg-gray-50 border-gray-200 shadow-none hover:border-primary/50 transition-colors">
+              <hlm-select-value placeholder="All Barangays" />
+            </hlm-select-trigger>
+            <hlm-select-content class="w-full min-w-[240px] bg-white border-gray-200 shadow-lg rounded-xl overflow-hidden p-0">
+              <ng-scrollbar hlm class="h-64" appearance="compact">
+                <div class="p-1">
+                  <hlm-option value="All" class="cursor-pointer hover:bg-gray-100 rounded-md">All Barangays</hlm-option>
+                  @for (b of filteredBarangays; track b) {
+                    <hlm-option [value]="b" class="cursor-pointer hover:bg-gray-100 rounded-md">{{ b }}</hlm-option>
+                  }
+                </div>
+              </ng-scrollbar>
+            </hlm-select-content>
+          </brn-select>
+        </div>
 
-    <div class="md:col-span-4 flex gap-4 mt-4">
-      <button type="submit" [disabled]="isLoading" class="bg-primary text-primary-foreground px-6 py-2 rounded-lg hover:bg-primary/90 shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-        {{ isLoading ? 'Loading Data...' : 'Filter Reports' }}
-      </button>
-
-      <button type="button" (click)="exportToCSV()" [disabled]="reports.length === 0" class="bg-slate-800 text-white px-6 py-2 rounded-lg hover:bg-slate-700 shadow-md disabled:bg-slate-300 disabled:text-slate-500 disabled:cursor-not-allowed transition-all">
-        Export CSV
-      </button>
-    </div>
-  </form>
-
-  <div class="overflow-hidden rounded-xl border border-border shadow-lg bg-white">
-    <div class="bg-slate-100 px-5 py-3 border-b border-border flex justify-between items-center">
-      <span class="text-lg font-semibold text-slate-900">Filtered Results</span>
-      <span class="text-sm text-slate-500">{{ reports.length }} reports found</span>
-    </div>
-
-    <div class="max-h-[70vh] overflow-y-auto">
-      <div *ngIf="reports.length === 0" class="p-8 text-center text-slate-500 text-lg">
-        No reports found. Adjust your filters and click "Filter Reports".
+        <div class="flex flex-col gap-2">
+          <label hlmLabel class="text-xs font-bold text-gray-500 uppercase tracking-wider">Category</label>
+          <brn-select class="w-full" formControlName="category">
+            <hlm-select-trigger class="w-full bg-gray-50 border-gray-200 shadow-none hover:border-primary/50 transition-colors">
+              <hlm-select-value placeholder="All Categories" />
+            </hlm-select-trigger>
+            <hlm-select-content class="w-full min-w-[240px] bg-white border-gray-200 shadow-lg rounded-xl overflow-hidden p-0">
+              <ng-scrollbar hlm class="h-48" appearance="compact">
+                <div class="p-1">
+                  @for (c of categories; track c) {
+                    <hlm-option [value]="c" class="cursor-pointer hover:bg-gray-100 rounded-md">{{ c === 'All' ? 'All Categories' : c }}</hlm-option>
+                  }
+                </div>
+              </ng-scrollbar>
+            </hlm-select-content>
+          </brn-select>
+        </div>
       </div>
 
-      <table *ngIf="reports.length > 0" class="min-w-full text-sm">
-        <thead class="bg-slate-50 sticky top-0 z-10 border-b border-border">
-          <tr>
-            <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500">#</th>
-            <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500">Title</th>
-            <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500">Category</th>
-            <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500">Barangay</th>
-            <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500">Status</th>
-            <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500">Date</th>
-            <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500">Latitude</th>
-            <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500">Longitude</th>
-            <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500">Resolved By</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-border">
-          <tr *ngFor="let r of reports; let i = index" class="hover:bg-slate-50 transition">
-            <td class="px-4 py-3 text-slate-500">{{ i + 1 }}</td>
-            <td class="px-4 py-3 font-semibold text-slate-900">{{ r.title || r.category }}</td>
-            <td class="px-4 py-3 text-slate-600">{{ r.category }}</td>
-            <td class="px-4 py-3 text-slate-600">{{ r.barangay }}</td>
-            <td class="px-4 py-3">
-              <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-700">
-                <span class="w-2 h-2 rounded-full" [ngClass]="{'bg-red-500': r.status === 'Reported', 'bg-blue-500': r.status === 'In Progress', 'bg-yellow-400': r.status === 'Under Review', 'bg-green-500': r.status === 'Resolved'}"></span>
-                <span>{{ r.status }}</span>
-              </div>
-            </td>
-            <td class="px-4 py-3 text-slate-500">{{ r.createdAt | date:'MMM d, y, h:mm a' }}</td>
-            <td class="px-4 py-3 font-mono text-xs text-slate-600">{{ r.location.coordinates[1] }}</td>
-            <td class="px-4 py-3 font-mono text-xs text-slate-600">{{ r.location.coordinates[0] }}</td>
-            <td class="px-4 py-3 text-slate-700">{{ getResolvedBy(r) }}</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="flex flex-col sm:flex-row justify-end items-center gap-3 pt-6 border-t border-gray-100">
+        <button hlmBtn variant="outline" type="button" (click)="exportToCSV()" [disabled]="!reports.length" class="w-full sm:w-auto gap-2 rounded-xl transition-all">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+          Export CSV
+        </button>
+        <button hlmBtn type="submit" [disabled]="isLoading" class="w-full sm:w-auto rounded-xl shadow-sm px-8">
+          {{ isLoading ? 'Loading...' : 'Filter Reports' }}
+        </button>
+      </div>
+    </form>
+
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col overflow-hidden">
+      <div class="px-5 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+        <span class="font-semibold text-gray-900">Filtered Results</span>
+        <span class="text-xs font-medium text-gray-600 bg-white border border-gray-200 px-3 py-1.5 rounded-full shadow-sm">
+          {{ reports.length }} reports
+        </span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <div hlmTableContainer class="min-w-[1000px] w-full max-h-[60vh] overflow-y-auto">
+          <table hlmTable class="w-full border-separate border-spacing-0">
+            <thead hlmTHead class="sticky top-0 z-10 bg-white shadow-sm">
+              <tr hlmTr class="bg-white border-b border-gray-200">
+                <th hlmTh class="py-4 pl-5 w-16 text-xs font-semibold text-gray-500 uppercase tracking-wider">#</th>
+                <th hlmTh class="py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Incident</th>
+                <th hlmTh class="py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Barangay</th>
+                <th hlmTh class="py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                <th hlmTh class="py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
+                <th hlmTh class="py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider pr-6">Resolved By</th>
+              </tr>
+            </thead>
+            <tbody hlmTBody>
+              @for (r of reports; track r._id; let i = $index) {
+                <tr hlmTr class="hover:bg-gray-50/80 border-b border-gray-100 transition-colors">
+                  <td hlmTd class="py-4 pl-5 text-gray-500 text-sm">{{ i + 1 }}</td>
+                  <td hlmTd class="py-4">
+                    <div class="font-semibold text-gray-900">{{ r.title || r.category }}</div>
+                    <div class="text-xs text-gray-500">{{ r.category }}</div>
+                  </td>
+                  <td hlmTd class="py-4 text-gray-600 font-medium">{{ r.barangay }}</td>
+                  <td hlmTd class="py-4">
+                    <span hlmBadge variant="outline" class="font-medium text-xs px-2.5 py-0.5"
+                      [ngClass]="{'text-primary bg-primary/5': r.status === 'Reported', 'text-blue-600 bg-blue-50': r.status === 'In Progress', 'text-emerald-600 bg-emerald-50': r.status === 'Resolved'}">
+                      {{ r.status }}
+                    </span>
+                  </td>
+                  <td hlmTd class="py-4 text-gray-500 text-sm">{{ r.createdAt | date:'MMM d, y, h:mm a' }}</td>
+                  <td hlmTd class="py-4 pr-6 text-gray-700 font-medium text-sm">{{ getResolvedBy(r) }}</td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="6" class="py-20 text-center text-gray-400">
+                    No records found for the selected criteria.
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 </div>
