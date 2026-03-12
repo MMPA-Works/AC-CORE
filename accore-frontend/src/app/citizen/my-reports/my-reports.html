@@ -144,7 +144,11 @@
               </div>
 
               <div class="grid gap-3 sm:grid-cols-2">
-                <a [routerLink]="['/citizen/my-reports', report._id]" hlmBtn class="w-full">
+                <a
+                  [routerLink]="['/citizen/my-reports', report._id]"
+                  hlmBtn
+                  class="w-full transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-md"
+                >
                   View Details
                 </a>
                 <a

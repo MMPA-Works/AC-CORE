@@ -1,10 +1,12 @@
-import { Component, inject, OnInit, OnDestroy, PLATFORM_ID, signal } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, PLATFORM_ID, signal } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { HazardReportService } from '../../services/hazard-report';
 import * as L from 'leaflet';
 import { LucideAngularModule } from 'lucide-angular';
 import { HlmScrollAreaImports } from '@spartan-ng/helm/scroll-area';
 import { HlmSkeletonImports } from '@spartan-ng/helm/skeleton';
+import { EMPTY, Subject, timer } from 'rxjs';
+import { catchError, switchMap, takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-live-map',
@@ -21,8 +23,10 @@ import { HlmSkeletonImports } from '@spartan-ng/helm/skeleton';
 export class LiveMap implements OnInit, OnDestroy {
   private hazardReportService = inject(HazardReportService);
   private platformId = inject(PLATFORM_ID);
+  private readonly destroy$ = new Subject<void>();
+  private readonly refreshIntervalMs = 10000;
+  private readonly activeStatuses = new Set(['Reported', 'Under Review', 'In Progress']);
 
-  allReports = signal<any[]>([]);
   reports = signal<any[]>([]);
 
   isLoading = signal<boolean>(true);
@@ -30,17 +34,21 @@ export class LiveMap implements OnInit, OnDestroy {
   isPanelOpen = signal<boolean>(true);
 
   private map: L.Map | undefined;
-  private markers: L.Marker[] = [];
+  private markerLayer: L.LayerGroup | undefined;
 
   ngOnInit() {
     if (isPlatformBrowser(this.platformId)) {
-      this.fetchReports();
+      this.startAutoRefresh();
     }
   }
 
   ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+
     if (this.map) {
       this.map.remove();
+      this.map = undefined;
     }
   }
 
@@ -48,36 +56,43 @@ export class LiveMap implements OnInit, OnDestroy {
     this.isPanelOpen.update((state) => !state);
   }
 
-  fetchReports() {
+  private startAutoRefresh(): void {
     this.isLoading.set(true);
 
-    this.hazardReportService.getReports().subscribe({
-      next: (data: any) => {
-        const actualData = Array.isArray(data) ? data : (data.reports || []);
+    timer(0, this.refreshIntervalMs).pipe(
+      takeUntil(this.destroy$),
+      switchMap(() =>
+        this.hazardReportService.getReports().pipe(
+          catchError((error) => {
+            console.error('Failed to fetch reports', error);
+            this.errorMessage.set(this.reports().length ? 'Live updates paused. Retrying...' : 'Could not load reports.');
+            this.isLoading.set(false);
+            return EMPTY;
+          })
+        )
+      )
+    ).subscribe((data: any) => this.handleReportsResponse(data));
+  }
 
-        this.allReports.set(actualData);
+  private handleReportsResponse(data: any): void {
+    const actualData = Array.isArray(data) ? data : (data.reports || []);
+    const activeReports = actualData.filter((report: any) => this.activeStatuses.has(report.status));
 
-        const reportedOnly = actualData.filter(
-          (report: any) => report.status === 'Reported'
-        );
+    this.reports.set(activeReports);
+    this.errorMessage.set('');
+    this.isLoading.set(false);
 
-        this.reports.set(reportedOnly);
+    if (!this.map) {
+      setTimeout(() => this.initMap(), 0);
+      return;
+    }
 
-        this.isLoading.set(false);
-
-        setTimeout(() => this.initMap(), 0);
-      },
-      error: (error) => {
-        console.error('Failed to fetch reports', error);
-        this.errorMessage.set('Could not load reports.');
-        this.isLoading.set(false);
-      },
-    });
+    this.refreshMarkers();
   }
 
   private initMap(): void {
     if (this.map) {
-      this.map.remove();
+      return;
     }
 
     this.map = L.map('admin-map', { zoomControl: false }).setView([15.145, 120.5887], 13);
@@ -85,10 +100,11 @@ export class LiveMap implements OnInit, OnDestroy {
     L.control.zoom({ position: 'bottomleft' }).addTo(this.map);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors',
+      attribution: '&copy; OpenStreetMap contributors',
     }).addTo(this.map);
 
-    this.plotAllMarkers();
+    this.markerLayer = L.layerGroup().addTo(this.map);
+    this.refreshMarkers();
 
     setTimeout(() => {
       if (this.map) {
@@ -97,13 +113,12 @@ export class LiveMap implements OnInit, OnDestroy {
     }, 100);
   }
 
-  private plotAllMarkers(): void {
-    if (!this.map) return;
+  private refreshMarkers(): void {
+    if (!this.map || !this.markerLayer) return;
 
-    const currentMap = this.map;
-    const currentReports = this.allReports();
+    this.markerLayer.clearLayers();
 
-    currentReports.forEach((report) => {
+    this.reports().forEach((report) => {
       if (report.location && report.location.coordinates) {
         const lng = report.location.coordinates[0];
         const lat = report.location.coordinates[1];
@@ -126,7 +141,7 @@ export class LiveMap implements OnInit, OnDestroy {
           popupAnchor: [0, -42],
         });
 
-        const marker = L.marker([lat, lng], { icon: customIcon }).addTo(currentMap);
+        const marker = L.marker([lat, lng], { icon: customIcon }).addTo(this.markerLayer!);
 
         marker.bindPopup(`
           <div class="p-1 min-w-[260px] max-w-[300px] font-sans">
@@ -139,8 +154,6 @@ export class LiveMap implements OnInit, OnDestroy {
             </div>
           </div>
         `);
-
-        this.markers.push(marker);
       }
     });
   }
