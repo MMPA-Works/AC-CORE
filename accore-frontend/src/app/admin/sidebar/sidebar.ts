@@ -37,9 +37,13 @@ import { HazardReportService } from '../../services/hazard-report';
       }"
     >
       <div class="h-20 flex items-center justify-between px-5 shrink-0 border-b border-gray-100 transition-all">
-        <div class="flex items-center overflow-hidden">
-          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shrink-0 shadow-sm">
-            <lucide-icon name="shield-alert" class="text-white w-5 h-5"></lucide-icon>
+        <a routerLink="/admin/dashboard" class="flex items-center overflow-hidden min-w-0">
+          <div class="w-10 h-10 flex items-center justify-center shrink-0 overflow-hidden">
+            <img
+              src="logo.svg"
+              alt="AC-CORE Angeles City Municipal Maintenance Official Logo"
+              class="h-10 w-10 object-contain"
+            />
           </div>
           <div 
             class="flex flex-col ml-3 transition-opacity duration-300 whitespace-nowrap"
@@ -48,7 +52,7 @@ import { HazardReportService } from '../../services/hazard-report';
             <span class="text-lg font-extrabold tracking-tight text-gray-900 leading-none">AC-CORE</span>
             <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-1">Command Center</span>
           </div>
-        </div>
+        </a>
         
         <button class="lg:hidden p-2 text-gray-400 hover:text-gray-900" (click)="closeMobile()">
           <lucide-icon name="x" class="w-5 h-5"></lucide-icon>
@@ -208,7 +212,7 @@ export class SidebarComponent implements OnInit {
   }
 
   loadUserData() {
-    const token = this.authService.getToken();
+    const token = this.authService.getAdminToken();
     if (token) {
       try {
         const decoded: any = jwtDecode(token);

@@ -131,7 +131,7 @@ export class ReportDetails implements OnInit, OnDestroy {
       next: (response) => {
         const report = (response as any)?.report || (response as any)?.data || response;
         const normalizedReport = report as HazardReportDetail;
-        const currentUserId = this.authService.getUserId();
+        const currentUserId = this.authService.getUserId('citizen');
         const ownerId = this.getReportOwnerId(normalizedReport);
 
         if (currentUserId && ownerId && currentUserId !== ownerId) {

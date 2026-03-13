@@ -50,6 +50,7 @@ export class Signup implements OnInit {
 
     this.http.post('http://localhost:5000/api/auth/citizen/google', { token }).subscribe({
       next: (response: any) => {
+        localStorage.removeItem('adminToken');
         localStorage.setItem('token', response.token);
         toast.success('Signup successful!');
         this.router.navigate(['/dashboard']);
@@ -78,6 +79,7 @@ export class Signup implements OnInit {
       .post('http://localhost:5000/api/auth/citizen/register', this.signupForm.value)
       .subscribe({
         next: (response: any) => {
+          localStorage.removeItem('adminToken');
           localStorage.setItem('token', response.token);
           toast.success('Account created!');
           this.router.navigate(['/dashboard']);
