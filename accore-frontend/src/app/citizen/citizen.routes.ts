@@ -8,8 +8,10 @@ import { MyReports } from './my-reports/my-reports';
 import { ReportDetails } from './report-details/report-details';
 import { Directory } from './directory/directory';
 import { AuthGuard } from '../shared/auth.guard';
+import { LegalLayout } from './legal/legal-layout';
 
 export const CITIZEN_ROUTES: Routes = [
+  // Public Landing & Auth
   {
     path: '',
     component: Home,
@@ -30,6 +32,28 @@ export const CITIZEN_ROUTES: Routes = [
     path: 'directory', 
     component: Directory 
   },
+
+  // Legal Pages (Wrapped in LegalLayout for Header/Footer)
+  {
+    path: '',
+    component: LegalLayout,
+    children: [
+      { 
+        path: 'privacy', 
+        loadComponent: () => import('./legal/privacy').then(m => m.PrivacyComponent) 
+      },
+      { 
+        path: 'terms', 
+        loadComponent: () => import('./legal/terms').then(m => m.TermsComponent) 
+      },
+      { 
+        path: 'cookies', 
+        loadComponent: () => import('./legal/cookies').then(m => m.CookiesComponent) 
+      }
+    ]
+  },
+
+  // Protected Routes (Require Login)
   {
     path: 'dashboard',
     component: Dashboard,
