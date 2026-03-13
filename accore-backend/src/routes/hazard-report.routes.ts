@@ -6,7 +6,8 @@ import {
   updateReportStatus,
   archiveReport,
   getAnalytics,
-  getPublicReports
+  getPublicReports,
+  toggleVerify // Make sure this is exported from your controller!
 } from "../controllers/hazard-report.controller";
 import { upload } from "../middlewares/upload.middleware";
 import { verifyToken, verifyAdmin } from "../middlewares/auth.middleware";
@@ -19,6 +20,10 @@ router.post("/", verifyToken, reportLimiter, upload.single("image"), createRepor
 router.get("/", verifyToken, getReports);
 router.get("/public", verifyToken, getPublicReports);
 router.get("/:id", verifyToken, getReportById);
+
+// FIX: Use verifyToken here
+router.patch("/:id/verify", verifyToken, toggleVerify);
+
 router.put("/:id/status", verifyToken, verifyAdmin, updateReportStatus);
 router.put("/:id/archive", verifyToken, verifyAdmin, archiveReport);
 

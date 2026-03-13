@@ -29,6 +29,8 @@ export interface HazardReport {
   status: HazardReportStatus;
   isArchived?: boolean;
   imageURL: string;
+  verifications: string[];
+  hasVerified?: boolean;
   statusHistory: HazardReportStatusHistoryEntry[];
   createdAt: string;
   updatedAt: string;
