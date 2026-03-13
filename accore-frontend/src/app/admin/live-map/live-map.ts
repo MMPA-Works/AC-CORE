@@ -192,32 +192,45 @@ export class LiveMap implements OnInit, OnDestroy {
             popupAnchor: [0, -32],
           });
 
+          const verificationCount = report.verifications?.length || 0;
+
           const popupContent = `
-            <div style="font-family: 'Google Sans', sans-serif; padding: 12px; display: flex; flex-direction: column; gap: 8px;">
-              <div>
-                <strong style="font-size: 16px; color: #171717; display: block; margin-bottom: 2px; text-transform: capitalize;">
-                  ${report.title || 'Hazard Report'}
-                </strong>
-                <div style="display: flex; align-items: center; gap: 6px;">
-                  <span style="color: #525252; font-size: 12px; font-weight: 500; text-transform: capitalize;">
-                    ${report.category || 'Hazard'}
-                  </span>
-                  <span style="color: #d4d4d8; font-size: 12px;">•</span>
-                  <span style="color: #525252; font-size: 12px;">Brgy. ${report.barangay}</span>
+            <div style="font-family: 'Google Sans', sans-serif; display: flex; flex-direction: column; gap: 10px; min-width: 220px; padding-top: 4px;">
+              <div style="padding-right: 16px;">
+                <h3 style="margin: 0 0 4px 0; font-size: 15px; color: #0f172a; font-weight: 700; line-height: 1.3; word-break: break-word;">
+                  ${report.title || report.category || 'Hazard Report'}
+                </h3>
+                <div style="display: flex; align-items: center; gap: 4px; color: #64748b; font-size: 12px; font-weight: 500;">
+                  <span style="text-transform: capitalize;">${report.category || 'Hazard'}</span>
+                  <span style="color: #cbd5e1;">&bull;</span>
+                  <span>Brgy. ${report.barangay || 'Unknown'}</span>
                 </div>
               </div>
 
-              <div style="display: flex; gap: 6px; margin-top: 4px;">
-                <span style="padding: 2px 8px; background-color: ${markerColor}15; color: ${markerColor}; border-radius: 6px; font-size: 10px; font-weight: 800; text-transform: uppercase;">
-                  ${report.severity || 'Unknown'} Severity
+              <p style="margin: 0; font-size: 13px; color: #475569; line-height: 1.5; word-wrap: break-word; white-space: normal;">
+                ${report.description ? report.description.substring(0, 100) + (report.description.length > 100 ? '...' : '') : 'No description provided.'}
+              </p>
+
+              <div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding-top: 6px; border-top: 1px solid #f1f5f9;">
+                <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 6px; background-color: ${markerColor}15; color: ${markerColor}; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase;">
+                  <span style="width: 6px; height: 6px; border-radius: 50%; background-color: ${markerColor};"></span>
+                  ${report.severity || 'Unknown'}
                 </span>
-                <span style="padding: 2px 8px; background-color: #f3f4f6; color: #525252; border-radius: 6px; font-size: 10px; font-weight: 800; text-transform: uppercase;">
+                
+                <span style="padding: 2px 6px; background-color: #f1f5f9; color: #475569; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase;">
                   ${report.status || 'Reported'}
                 </span>
-              </div>
 
-              <div style="margin-top: 8px; padding-top: 12px; border-top: 1px solid #e5e5e5;">
-                <span style="font-size: 12px; color: #525252;">${report.description || 'No description provided.'}</span>
+                ${
+                  verificationCount > 0
+                    ? `
+                  <span style="display: inline-flex; align-items: center; gap: 3px; background-color: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 700;">
+                    <svg style="width: 10px; height: 10px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    ${verificationCount} Verified
+                  </span>
+                `
+                    : ''
+                }
               </div>
             </div>
           `;

@@ -1,4 +1,14 @@
-import { Component, OnInit, OnDestroy, inject, signal, PLATFORM_ID, computed, NgZone, ViewEncapsulation } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  inject,
+  signal,
+  PLATFORM_ID,
+  computed,
+  NgZone,
+  ViewEncapsulation,
+} from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { HazardReportService } from '../../services/hazard-report';
 import { ExportService } from '../../services/export';
@@ -23,48 +33,105 @@ import { LucideAngularModule } from 'lucide-angular';
     HlmButtonImports,
     HlmBadgeImports,
     HlmScrollAreaImports,
-    LucideAngularModule
+    LucideAngularModule,
   ],
   templateUrl: './analytics-dashboard.html',
   encapsulation: ViewEncapsulation.None,
-  styles: [`
-    .leaflet-popup-content-wrapper {
-      border-radius: 12px;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    }
-    .leaflet-popup-content { margin: 0; width: 240px !important; }
-    
-    .ac-core-cluster { background: transparent; border: 0; }
-    .ac-core-cluster-shell { display: flex; height: 100%; justify-content: center; align-items: flex-start; width: 100%; }
-    .ac-core-cluster-pin {
-      align-items: center; 
-      background: linear-gradient(135deg, #ef4444 0%, #d93829 68%, #b91c1c 100%);
-      border: 2px solid rgba(255, 255, 255, 0.95); border-radius: 50% 50% 50% 0; 
-      box-shadow: 0 10px 24px rgba(217, 56, 41, 0.35);
-      display: flex; justify-content: center; position: relative; transform: rotate(-45deg); width: 100%; height: 100%;
-    }
-    .ac-core-cluster-pin::before { background: rgba(217, 56, 41, 0.15); border-radius: 50% 50% 50% 0; content: ''; inset: -5px; position: absolute; z-index: -1; }
-    .ac-core-cluster-count { align-items: center; color: #ffffff; display: flex; font-weight: 800; justify-content: center; transform: rotate(45deg); }
-    
-    .ac-core-cluster--small { height: 34px; width: 34px; }
-    .ac-core-cluster--small .ac-core-cluster-count { font-size: 11px; }
-    
-    .ac-core-cluster--medium { height: 40px; width: 40px; }
-    .ac-core-cluster--medium .ac-core-cluster-pin { 
-      background: linear-gradient(135deg, #f97316 0%, #f07c2b 65%, #ea580c 100%); 
-      box-shadow: 0 12px 28px rgba(240, 124, 43, 0.35);
-    }
-    .ac-core-cluster--medium .ac-core-cluster-pin::before { background: rgba(240, 124, 43, 0.15); inset: -6px; }
-    .ac-core-cluster--medium .ac-core-cluster-count { font-size: 12px; }
-    
-    .ac-core-cluster--large { height: 46px; width: 46px; }
-    .ac-core-cluster--large .ac-core-cluster-pin { 
-      background: linear-gradient(135deg, #b91c1c 0%, #991b1b 70%, #7f1d1d 100%); 
-      box-shadow: 0 14px 32px rgba(153, 27, 27, 0.35);
-    }
-    .ac-core-cluster--large .ac-core-cluster-pin::before { background: rgba(153, 27, 27, 0.15); inset: -7px; }
-    .ac-core-cluster--large .ac-core-cluster-count { font-size: 14px; }
-  `]
+  styles: [
+    `
+      .leaflet-popup-content-wrapper {
+        border-radius: 12px;
+        box-shadow:
+          0 10px 15px -3px rgba(0, 0, 0, 0.1),
+          0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      }
+      .leaflet-popup-content {
+        margin: 0;
+        width: 240px !important;
+      }
+
+      .ac-core-cluster {
+        background: transparent;
+        border: 0;
+      }
+      .ac-core-cluster-shell {
+        display: flex;
+        height: 100%;
+        justify-content: center;
+        align-items: flex-start;
+        width: 100%;
+      }
+      .ac-core-cluster-pin {
+        align-items: center;
+        background: linear-gradient(135deg, #ef4444 0%, #d93829 68%, #b91c1c 100%);
+        border: 2px solid rgba(255, 255, 255, 0.95);
+        border-radius: 50% 50% 50% 0;
+        box-shadow: 0 10px 24px rgba(217, 56, 41, 0.35);
+        display: flex;
+        justify-content: center;
+        position: relative;
+        transform: rotate(-45deg);
+        width: 100%;
+        height: 100%;
+      }
+      .ac-core-cluster-pin::before {
+        background: rgba(217, 56, 41, 0.15);
+        border-radius: 50% 50% 50% 0;
+        content: '';
+        inset: -5px;
+        position: absolute;
+        z-index: -1;
+      }
+      .ac-core-cluster-count {
+        align-items: center;
+        color: #ffffff;
+        display: flex;
+        font-weight: 800;
+        justify-content: center;
+        transform: rotate(45deg);
+      }
+
+      .ac-core-cluster--small {
+        height: 34px;
+        width: 34px;
+      }
+      .ac-core-cluster--small .ac-core-cluster-count {
+        font-size: 11px;
+      }
+
+      .ac-core-cluster--medium {
+        height: 40px;
+        width: 40px;
+      }
+      .ac-core-cluster--medium .ac-core-cluster-pin {
+        background: linear-gradient(135deg, #f97316 0%, #f07c2b 65%, #ea580c 100%);
+        box-shadow: 0 12px 28px rgba(240, 124, 43, 0.35);
+      }
+      .ac-core-cluster--medium .ac-core-cluster-pin::before {
+        background: rgba(240, 124, 43, 0.15);
+        inset: -6px;
+      }
+      .ac-core-cluster--medium .ac-core-cluster-count {
+        font-size: 12px;
+      }
+
+      .ac-core-cluster--large {
+        height: 46px;
+        width: 46px;
+      }
+      .ac-core-cluster--large .ac-core-cluster-pin {
+        background: linear-gradient(135deg, #b91c1c 0%, #991b1b 70%, #7f1d1d 100%);
+        box-shadow: 0 14px 32px rgba(153, 27, 27, 0.35);
+      }
+      .ac-core-cluster--large .ac-core-cluster-pin::before {
+        background: rgba(153, 27, 27, 0.15);
+        inset: -7px;
+      }
+      .ac-core-cluster--large .ac-core-cluster-count {
+        font-size: 14px;
+      }
+    `,
+  ],
 })
 export class AnalyticsDashboard implements OnInit, OnDestroy {
   private hazardService = inject(HazardReportService);
@@ -77,13 +144,12 @@ export class AnalyticsDashboard implements OnInit, OnDestroy {
   isLoading = signal<boolean>(true);
   analyticsData = signal<any>(null);
 
-  // Computed KPI Metrics for the new 6-card layout
   activeHazardsCount = computed(() => this.analyticsData()?.totalActive || 0);
   criticalAlertsCount = computed(() => this.getSeverityCount('Critical'));
   underReviewCount = computed(() => this.getStatusCount('Under Review'));
   inProgressCount = computed(() => this.getStatusCount('In Progress'));
   resolvedCount = computed(() => this.getStatusCount('Resolved'));
-  
+
   resolutionRate = computed(() => {
     const total = this.totalReports();
     const resolved = this.resolvedCount();
@@ -123,9 +189,9 @@ export class AnalyticsDashboard implements OnInit, OnDestroy {
         titleFont: { size: 14, family: "'Inter', sans-serif" },
         bodyFont: { size: 13, family: "'Inter', sans-serif" },
         callbacks: {
-          label: (context) => ` ${context.label}: ${context.raw} Reports`
-        }
-      }
+          label: (context) => ` ${context.label}: ${context.raw} Reports`,
+        },
+      },
     },
   };
   public doughnutChartType: ChartType = 'doughnut';
@@ -161,9 +227,9 @@ export class AnalyticsDashboard implements OnInit, OnDestroy {
 
         if (data?.bySeverity) {
           const themeColors: Record<string, string> = {
-            'Critical': '#d93829', 
-            'Medium': '#f07c2b',   
-            'Low': '#f9a842'       
+            Critical: '#d93829',
+            Medium: '#f07c2b',
+            Low: '#f9a842',
           };
 
           const counts = data.bySeverity.map((item: any) => item.count);
@@ -171,12 +237,16 @@ export class AnalyticsDashboard implements OnInit, OnDestroy {
 
           this.doughnutChartData = {
             labels: data.bySeverity.map((item: any) => item._id),
-            datasets: [{
-              data: counts,
-              backgroundColor: data.bySeverity.map((item: any) => themeColors[item._id] || '#9ca3af'),
-              borderWidth: 0,
-              hoverOffset: 8
-            }]
+            datasets: [
+              {
+                data: counts,
+                backgroundColor: data.bySeverity.map(
+                  (item: any) => themeColors[item._id] || '#9ca3af',
+                ),
+                borderWidth: 0,
+                hoverOffset: 8,
+              },
+            ],
           };
         }
 
@@ -188,7 +258,7 @@ export class AnalyticsDashboard implements OnInit, OnDestroy {
       error: (err) => {
         console.error('Failed to load analytics', err);
         this.isLoading.set(false);
-      }
+      },
     });
   }
 
@@ -197,12 +267,12 @@ export class AnalyticsDashboard implements OnInit, OnDestroy {
 
     this.ngZone.runOutsideAngular(() => {
       this.map = L.map('mini-map', { zoomControl: false }).setView([15.145, 120.5887], 13);
-      
+
       L.control.zoom({ position: 'bottomright' }).addTo(this.map);
-      
+
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
-        attribution: '&copy; OpenStreetMap contributors'
+        attribution: '&copy; OpenStreetMap contributors',
       }).addTo(this.map);
 
       this.markerClusterGroup = L.markerClusterGroup({
@@ -212,7 +282,12 @@ export class AnalyticsDashboard implements OnInit, OnDestroy {
         disableClusteringAtZoom: 17,
         iconCreateFunction: (cluster) => {
           const count = cluster.getChildCount();
-          const sizeClass = count < 10 ? 'ac-core-cluster--small' : count < 25 ? 'ac-core-cluster--medium' : 'ac-core-cluster--large';
+          const sizeClass =
+            count < 10
+              ? 'ac-core-cluster--small'
+              : count < 25
+                ? 'ac-core-cluster--medium'
+                : 'ac-core-cluster--large';
           return L.divIcon({
             html: `<div class="ac-core-cluster-shell"><div class="ac-core-cluster-pin"><div class="ac-core-cluster-count">${count}</div></div></div>`,
             className: `ac-core-cluster ${sizeClass}`,
@@ -225,7 +300,7 @@ export class AnalyticsDashboard implements OnInit, OnDestroy {
       this.map.addLayer(this.markerClusterGroup);
       const markers: L.Marker[] = [];
 
-      hotspots.forEach(report => {
+      hotspots.forEach((report) => {
         if (report.location?.coordinates?.length >= 2) {
           const lng = report.location.coordinates[0];
           const lat = report.location.coordinates[1];
@@ -241,27 +316,41 @@ export class AnalyticsDashboard implements OnInit, OnDestroy {
             </div>`,
             iconSize: [32, 32],
             iconAnchor: [16, 32],
-            popupAnchor: [0, -32]
+            popupAnchor: [0, -32],
           });
 
+          const verificationCount = report.verifications?.length || 0;
+
+          // Clean, flat UI fixing the undefined bug and bad layout
           const popupContent = `
-            <div style="font-family: 'Google Sans', sans-serif; padding: 12px; display: flex; flex-direction: column; gap: 8px;">
-              <div>
-                <strong style="font-size: 16px; color: #171717; display: block; margin-bottom: 2px; text-transform: capitalize;">
-                  ${report.title || 'Hazard Report'}
-                </strong>
-                <div style="display: flex; align-items: center; gap: 6px;">
-                  <span style="color: #525252; font-size: 12px; font-weight: 500; text-transform: capitalize;">
-                    ${report.category || 'Hazard'}
-                  </span>
-                  <span style="color: #d4d4d8; font-size: 12px;">•</span>
-                  <span style="color: #525252; font-size: 12px;">Brgy. ${report.barangay}</span>
+            <div style="font-family: 'Google Sans', sans-serif; display: flex; flex-direction: column; gap: 10px; min-width: 220px; padding-top: 4px;">
+              <div style="padding-right: 16px;">
+                <h3 style="margin: 0 0 4px 0; font-size: 15px; color: #0f172a; font-weight: 700; line-height: 1.3; word-break: break-word;">
+                  ${report.title || report.category || 'Hazard Report'}
+                </h3>
+                <div style="display: flex; align-items: center; gap: 4px; color: #64748b; font-size: 12px; font-weight: 500;">
+                  <span style="text-transform: capitalize;">${report.category || 'Hazard'}</span>
+                  <span style="color: #cbd5e1;">&bull;</span>
+                  <span>Brgy. ${report.barangay || 'Unknown'}</span>
                 </div>
               </div>
-              <div style="display: flex; gap: 6px; margin-top: 4px;">
-                <span style="padding: 2px 8px; background-color: ${markerColor}15; color: ${markerColor}; border-radius: 6px; font-size: 10px; font-weight: 800; text-transform: uppercase;">
-                  ${report.severity || 'Unknown'} Severity
+
+              <div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding-top: 6px; border-top: 1px solid #f1f5f9;">
+                <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 6px; background-color: ${markerColor}15; color: ${markerColor}; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase;">
+                  <span style="width: 6px; height: 6px; border-radius: 50%; background-color: ${markerColor};"></span>
+                  ${report.severity || 'Unknown'}
                 </span>
+                
+                <span style="padding: 2px 6px; background-color: #f1f5f9; color: #475569; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase;">
+                  ${report.status || 'Active'}
+                </span>
+
+                ${verificationCount > 0 ? `
+                  <span style="display: inline-flex; align-items: center; gap: 3px; background-color: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 700;">
+                    <svg style="width: 10px; height: 10px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    ${verificationCount} Verified
+                  </span>
+                ` : ''}
               </div>
             </div>
           `;
@@ -271,19 +360,24 @@ export class AnalyticsDashboard implements OnInit, OnDestroy {
       });
 
       this.markerClusterGroup.addLayers(markers);
-      
+
       setTimeout(() => {
         if (this.map) this.map.invalidateSize();
-      }, 500); 
+      }, 500);
     });
   }
 
   private getMarkerColor(severity: string | undefined): string {
     switch (severity?.toLowerCase()) {
-      case 'critical': return '#d93829';
-      case 'medium': case 'high': return '#f07c2b';
-      case 'low': return '#f9a842';
-      default: return '#737373';
+      case 'critical':
+        return '#d93829';
+      case 'medium':
+      case 'high':
+        return '#f07c2b';
+      case 'low':
+        return '#f9a842';
+      default:
+        return '#737373';
     }
   }
 

@@ -507,13 +507,23 @@ export const getAnalytics = async (
               },
             },
           ],
+          // Inside getAnalytics function, update the activeHotspots array:
           activeHotspots: [
             {
               $match: {
                 status: { $in: ["Reported", "Under Review", "In Progress"] },
               },
             },
-            { $project: { title: 1, severity: 1, location: 1 } },
+            {
+              $project: {
+                title: 1,
+                severity: 1,
+                location: 1,
+                category: 1,
+                barangay: 1,
+                verifications: 1,
+              },
+            },
           ],
         },
       },
