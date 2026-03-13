@@ -8,6 +8,7 @@ export interface IHazardReport extends Document {
   category: string;
   severity: string;
   barangay: string;
+  isHighPriority: boolean;
   isPossibleDuplicate: boolean;
   isArchived: boolean;
   elevation: number;
@@ -65,6 +66,10 @@ const hazardReportSchema: Schema = new Schema(
       required: true,
       enum: ANGELES_CITY_BARANGAYS,
     },
+    isHighPriority: {
+      type: Boolean,
+      default: false,
+    },
     isPossibleDuplicate: {
       type: Boolean,
       default: false,
@@ -92,7 +97,6 @@ const hazardReportSchema: Schema = new Schema(
     status: {
       type: String,
       required: true,
-      // Updated to match the new 4-step tracker
       enum: ["Reported", "Under Review", "In Progress", "Resolved"],
       default: "Reported",
     },

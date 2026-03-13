@@ -8,6 +8,7 @@ import uploadRoutes from './routes/upload.routes';
 import authRoutes from './routes/auth.routes';
 import citizenAuthRoutes from './routes/citizen-auth.routes';
 import barangayRoutes from './routes/barangay.routes';
+import './services/weather.service';
 
 const app = express();
 

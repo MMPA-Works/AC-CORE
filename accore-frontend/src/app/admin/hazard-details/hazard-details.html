@@ -11,6 +11,14 @@
         <div class="flex flex-col gap-2">
           <div class="flex items-center gap-3">
             <h2 class="text-2xl font-bold text-slate-900">{{ reportData.title || reportData.category }}</h2>
+            
+            @if (reportData.isHighPriority) {
+              <span class="px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-red-100 border border-red-200 text-red-800 flex items-center gap-1 shadow-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                High Priority Alert
+              </span>
+            }
+
             <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-primary/10 border border-primary/20 text-primary">
               {{ reportData.status }}
             </span>
@@ -56,7 +64,7 @@
               </div>
               <hlm-dialog>
                 <div hlmDialogTrigger class="w-full h-64 bg-slate-100 relative cursor-zoom-in group flex items-center justify-center p-2">
-                  <img [src]="reportData.imageURL || 'assets/placeholder.png'" [alt]="'Visual evidence of ' + (reportData.category || 'hazard') + ' in ' + reportData.barangay" class="max-w-full max-h-full object-contain drop-shadow-sm transition-transform duration-300 group-hover:scale-[1.03]" />
+                  <img [src]="reportData.imageURL || 'assets/placeholder.png'" [alt]="reportData.category + ' hazard report visual evidence located in ' + reportData.barangay + ', Angeles City'" class="max-w-full max-h-full object-contain drop-shadow-sm transition-transform duration-300 group-hover:scale-[1.03]" />
                   <div class="absolute inset-0 bg-slate-900/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
                     <span class="bg-primary text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded shadow-sm">Expand</span>
                   </div>
@@ -67,7 +75,7 @@
                       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                   </div>
-                  <img [src]="reportData.imageURL || 'assets/placeholder.png'" [alt]="'Expanded visual evidence of ' + (reportData.category || 'hazard') + ' in ' + reportData.barangay" class="max-w-full max-h-[80vh] object-contain rounded-xl shadow-2xl bg-black/60 backdrop-blur-sm" />
+                  <img [src]="reportData.imageURL || 'assets/placeholder.png'" [alt]="'Expanded view of the ' + reportData.category + ' hazard report visual evidence located in ' + reportData.barangay + ', Angeles City'" class="max-w-full max-h-[80vh] object-contain rounded-xl shadow-2xl bg-black/60 backdrop-blur-sm" />
                 </hlm-dialog-content>
               </hlm-dialog>
             </div>

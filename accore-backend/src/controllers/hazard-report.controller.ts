@@ -6,8 +6,8 @@ import { v2 as cloudinary } from "cloudinary";
 import { PRIORITY_COMMERCIAL_ZONES } from "../utils/constants";
 import { findDownstreamRisks } from "../utils/geo.utils";
 import NodeCache from "node-cache";
+import { getIsRaining } from "../services/weather.service";
 
-// Initialize cache with a 10-minute (600 seconds) Time-To-Live
 const analyticsCache = new NodeCache({ stdTTL: 600 });
 const ANALYTICS_CACHE_KEY = "dashboard_analytics";
 
@@ -155,13 +155,23 @@ export const createReport = async (
       },
     }).select("_id");
 
+    let finalSeverity = severity;
+    let isHighPriority = false;
+
+    // Bump priority if it is currently raining in a commercial zone
+    if (PRIORITY_COMMERCIAL_ZONES.includes(barangay) && getIsRaining()) {
+      isHighPriority = true;
+      finalSeverity = "Critical";
+    }
+
     const newReport = new HazardReport({
       citizenId,
       title,
       description,
       category,
-      severity,
+      severity: finalSeverity,
       barangay,
+      isHighPriority,
       isPossibleDuplicate: !!possibleDuplicate,
       location: {
         type: "Point",
