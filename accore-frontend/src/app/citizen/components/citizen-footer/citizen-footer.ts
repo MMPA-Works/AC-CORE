@@ -18,10 +18,16 @@ import { LucideAngularModule, LUCIDE_ICONS, LucideIconProvider, Phone, Shield } 
 export class CitizenFooterComponent {
   currentYear = new Date().getFullYear();
 
-  readonly footerLinks = [
+  readonly platformLinks = [
     { label: 'Dashboard', route: '/citizen/dashboard' },
     { label: 'Report Hazard', route: '/citizen/report' },
     { label: 'My Reports', route: '/citizen/my-reports' },
     { label: 'Emergency Directory', route: '/citizen/directory' },
+  ];
+
+  readonly legalLinks = [
+    { label: 'Privacy Policy', route: '/citizen/privacy' },
+    { label: 'Terms of Service', route: '/citizen/terms' },
+    { label: 'Cookie Policy', route: '/citizen/cookies' },
   ];
 }

@@ -4,29 +4,26 @@
 @import 'tailwindcss/utilities.css';
 
 @import '@spartan-ng/brain/hlm-tailwind-preset.css';
-@import "leaflet/dist/leaflet.css";
-@import "leaflet.markercluster/dist/MarkerCluster.css";
-@import "leaflet.markercluster/dist/MarkerCluster.Default.css";
+@import 'leaflet/dist/leaflet.css';
+@import 'leaflet.markercluster/dist/MarkerCluster.css';
+@import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 @import '@angular/cdk/overlay-prebuilt.css';
 
 /* FIX: Prevent the browser's default scrollbar. 
    This ensures the ONLY scrollbar is the one in your admin-layout.html 
 */
-html, body {
-  height: 100%;
+html,
+body {
   margin: 0;
   padding: 0;
-  overflow: hidden !important; 
 }
 
 app-root {
   display: block;
-  height: 100%;
-  overflow: hidden; /* Ensure root doesn't scroll */
+  min-height: 100vh; /* This allows the root container to grow with long citizen pages */
 }
 
-/* Ensure the Angular root and layout components fill the screen height */
-app-root, app-admin-layout {
+app-admin-layout {
   display: block;
   height: 100%;
 }
@@ -35,43 +32,44 @@ app-root, app-admin-layout {
   color-scheme: light;
 
   --font-sans:
-    'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans',
-    sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-    
+    'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+    'Noto Color Emoji';
+
   --radius: 0.625rem;
-  
+
   --background: oklch(1 0 0);
   --foreground: oklch(0.15 0.01 28);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.15 0.01 28);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.15 0.01 28);
-  
+
   /* Primary: #ac1001 (Red) */
   --primary: hsl(4 98% 34%);
   --primary-foreground: hsl(0 0% 100%);
-  
+
   /* Secondary: #f99b36 (Yellow/Orange) */
   --secondary: hsl(31 94% 59%);
   --secondary-foreground: hsl(0 0% 10%);
-  
+
   --muted: oklch(0.96 0.01 28);
   --muted-foreground: oklch(0.55 0.02 28);
   --accent: oklch(0.96 0.01 28);
   --accent-foreground: hsl(4 98% 34%);
-  
+
   --destructive: oklch(0.6 0.2 25);
-  --border: oklch(0.90 0.01 28);
-  --input: oklch(0.90 0.01 28);
-  --ring: hsl(31 94% 59%); 
-  
+  --border: oklch(0.9 0.01 28);
+  --input: oklch(0.9 0.01 28);
+  --ring: hsl(31 94% 59%);
+
   --sidebar: oklch(1 0 0);
   --sidebar-foreground: oklch(0.15 0.01 28);
   --sidebar-primary: hsl(4 98% 34%);
   --sidebar-primary-foreground: hsl(0 0% 100%);
   --sidebar-accent: oklch(0.96 0.01 28);
   --sidebar-accent-foreground: hsl(4 98% 34%);
-  --sidebar-border: oklch(0.90 0.01 28);
+  --sidebar-border: oklch(0.9 0.01 28);
   --sidebar-ring: hsl(31 94% 59%);
 }
 
@@ -84,25 +82,25 @@ app-root, app-admin-layout {
   --card-foreground: hsl(0 0% 98%);
   --popover: oklch(0.18 0.01 28);
   --popover-foreground: hsl(0 0% 98%);
-  
+
   /* Primary: #ac1001 (Red) */
   --primary: hsl(4 98% 34%);
   --primary-foreground: hsl(0 0% 100%);
-  
+
   /* Secondary: #f99b36 (Yellow/Orange) */
   --secondary: hsl(31 94% 59%);
   --secondary-foreground: hsl(0 0% 10%);
-  
+
   --muted: oklch(0.25 0.01 28);
-  --muted-foreground: oklch(0.70 0.02 28);
+  --muted-foreground: oklch(0.7 0.02 28);
   --accent: oklch(0.25 0.01 28);
   --accent-foreground: hsl(0 0% 98%);
-  
-  --destructive: oklch(0.70 0.19 22);
+
+  --destructive: oklch(0.7 0.19 22);
   --border: oklch(0.25 0.01 28);
   --input: oklch(0.25 0.01 28);
   --ring: hsl(31 94% 59%);
-  
+
   --sidebar: oklch(0.18 0.01 28);
   --sidebar-foreground: hsl(0 0% 98%);
   --sidebar-primary: hsl(4 98% 34%);
@@ -123,8 +121,8 @@ app-root, app-admin-layout {
 }
 
 @layer base {
-  button, 
-  [type='button'], 
+  button,
+  [type='button'],
   [type='submit'],
   a[hlmBtn] {
     cursor: pointer;
@@ -177,12 +175,12 @@ app-root, app-admin-layout {
   text-decoration: none !important;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1) !important;
   transition: all 0.2s ease !important;
-  padding: 0 !important; 
+  padding: 0 !important;
 }
 
 .leaflet-popup-close-button:hover {
   background: rgba(255, 255, 255, 1) !important;
-  color: #ef4444 !important; 
+  color: #ef4444 !important;
   transform: scale(1.08) !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
 }
