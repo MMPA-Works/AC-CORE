@@ -27,6 +27,7 @@ export interface HazardReport {
   barangay: string;
   location: HazardReportLocation;
   status: HazardReportStatus;
+  isHighPriority?: boolean;
   isArchived?: boolean;
   imageURL: string;
   verifications: string[];
