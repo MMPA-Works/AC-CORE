@@ -10,6 +10,7 @@ import { HazardReportService } from '../../services/hazard-report';
 import { AuthService } from '../../shared/auth';
 import { HazardReport } from '../../shared/models/hazard-report';
 import { CitizenHeaderComponent } from '../components/citizen-header/citizen-header';
+import { CitizenFooterComponent } from '../components/citizen-footer/citizen-footer';
 import { PizzaTrackerComponent } from '../components/pizza-tracker/pizza-tracker';
 
 type CitizenIdentity = {
@@ -33,6 +34,7 @@ type HazardReportDetail = Omit<HazardReport, 'citizenId'> & {
     HlmCardImports,
     HlmSpinnerImports,
     CitizenHeaderComponent,
+    CitizenFooterComponent,
     PizzaTrackerComponent,
   ],
   templateUrl: './report-details.html',
