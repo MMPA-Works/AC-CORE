@@ -8,7 +8,6 @@ import { LucideAngularModule, LUCIDE_ICONS, LucideIconProvider, Phone, Shield } 
   standalone: true,
   imports: [CommonModule, RouterModule, LucideAngularModule],
   templateUrl: './citizen-footer.html',
-  // OPTIMIZATION: OnPush strategy reduces CPU usage significantly during scroll and map interaction
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
