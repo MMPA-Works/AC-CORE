@@ -1,0 +1,91 @@
+.leaflet-popup-content-wrapper {
+  border-radius: 12px;
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+.leaflet-popup-content {
+  margin: 0;
+  width: 240px !important;
+}
+
+.ac-core-cluster {
+  background: transparent;
+  border: 0;
+}
+.ac-core-cluster-shell {
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+}
+.ac-core-cluster-pin {
+  align-items: center;
+  background: linear-gradient(135deg, #ef4444 0%, #d93829 68%, #b91c1c 100%);
+  border: 2px solid rgba(255, 255, 255, 0.95);
+  border-radius: 50% 50% 50% 0;
+  box-shadow: 0 10px 24px rgba(217, 56, 41, 0.35);
+  display: flex;
+  justify-content: center;
+  position: relative;
+  transform: rotate(-45deg);
+  width: 100%;
+  height: 100%;
+}
+.ac-core-cluster-pin::before {
+  background: rgba(217, 56, 41, 0.15);
+  border-radius: 50% 50% 50% 0;
+  content: '';
+  inset: -5px;
+  position: absolute;
+  z-index: -1;
+}
+.ac-core-cluster-count {
+  align-items: center;
+  color: #ffffff;
+  display: flex;
+  font-weight: 800;
+  justify-content: center;
+  transform: rotate(45deg);
+}
+
+.ac-core-cluster--small {
+  height: 34px;
+  width: 34px;
+}
+.ac-core-cluster--small .ac-core-cluster-count {
+  font-size: 11px;
+}
+
+.ac-core-cluster--medium {
+  height: 40px;
+  width: 40px;
+}
+.ac-core-cluster--medium .ac-core-cluster-pin {
+  background: linear-gradient(135deg, #f97316 0%, #f07c2b 65%, #ea580c 100%);
+  box-shadow: 0 12px 28px rgba(240, 124, 43, 0.35);
+}
+.ac-core-cluster--medium .ac-core-cluster-pin::before {
+  background: rgba(240, 124, 43, 0.15);
+  inset: -6px;
+}
+.ac-core-cluster--medium .ac-core-cluster-count {
+  font-size: 12px;
+}
+
+.ac-core-cluster--large {
+  height: 46px;
+  width: 46px;
+}
+.ac-core-cluster--large .ac-core-cluster-pin {
+  background: linear-gradient(135deg, #b91c1c 0%, #991b1b 70%, #7f1d1d 100%);
+  box-shadow: 0 14px 32px rgba(153, 27, 27, 0.35);
+}
+.ac-core-cluster--large .ac-core-cluster-pin::before {
+  background: rgba(153, 27, 27, 0.15);
+  inset: -7px;
+}
+.ac-core-cluster--large .ac-core-cluster-count {
+  font-size: 14px;
+}

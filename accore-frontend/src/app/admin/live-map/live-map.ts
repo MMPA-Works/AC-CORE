@@ -158,12 +158,59 @@ export class LiveMap implements OnInit, OnDestroy {
       this.map.addLayer(this.markerClusterGroup);
       this.refreshMarkers();
 
+      // Load the hazard routing lines after the map and markers are ready
+      this.loadRiskPaths();
+
       setTimeout(() => {
         if (this.map) {
           this.map.invalidateSize();
         }
       }, 100);
     });
+  }
+
+  private loadRiskPaths(): void {
+    this.hazardReportService
+      .getDownstreamRisks()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (risks) => {
+          // We run Leaflet modifications outside of Angular to maintain high performance
+          this.ngZone.runOutsideAngular(() => {
+            if (!this.map) return;
+
+            Object.entries(risks).forEach(([sourceId, group]) => {
+              const source = group.find((r) => r._id === sourceId);
+              if (!source) return;
+
+              group.forEach((target) => {
+                if (target._id !== sourceId) {
+                  // Leaflet requires coordinates in [latitude, longitude] order
+                  const latlngs: L.LatLngExpression[] = [
+                    [source.location.coordinates[1], source.location.coordinates[0]],
+                    [target.location.coordinates[1], target.location.coordinates[0]],
+                  ];
+
+                  const line = L.polyline(latlngs, {
+                    color: '#c03e30', // Bright neon cyan
+                    weight: 6, // Thicker line
+                    dashArray: '15, 15', // Larger, clearer dashes
+                    opacity: 1.0, // Fully opaque and bright
+                  }).addTo(this.map!);
+
+                  line.bindPopup(`
+                  <div class="p-1 font-sans">
+                    <span class="text-xs font-bold text-red-600 uppercase tracking-wider">Geospatial Route</span>
+                    <p class="text-sm mt-1">Water flows from <b>${source.title || source.category}</b> down to <b>${target.title || target.category}</b>.</p>
+                  </div>
+                `);
+                }
+              });
+            });
+          });
+        },
+        error: (err) => console.error('Failed to load risk paths:', err),
+      });
   }
 
   private refreshMarkers(): void {
