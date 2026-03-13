@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   createReport,
+  createGuestReport,
   getReports,
   getReportById,
   updateReportStatus,
@@ -14,7 +15,11 @@ import { upload } from "../middlewares/upload.middleware";
 import { verifyToken, verifyAdmin } from "../middlewares/auth.middleware";
 import { reportLimiter } from "../middlewares/rate-limit.middleware";
 import { validate } from "../middlewares/validation.middleware";
-import { createReportSchema, updateStatusSchema } from "../validations/hazard-report.validation";
+import {
+  createGuestReportSchema,
+  createReportSchema,
+  updateStatusSchema,
+} from "../validations/hazard-report.validation";
 
 const router = Router();
 
@@ -35,6 +40,14 @@ router.post(
   upload.single("image"),
   validate(createReportSchema),
   createReport,
+);
+
+router.post(
+  "/guest",
+  reportLimiter,
+  upload.single("image"),
+  validate(createGuestReportSchema),
+  createGuestReport,
 );
 
 router.get("/:id", verifyToken, getReportById);

@@ -16,16 +16,30 @@ export class HazardReportService {
 
   constructor(private http: HttpClient) {}
 
-  private getAuthHeaders(): HttpHeaders {
-    const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
+  private getCitizenToken(): string | null {
+    return localStorage.getItem('token');
+  }
+
+  private getStoredToken(): string | null {
+    return localStorage.getItem('adminToken') || localStorage.getItem('token');
+  }
+
+  private getAuthHeaders(token = this.getStoredToken()): HttpHeaders {
+    if (!token) {
+      return new HttpHeaders();
+    }
+
     return new HttpHeaders({
       Authorization: `Bearer ${token}`,
     });
   }
 
   submitReport(formData: FormData): Observable<HazardReport> {
-    return this.http.post<HazardReport>(this.apiUrl, formData, {
-      headers: this.getAuthHeaders(),
+    const citizenToken = this.getCitizenToken();
+    const targetUrl = citizenToken ? this.apiUrl : `${this.apiUrl}/guest`;
+
+    return this.http.post<HazardReport>(targetUrl, formData, {
+      headers: this.getAuthHeaders(citizenToken),
     });
   }
 

@@ -26,6 +26,10 @@ export class AuthService {
     return localStorage.getItem('adminToken') || localStorage.getItem('token');
   }
 
+  getCitizenToken(): string | null {
+    return localStorage.getItem('token');
+  }
+
   getRole(): string | null {
     const token = this.getToken();
     if (!token) {

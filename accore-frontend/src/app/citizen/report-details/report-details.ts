@@ -20,7 +20,7 @@ type CitizenIdentity = {
 };
 
 type HazardReportDetail = Omit<HazardReport, 'citizenId'> & {
-  citizenId: string | CitizenIdentity;
+  citizenId: string | CitizenIdentity | null;
 };
 
 @Component({

@@ -2,7 +2,8 @@ import mongoose, { Schema, Document } from "mongoose";
 import { ANGELES_CITY_BARANGAYS } from "../utils/constants";
 
 export interface IHazardReport extends Document {
-  citizenId: mongoose.Types.ObjectId;
+  citizenId?: mongoose.Types.ObjectId | null;
+  guestContact?: string | null;
   title: string;
   description: string;
   category: string;
@@ -34,7 +35,13 @@ const hazardReportSchema: Schema = new Schema(
     citizenId: {
       type: Schema.Types.ObjectId,
       ref: "Citizen",
-      required: true,
+      required: false,
+      default: null,
+    },
+    guestContact: {
+      type: String,
+      required: false,
+      trim: true,
     },
     title: {
       type: String,
