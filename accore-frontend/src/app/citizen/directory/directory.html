@@ -1,5 +1,5 @@
 <div class="min-h-screen bg-background flex flex-col font-sans text-foreground">
-  <app-citizen-header class="sticky top-0 z-50 block w-full"></app-citizen-header>
+  <app-citizen-header></app-citizen-header>
 
   <main class="mx-auto flex w-full max-w-6xl flex-col gap-12 px-4 py-8 md:px-6 md:py-12">
     <header class="space-y-4">
@@ -20,7 +20,7 @@
     </header>
 
     <div class="space-y-12">
-      @for (category of directoryData; track category.categoryName) {
+      @for (category of directoryData(); track category.categoryName) {
         <section class="space-y-6">
           <div class="flex items-center gap-3 border-b border-border pb-3">
             <ng-icon hlm [name]="category.icon" class="h-6 w-6 text-primary"></ng-icon>
@@ -91,7 +91,7 @@
 
       <div class="w-full">
         <hlm-accordion type="single">
-          @for (faq of faqs; track faq.question) {
+          @for (faq of faqs(); track faq.question) {
             <hlm-accordion-item class="border-b border-border">
               <h3 class="contents">
                 <button hlmAccordionTrigger class="text-left hover:text-primary transition-colors">
