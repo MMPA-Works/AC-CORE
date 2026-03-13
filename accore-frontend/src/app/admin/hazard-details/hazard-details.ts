@@ -51,7 +51,9 @@ export class HazardDetails implements OnInit {
       if (index === 0 && !history) {
         history = {
           updatedAt: rep.createdAt,
-          adminName: rep.citizenId?.firstName ? (rep.citizenId.firstName + ' ' + rep.citizenId.lastName) : 'Citizen Reporter'
+          adminName: rep.citizenId?.firstName
+            ? (rep.citizenId.firstName + ' ' + rep.citizenId.lastName)
+            : (this.isGuestReport(rep) ? 'Guest Reporter' : 'Citizen Reporter')
         };
       }
 
@@ -103,6 +105,18 @@ export class HazardDetails implements OnInit {
     });
   }
 
+  isGuestReport(report: any): boolean {
+    return !report?.citizenId;
+  }
+
+  getArchiveButtonLabel(report: any): string {
+    if (report?.isArchived) {
+      return 'Restore Report';
+    }
+
+    return this.isGuestReport(report) ? 'Flag as Spam' : 'Archive Report';
+  }
+
   saveStatus(): void {
     const currentReport = this.report();
     const newStatus = this.pendingStatus();
@@ -143,7 +157,11 @@ export class HazardDetails implements OnInit {
         this.isArchiving.set(false);
 
         if (updatedReport.isArchived) {
-          toast.success('Report archived successfully');
+          toast.success(
+            this.isGuestReport(currentReport)
+              ? 'Guest report flagged as spam'
+              : 'Report archived successfully'
+          );
           this.router.navigate(['/admin/hazards']);
           return;
         }

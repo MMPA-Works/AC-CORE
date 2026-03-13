@@ -14,6 +14,7 @@ const ANALYTICS_CACHE_KEY = "dashboard_analytics";
 interface AuthRequest extends Request {
   user?: {
     id: string;
+    _id?: string;
     role: string;
   };
 }
@@ -76,6 +77,7 @@ const buildAdminMatch = (query: Request["query"]) => {
       { barangay: searchRegex },
       { status: searchRegex },
       { severity: searchRegex },
+      { guestContact: searchRegex },
     ];
 
     if (Types.ObjectId.isValid(search)) {
@@ -103,6 +105,79 @@ const buildAdminSort = (
   }
 };
 
+type ReportCreator = {
+  citizenId?: string | null;
+  guestContact?: string | null;
+};
+
+const createAndSaveReport = async (
+  req: Request,
+  reporter: ReportCreator,
+) => {
+  const b64 = Buffer.from(req.file!.buffer).toString("base64");
+  const dataURI = "data:" + req.file!.mimetype + ";base64," + b64;
+
+  const uploadResponse = await cloudinary.uploader.upload(dataURI, {
+    folder: "accore_hazards",
+  });
+
+  const { title, description, category, severity, barangay, latitude, longitude } =
+    req.body;
+
+  const parsedLatitude = parseFloat(latitude);
+  const parsedLongitude = parseFloat(longitude);
+  const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+  const possibleDuplicate = await HazardReport.findOne({
+    category,
+    createdAt: { $gte: twentyFourHoursAgo },
+    location: {
+      $near: {
+        $geometry: {
+          type: "Point",
+          coordinates: [parsedLongitude, parsedLatitude],
+        },
+        $maxDistance: 50,
+      },
+    },
+  }).select("_id");
+
+  let finalSeverity = severity;
+  let isHighPriority = false;
+
+  // Bump priority if it is currently raining in a commercial zone
+  if (PRIORITY_COMMERCIAL_ZONES.includes(barangay) && getIsRaining()) {
+    isHighPriority = true;
+    finalSeverity = "Critical";
+  }
+
+  const normalizedGuestContact =
+    typeof reporter.guestContact === "string" &&
+    reporter.guestContact.trim().length
+      ? reporter.guestContact.trim()
+      : null;
+
+  const newReport = new HazardReport({
+    citizenId: reporter.citizenId ?? null,
+    guestContact: normalizedGuestContact,
+    title,
+    description,
+    category,
+    severity: finalSeverity,
+    barangay,
+    isHighPriority,
+    isPossibleDuplicate: !!possibleDuplicate,
+    location: {
+      type: "Point",
+      coordinates: [parsedLongitude, parsedLatitude],
+    },
+    imageURL: uploadResponse.secure_url,
+    status: "Reported",
+  });
+
+  return newReport.save();
+};
+
 export const createReport = async (
   req: AuthRequest,
   res: Response,
@@ -119,69 +194,7 @@ export const createReport = async (
       res.status(400).json({ message: "Image file is required." });
       return;
     }
-
-    const b64 = Buffer.from(req.file.buffer).toString("base64");
-    const dataURI = "data:" + req.file.mimetype + ";base64," + b64;
-
-    const uploadResponse = await cloudinary.uploader.upload(dataURI, {
-      folder: "accore_hazards",
-    });
-
-    const {
-      title,
-      description,
-      category,
-      severity,
-      barangay,
-      latitude,
-      longitude,
-    } = req.body;
-
-    const parsedLatitude = parseFloat(latitude);
-    const parsedLongitude = parseFloat(longitude);
-    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-
-    const possibleDuplicate = await HazardReport.findOne({
-      category,
-      createdAt: { $gte: twentyFourHoursAgo },
-      location: {
-        $near: {
-          $geometry: {
-            type: "Point",
-            coordinates: [parsedLongitude, parsedLatitude],
-          },
-          $maxDistance: 50,
-        },
-      },
-    }).select("_id");
-
-    let finalSeverity = severity;
-    let isHighPriority = false;
-
-    // Bump priority if it is currently raining in a commercial zone
-    if (PRIORITY_COMMERCIAL_ZONES.includes(barangay) && getIsRaining()) {
-      isHighPriority = true;
-      finalSeverity = "Critical";
-    }
-
-    const newReport = new HazardReport({
-      citizenId,
-      title,
-      description,
-      category,
-      severity: finalSeverity,
-      barangay,
-      isHighPriority,
-      isPossibleDuplicate: !!possibleDuplicate,
-      location: {
-        type: "Point",
-        coordinates: [parsedLongitude, parsedLatitude],
-      },
-      imageURL: uploadResponse.secure_url,
-      status: "Reported",
-    });
-
-    const savedReport = await newReport.save();
+    const savedReport = await createAndSaveReport(req, { citizenId });
 
     analyticsCache.del(ANALYTICS_CACHE_KEY);
 
@@ -189,6 +202,34 @@ export const createReport = async (
   } catch (error: any) {
     res.status(500).json({
       message: "Failed to create hazard report",
+      error: error.message,
+    });
+  }
+};
+
+export const createGuestReport = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ message: "Image file is required." });
+      return;
+    }
+
+    const savedReport = await createAndSaveReport(req, {
+      guestContact:
+        typeof req.body.guestContact === "string"
+          ? req.body.guestContact
+          : null,
+    });
+
+    analyticsCache.del(ANALYTICS_CACHE_KEY);
+
+    res.status(201).json(savedReport);
+  } catch (error: any) {
+    res.status(500).json({
+      message: "Failed to create guest hazard report",
       error: error.message,
     });
   }

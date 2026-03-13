@@ -224,6 +224,10 @@ export class HazardList implements OnInit, OnDestroy {
     this.exportService.exportToCSV(this.reports(), `${prefix}_page_${this.currentPage()}.csv`);
   }
 
+  isGuestReport(report: HazardReport): boolean {
+    return !report.citizenId;
+  }
+
   setArchiveView(view: 'active' | 'archived'): void {
     if (this.archiveView() === view) {
       return;

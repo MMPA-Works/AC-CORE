@@ -8,7 +8,13 @@ import {
   NgZone,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormBuilder,
+  ReactiveFormsModule,
+  ValidationErrors,
+  Validators,
+} from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import imageCompression from 'browser-image-compression';
 import { LucideAngularModule } from 'lucide-angular';
@@ -25,7 +31,25 @@ import { CitizenFooterComponent } from '../components/citizen-footer/citizen-foo
 import { HazardReportService } from '../../services/hazard-report';
 import { BarangayService } from '../../services/barangay';
 import { APP_CONFIG } from '../../app.config';
+import { AuthService } from '../../shared/auth';
 import * as L from 'leaflet';
+
+const guestContactValidator = (
+  control: AbstractControl,
+): ValidationErrors | null => {
+  const normalizedValue = String(control.value ?? '').trim();
+
+  if (!normalizedValue) {
+    return null;
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const phoneRegex = /^(?:\+63|0)\d{10}$/;
+
+  return emailRegex.test(normalizedValue) || phoneRegex.test(normalizedValue)
+    ? null
+    : { guestContact: true };
+};
 
 @Component({
   selector: 'app-report',
@@ -51,11 +75,15 @@ export class Report implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private cdr = inject(ChangeDetectorRef);
   private ngZone = inject(NgZone);
+  private authService = inject(AuthService);
   private hazardService = inject(HazardReportService);
   private barangayService = inject(BarangayService);
 
   private map?: L.Map;
   private marker?: L.Marker;
+
+  readonly isGuestMode = !this.authService.getCitizenToken();
+  readonly closeRoute = this.isGuestMode ? '/' : '/dashboard';
 
   isSubmitting = signal(false);
   isCompressing = signal(false);
@@ -70,6 +98,7 @@ export class Report implements OnInit, OnDestroy {
     title: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
     category: ['', Validators.required],
     severity: ['', Validators.required],
+    guestContact: ['', [guestContactValidator]],
     barangay: [{ value: '', disabled: true }, Validators.required],
     description: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(1000)]],
     latitude: [APP_CONFIG.map.defaultLat],
@@ -239,7 +268,10 @@ export class Report implements OnInit, OnDestroy {
 
   onSubmit() {
     const data = this.reportForm.getRawValue();
-    if (this.reportForm.invalid || !this.selectedFile || !data.barangay) return;
+    if (this.reportForm.invalid || !this.selectedFile || !data.barangay) {
+      this.reportForm.markAllAsTouched();
+      return;
+    }
 
     this.isSubmitting.set(true);
     const fd = new FormData();
@@ -249,7 +281,11 @@ export class Report implements OnInit, OnDestroy {
     this.hazardService.submitReport(fd).subscribe({
       next: () => {
         this.isSubmitting.set(false);
-        this.statusMessage.set('Hazard report submitted. Thank you for your civic contribution!');
+        this.statusMessage.set(
+          this.isGuestMode
+            ? 'Guest hazard report submitted. City staff may use your contact if follow-up is needed.'
+            : 'Hazard report submitted. Thank you for your civic contribution!',
+        );
         this.isError.set(false);
         this.reset();
       },
@@ -263,6 +299,7 @@ export class Report implements OnInit, OnDestroy {
 
   private reset() {
     this.reportForm.reset({
+      guestContact: '',
       latitude: APP_CONFIG.map.defaultLat,
       longitude: APP_CONFIG.map.defaultLng,
     });

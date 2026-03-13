@@ -22,6 +22,18 @@
             <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-primary/10 border border-primary/20 text-primary">
               {{ reportData.status }}
             </span>
+
+            @if (isGuestReport(reportData)) {
+              <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-50 border border-amber-200 text-amber-800">
+                Guest Report
+              </span>
+            }
+
+            @if (reportData.isPossibleDuplicate) {
+              <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-100 border border-slate-200 text-slate-700">
+                Possible Duplicate
+              </span>
+            }
           </div>
           <div class="flex items-center gap-2 text-sm text-slate-500 font-medium flex-wrap">
             <span class="flex items-center gap-1 text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md">
@@ -51,7 +63,7 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
         <div class="lg:col-span-8 flex flex-col gap-6">
           
@@ -92,7 +104,7 @@
 
           </div>
 
-          <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex-1 flex flex-col">
+          <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
             <div class="px-4 py-3 border-b border-slate-100 bg-slate-50/80 flex items-center gap-2">
               <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
               <h3 class="text-sm font-semibold text-slate-800">Resolution Pipeline</h3>
@@ -162,15 +174,28 @@
             <div class="p-5">
               <div class="flex items-center gap-3 mb-5 pb-5 border-b border-slate-100">
                 <div class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm border border-primary/20 shrink-0">
-                  {{ reportData.citizenId?.firstName ? reportData.citizenId.firstName.charAt(0) : 'C' }}
+                  {{ reportData.citizenId?.firstName ? reportData.citizenId.firstName.charAt(0) : (isGuestReport(reportData) ? 'G' : 'C') }}
                 </div>
                 <div class="flex flex-col overflow-hidden">
                   <span class="font-semibold text-slate-900 text-sm truncate">
-                    {{ reportData.citizenId?.firstName ? (reportData.citizenId.firstName + ' ' + reportData.citizenId.lastName) : 'Citizen Reporter' }}
+                    {{ reportData.citizenId?.firstName ? (reportData.citizenId.firstName + ' ' + reportData.citizenId.lastName) : (isGuestReport(reportData) ? 'Guest Reporter' : 'Citizen Reporter') }}
                   </span>
-                  <span class="text-[11px] text-slate-500 truncate">Reported via Citizen Portal</span>
+                  <span class="text-[11px] text-slate-500 truncate">
+                    {{ isGuestReport(reportData) ? 'Submitted without an account' : 'Reported via Citizen Portal' }}
+                  </span>
                 </div>
               </div>
+
+              @if (reportData.guestContact) {
+                <div class="mb-5 rounded-lg border border-amber-200 bg-amber-50 p-3">
+                  <h4 class="text-[11px] font-semibold uppercase tracking-wider text-amber-800">
+                    Guest Contact
+                  </h4>
+                  <p class="mt-1 text-sm font-medium text-amber-900">
+                    {{ reportData.guestContact }}
+                  </p>
+                </div>
+              }
 
               <div>
                 <h4 class="text-xs font-semibold text-primary uppercase tracking-wider mb-2">Description provided</h4>
@@ -185,20 +210,20 @@
             <div class="p-5">
               <h3 class="text-sm font-semibold text-slate-900 mb-1">Update Status</h3>
               <p class="text-xs text-slate-500 mb-4">Advance this report to the next phase.</p>
-              
+               
                <div class="flex flex-col gap-3">
-                 <brn-select class="w-full" placeholder="Select Status" [ngModel]="pendingStatus()" (ngModelChange)="pendingStatus.set($event)">
-                   <hlm-select-trigger class="w-full bg-white border-slate-200 hover:bg-slate-50 transition-colors">
-                     <hlm-select-value />
-                  </hlm-select-trigger>
-                  <hlm-select-content class="w-full bg-white border-slate-200 shadow-lg rounded-lg">
-                    <hlm-option value="Reported">Reported</hlm-option>
-                    <hlm-option value="Under Review">Under Review</hlm-option>
-                    <hlm-option value="In Progress">In Progress</hlm-option>
-                    <hlm-option value="Resolved">Resolved</hlm-option>
-                  </hlm-select-content>
-                </brn-select>
-                 
+                  <brn-select class="w-full" placeholder="Select Status" [ngModel]="pendingStatus()" (ngModelChange)="pendingStatus.set($event)">
+                    <hlm-select-trigger class="w-full bg-white border-slate-200 hover:bg-slate-50 transition-colors">
+                      <hlm-select-value />
+                   </hlm-select-trigger>
+                   <hlm-select-content class="w-full bg-white border-slate-200 shadow-lg rounded-lg">
+                     <hlm-option value="Reported">Reported</hlm-option>
+                     <hlm-option value="Under Review">Under Review</hlm-option>
+                     <hlm-option value="In Progress">In Progress</hlm-option>
+                     <hlm-option value="Resolved">Resolved</hlm-option>
+                   </hlm-select-content>
+                 </brn-select>
+                  
                  <button hlmBtn class="w-full font-medium bg-primary hover:bg-primary/90 text-primary-foreground" (click)="saveStatus()" [disabled]="pendingStatus() === reportData.status">
                    Apply Update
                  </button>
@@ -209,11 +234,11 @@
                    class="w-full border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
                    (click)="toggleArchive()"
                    [disabled]="isArchiving()"
-                 >
-                   {{ reportData.isArchived ? 'Restore Report' : 'Archive Report' }}
-                 </button>
-               </div>
-             </div>
+                  >
+                    {{ getArchiveButtonLabel(reportData) }}
+                  </button>
+                </div>
+              </div>
            </div>
 
         </div>
