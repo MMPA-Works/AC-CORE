@@ -2,34 +2,54 @@
   <app-citizen-header class="sticky top-0 z-50 block w-full"></app-citizen-header>
 
   <div class="p-4 md:p-8">
-    <div class="max-w-3xl mx-auto bg-white shadow-2xl md:rounded-2xl overflow-hidden border border-slate-200">
+    <div
+      class="max-w-3xl mx-auto bg-white shadow-2xl md:rounded-2xl overflow-hidden border border-slate-200"
+    >
       <div class="relative h-72 md:h-96 w-full bg-slate-200">
         <div id="map" class="w-full h-full z-10"></div>
 
         <div class="absolute top-4 left-4 z-20">
           <span
-            class="bg-red-800 text-white text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-wider shadow-lg border border-red-900/20">
+            class="bg-red-800 text-white text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-wider shadow-lg border border-red-900/20"
+          >
             Angeles City Hazard Map
           </span>
         </div>
 
         <div class="absolute top-4 right-4 z-20">
-          <a routerLink="/dashboard" hlmBtn variant="secondary" size="icon"
-            class="rounded-full shadow-md bg-white/90 backdrop-blur hover:bg-white border border-slate-200">
+          <a
+            routerLink="/dashboard"
+            hlmBtn
+            variant="secondary"
+            size="icon"
+            class="rounded-full shadow-md bg-white/90 backdrop-blur hover:bg-white border border-slate-200"
+          >
             <lucide-icon name="x" class="w-4 h-4 text-slate-600"></lucide-icon>
           </a>
         </div>
 
         <div class="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 w-auto">
-          <button type="button" (click)="locateUserManual()" hlmBtn variant="secondary"
+          <button
+            type="button"
+            (click)="locateUserManual()"
+            hlmBtn
+            variant="secondary"
             class="rounded-full shadow-2xl bg-white/95 backdrop-blur hover:bg-white px-6 h-11 border border-slate-200 flex items-center gap-2 group transition-all active:scale-95"
-            [disabled]="isLocating()">
+            [disabled]="isLocating()"
+          >
             @if (isLocating()) {
-            <hlm-spinner class="w-4 h-4 text-red-800"></hlm-spinner>
-            <span class="text-xs font-bold uppercase tracking-tight text-slate-700">Detecting...</span>
+              <hlm-spinner class="w-4 h-4 text-red-800"></hlm-spinner>
+              <span class="text-xs font-bold uppercase tracking-tight text-slate-700"
+                >Detecting...</span
+              >
             } @else {
-            <lucide-icon name="navigation" class="w-4 h-4 text-red-800 group-hover:animate-pulse"></lucide-icon>
-            <span class="text-xs font-bold uppercase tracking-tight text-slate-700">Locate Me</span>
+              <lucide-icon
+                name="navigation"
+                class="w-4 h-4 text-red-800 group-hover:animate-pulse"
+              ></lucide-icon>
+              <span class="text-xs font-bold uppercase tracking-tight text-slate-700"
+                >Locate Me</span
+              >
             }
           </button>
         </div>
@@ -47,14 +67,14 @@
               </p>
               <h3 class="text-lg font-bold text-slate-900 leading-tight">
                 {{
-                reportForm.get('barangay')?.value ||
-                (isLocating() ? 'Searching...' : 'Move pin on map')
+                  reportForm.get('barangay')?.value ||
+                    (isLocating() ? 'Searching...' : 'Move pin on map')
                 }}
               </h3>
               <p class="text-xs text-slate-500">Hazard location is automatically detected.</p>
             </div>
             @if (isLocating()) {
-            <hlm-spinner class="w-5 h-5 text-red-700"></hlm-spinner>
+              <hlm-spinner class="w-5 h-5 text-red-700"></hlm-spinner>
             }
           </div>
 
@@ -93,76 +113,134 @@
 
             <div class="space-y-2">
               <label hlmLabel>Report Title</label>
-              <input hlmInput formControlName="title" placeholder="Briefly name the issue" class="w-full h-12" />
+              <input
+                hlmInput
+                formControlName="title"
+                placeholder="Briefly name the issue"
+                class="w-full h-12"
+              />
+              @if (reportForm.get('title')?.invalid && reportForm.get('title')?.touched) {
+                <div class="text-red-500 text-xs mt-1 font-medium">
+                  @if (reportForm.get('title')?.errors?.['minlength']) {
+                    <span>Title must be at least 3 characters.</span>
+                  }
+                  @if (reportForm.get('title')?.errors?.['maxlength']) {
+                    <span>Title cannot exceed 100 characters.</span>
+                  }
+                </div>
+              }
             </div>
 
             <div class="space-y-2">
               <label hlmLabel>Description</label>
-              <textarea hlmTextarea formControlName="description"
-                placeholder="Describe landmarks or specific details..." rows="3" class="w-full"></textarea>
+              <textarea
+                hlmTextarea
+                formControlName="description"
+                placeholder="Describe landmarks or specific details..."
+                rows="3"
+                class="w-full"
+              ></textarea>
+              @if (
+                reportForm.get('description')?.invalid && reportForm.get('description')?.touched
+              ) {
+                <div class="text-red-500 text-xs mt-1 font-medium">
+                  @if (reportForm.get('description')?.errors?.['minlength']) {
+                    <span>Please provide more details (at least 10 characters).</span>
+                  }
+                  @if (reportForm.get('description')?.errors?.['maxlength']) {
+                    <span>Description cannot exceed 1000 characters.</span>
+                  }
+                </div>
+              }
             </div>
 
             <div class="space-y-3">
               <label hlmLabel>Proof of Hazard</label>
               @if (!showUpload() && !imagePreview()) {
-              <button hlmBtn variant="outline" type="button"
-                class="w-full flex items-center justify-center gap-3 py-10 border-2 border-dashed border-slate-300 rounded-xl text-slate-600 hover:bg-slate-50 transition-all"
-                (click)="showUpload.set(true)">
-                <lucide-icon name="camera" class="w-6 h-6"></lucide-icon>
-                <span class="font-semibold">Add Hazard Photo</span>
-              </button>
+                <button
+                  hlmBtn
+                  variant="outline"
+                  type="button"
+                  class="w-full flex items-center justify-center gap-3 py-10 border-2 border-dashed border-slate-300 rounded-xl text-slate-600 hover:bg-slate-50 transition-all"
+                  (click)="showUpload.set(true)"
+                >
+                  <lucide-icon name="camera" class="w-6 h-6"></lucide-icon>
+                  <span class="font-semibold">Add Hazard Photo</span>
+                </button>
               } @else {
-              <div class="relative">
-                @if (imagePreview()) {
-                <div class="group relative w-full h-56 rounded-xl overflow-hidden shadow-md">
-                  <img [src]="imagePreview()" class="w-full h-full object-cover" />
-                  <div
-                    class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <button type="button" (click)="removeImage()"
-                      class="bg-white text-red-600 p-3 rounded-full shadow-xl">
-                      <lucide-icon name="x" class="w-6 h-6"></lucide-icon>
-                    </button>
-                  </div>
+                <div class="relative">
+                  @if (imagePreview()) {
+                    <div class="group relative w-full h-56 rounded-xl overflow-hidden shadow-md">
+                      <img [src]="imagePreview()" class="w-full h-full object-cover" />
+                      <div
+                        class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                      >
+                        <button
+                          type="button"
+                          (click)="removeImage()"
+                          class="bg-white text-red-600 p-3 rounded-full shadow-xl"
+                        >
+                          <lucide-icon name="x" class="w-6 h-6"></lucide-icon>
+                        </button>
+                      </div>
+                    </div>
+                  } @else {
+                    <label
+                      class="flex flex-col items-center justify-center w-full h-56 border-2 border-dashed rounded-xl cursor-pointer bg-slate-50 border-slate-300 hover:border-red-400 hover:bg-red-50/30 transition-all"
+                    >
+                      <lucide-icon
+                        name="upload-cloud"
+                        class="w-10 h-10 mb-2 text-slate-400"
+                      ></lucide-icon>
+                      <p class="text-sm font-medium text-slate-600">Click to upload photo</p>
+                      <input
+                        type="file"
+                        class="hidden"
+                        (change)="onFileSelected($event)"
+                        accept="image/*"
+                      />
+                    </label>
+                  }
                 </div>
-                } @else {
-                <label
-                  class="flex flex-col items-center justify-center w-full h-56 border-2 border-dashed rounded-xl cursor-pointer bg-slate-50 border-slate-300 hover:border-red-400 hover:bg-red-50/30 transition-all">
-                  <lucide-icon name="upload-cloud" class="w-10 h-10 mb-2 text-slate-400"></lucide-icon>
-                  <p class="text-sm font-medium text-slate-600">Click to upload photo</p>
-                  <input type="file" class="hidden" (change)="onFileSelected($event)" accept="image/*" />
-                </label>
-                }
-              </div>
               }
             </div>
           </div>
 
           <div class="pt-6 border-t border-slate-100">
-            <button hlmBtn type="submit"
+            <button
+              hlmBtn
+              type="submit"
               class="w-full h-14 bg-red-800 hover:bg-red-900 text-white rounded-xl text-lg font-bold shadow-xl disabled:opacity-50"
               [disabled]="
                 reportForm.invalid ||
                 !selectedFile ||
                 isSubmitting() ||
                 !reportForm.get('barangay')?.value
-              ">
+              "
+            >
               @if (isSubmitting()) {
-              <hlm-spinner class="mr-2 w-5 h-5"></hlm-spinner>
-              <span>Submitting Report...</span>
+                <hlm-spinner class="mr-2 w-5 h-5"></hlm-spinner>
+                <span>Submitting Report...</span>
               } @else {
-              <span>Submit Hazard Report</span>
+                <span>Submit Hazard Report</span>
               }
             </button>
 
             @if (statusMessage()) {
-            <div [class]="
+              <div
+                [class]="
                   isError()
                     ? 'text-red-600 bg-red-50 border-red-100'
                     : 'text-green-700 bg-green-50 border-green-100'
-                " class="mt-4 p-4 rounded-xl border text-sm font-semibold flex items-center gap-2">
-              <lucide-icon [name]="isError() ? 'alert-triangle' : 'check-circle-2'" class="w-4 h-4"></lucide-icon>
-              {{ statusMessage() }}
-            </div>
+                "
+                class="mt-4 p-4 rounded-xl border text-sm font-semibold flex items-center gap-2"
+              >
+                <lucide-icon
+                  [name]="isError() ? 'alert-triangle' : 'check-circle-2'"
+                  class="w-4 h-4"
+                ></lucide-icon>
+                {{ statusMessage() }}
+              </div>
             }
           </div>
         </form>
