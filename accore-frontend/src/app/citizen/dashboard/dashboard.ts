@@ -54,8 +54,8 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit() {
     if (isPlatformBrowser(this.platformId)) {
-      this.firstName = this.authService.getFirstName() || 'Citizen';
-      this.currentUserId = this.authService.getUserId();
+      this.firstName = this.authService.getFirstName('citizen') || 'Citizen';
+      this.currentUserId = this.authService.getUserId('citizen');
       this.fetchMyReports();
       this.fetchWeather();
     }

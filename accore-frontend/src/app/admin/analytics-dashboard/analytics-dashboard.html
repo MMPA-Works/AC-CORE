@@ -95,11 +95,8 @@
       </div>
     </div>
 
-    <div hlmCard class="shadow-sm border border-[var(--border)] bg-white p-5 lg:p-6 rounded-2xl hover:shadow-md transition-all duration-300 group relative overflow-hidden">
-      <div class="absolute -right-4 -top-4 opacity-5 pointer-events-none">
-        <lucide-icon name="trending-up" size="120"></lucide-icon>
-      </div>
-      <div class="flex items-start justify-between relative z-10">
+    <div hlmCard class="shadow-sm border border-[var(--border)] bg-white p-5 lg:p-6 rounded-2xl hover:shadow-md transition-all duration-300 group">
+      <div class="flex items-start justify-between">
         <div>
           <p class="text-sm font-bold text-[var(--muted-foreground)]">Resolution Rate</p>
           <div class="text-3xl lg:text-4xl font-black text-[var(--foreground)] mt-2 leading-none tracking-tight">{{ resolutionRate() }}%</div>
@@ -108,7 +105,7 @@
           <lucide-icon name="trending-up" size="24" strokeWidth="2.5"></lucide-icon>
         </div>
       </div>
-      <div class="mt-4 relative z-10">
+      <div class="mt-4">
         <p class="text-[10px] font-bold text-teal-600 uppercase tracking-widest">Overall Efficiency</p>
       </div>
     </div>

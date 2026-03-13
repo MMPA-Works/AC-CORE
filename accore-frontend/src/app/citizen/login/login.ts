@@ -52,6 +52,7 @@ export class Login implements OnInit {
 
     this.http.post('http://localhost:5000/api/auth/citizen/google', { token }).subscribe({
       next: (response: any) => {
+        localStorage.removeItem('adminToken');
         localStorage.setItem('token', response.token);
         toast.success('Login successful!');
         this.router.navigate(['/dashboard']);
@@ -78,6 +79,7 @@ export class Login implements OnInit {
 
     this.http.post('http://localhost:5000/api/auth/citizen/login', this.loginForm.value).subscribe({
       next: (response: any) => {
+        localStorage.removeItem('adminToken');
         localStorage.setItem('token', response.token);
         toast.success('Login successful!');
         this.router.navigate(['/dashboard']);
