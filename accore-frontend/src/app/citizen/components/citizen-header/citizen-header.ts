@@ -2,13 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
-import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { AuthService } from '../../../shared/auth';
 
 @Component({
   selector: 'app-citizen-header',
   standalone: true,
-  imports: [CommonModule, RouterModule, LucideAngularModule, HlmButtonImports],
+  imports: [CommonModule, RouterModule, LucideAngularModule],
   templateUrl: './citizen-header.html',
 })
 export class CitizenHeaderComponent {
@@ -36,7 +35,7 @@ export class CitizenHeaderComponent {
     },
     {
       label: 'Directory',
-      route: '/directory',
+      route: '/citizen/directory',
       aliases: ['/directory', '/citizen/directory'],
       icon: 'users',
     },

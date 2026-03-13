@@ -41,22 +41,33 @@ export class HlmToaster {
   public readonly theme = input<ToasterProps['theme']>('light');
   public readonly position = input<ToasterProps['position']>('bottom-right');
   public readonly hotKey = input<ToasterProps['hotkey']>(['altKey', 'KeyT']);
+  
   public readonly richColors = input<ToasterProps['richColors'], BooleanInput>(false, {
     transform: booleanAttribute,
   });
+  
   public readonly expand = input<ToasterProps['expand'], BooleanInput>(false, {
     transform: booleanAttribute,
   });
-  public readonly duration = input<ToasterProps['duration'], NumberInput>(4000, {
+  public readonly duration = input<ToasterProps['duration'], NumberInput>(5000, {
     transform: numberAttribute,
   });
-  public readonly visibleToasts = input<ToasterProps['visibleToasts'], NumberInput>(3, {
+  public readonly visibleToasts = input<ToasterProps['visibleToasts'], NumberInput>(1, {
     transform: numberAttribute,
   });
   public readonly closeButton = input<ToasterProps['closeButton'], BooleanInput>(false, {
     transform: booleanAttribute,
   });
-  public readonly toastOptions = input<ToasterProps['toastOptions']>({});
+  
+  public readonly toastOptions = input<ToasterProps['toastOptions']>({
+    class: 'p-4',
+    classes: {
+      closeButton: 'hover:bg-black/10 dark:hover:bg-white/10 transition-colors',
+      actionButton: 'hover:opacity-80 transition-opacity',
+      cancelButton: 'hover:opacity-80 transition-opacity',
+    }
+  });
+  
   public readonly offset = input<ToasterProps['offset']>(null);
   public readonly dir = input<ToasterProps['dir']>('auto');
   public readonly userClass = input<ClassValue>('', { alias: 'class' });

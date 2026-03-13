@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { Types } from "mongoose";
 import HazardReport from "../models/hazard-report.model";
 import Admin from "../models/admin.model";
 import { v2 as cloudinary } from "cloudinary";
@@ -10,6 +11,93 @@ interface AuthRequest extends Request {
     role: string;
   };
 }
+
+const SEVERITY_WEIGHT: Record<string, number> = {
+  Low: 1,
+  Medium: 2,
+  Critical: 3,
+};
+
+const STATUS_WEIGHT: Record<string, number> = {
+  Reported: 1,
+  "Under Review": 2,
+  "In Progress": 3,
+  Resolved: 4,
+};
+
+const ACTIVE_PUBLIC_STATUSES = [
+  "Reported",
+  "Under Review",
+  "Dispatched",
+  "In Progress",
+];
+
+const parsePositiveInt = (value: unknown, fallback: number, max = 100): number => {
+  const parsed = Number.parseInt(String(value ?? ""), 10);
+
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return fallback;
+  }
+
+  return Math.min(parsed, max);
+};
+
+const normalizeQueryValue = (value: unknown): string | null => {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const normalized = value.trim();
+  return normalized.length ? normalized : null;
+};
+
+const buildAdminMatch = (query: Request["query"]) => {
+  const archiveState = normalizeQueryValue(query.archived);
+  const filters: Record<string, unknown> = {
+    isArchived: archiveState === "true" ? true : { $ne: true },
+  };
+
+  const barangay = normalizeQueryValue(query.barangay);
+  const category = normalizeQueryValue(query.category);
+  const severity = normalizeQueryValue(query.severity);
+  const status = normalizeQueryValue(query.status);
+  const search = normalizeQueryValue(query.search);
+
+  if (barangay && barangay !== "All") filters.barangay = barangay;
+  if (category && category !== "All") filters.category = category;
+  if (severity && severity !== "All") filters.severity = severity;
+  if (status && status !== "All") filters.status = status;
+  if (search) {
+    const searchRegex = new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+    const searchFilters: Record<string, unknown>[] = [
+      { title: searchRegex },
+      { category: searchRegex },
+      { barangay: searchRegex },
+      { status: searchRegex },
+      { severity: searchRegex },
+    ];
+
+    if (Types.ObjectId.isValid(search)) {
+      searchFilters.push({ _id: new Types.ObjectId(search) });
+    }
+
+    filters.$or = searchFilters;
+  }
+
+  return filters;
+};
+
+const buildAdminSort = (sortColumn: string | null, sortDirection: 1 | -1) => {
+  switch (sortColumn) {
+    case "severity":
+      return { severityWeight: sortDirection, createdAt: -1 as const };
+    case "status":
+      return { statusWeight: sortDirection, createdAt: -1 as const };
+    case "createdAt":
+    default:
+      return { createdAt: sortDirection };
+  }
+};
 
 export const createReport = async (
   req: AuthRequest,
@@ -109,8 +197,85 @@ export const getReports = async (
       return;
     }
 
+    const hasPagination = req.query.page !== undefined || req.query.limit !== undefined;
+    const page = parsePositiveInt(req.query.page, 1);
+    const limit = parsePositiveInt(req.query.limit, 10);
+    const skip = (page - 1) * limit;
+
     if (userRole === "admin") {
+      if (hasPagination) {
+        const filters = buildAdminMatch(req.query);
+        const sortColumn = normalizeQueryValue(req.query.sortColumn);
+        const sortDirection = normalizeQueryValue(req.query.sortDirection) === "asc" ? 1 : -1;
+        const pipeline: any[] = [];
+        const archiveFilter = filters.isArchived;
+
+        if (Object.keys(filters).length) {
+          pipeline.push({ $match: filters });
+        }
+
+        pipeline.push({
+          $addFields: {
+            severityWeight: {
+              $switch: {
+                branches: Object.entries(SEVERITY_WEIGHT).map(([label, weight]) => ({
+                  case: { $eq: ["$severity", label] },
+                  then: weight,
+                })),
+                default: 0,
+              },
+            },
+            statusWeight: {
+              $switch: {
+                branches: Object.entries(STATUS_WEIGHT).map(([label, weight]) => ({
+                  case: { $eq: ["$status", label] },
+                  then: weight,
+                })),
+                default: 0,
+              },
+            },
+          },
+        });
+
+        pipeline.push({ $sort: buildAdminSort(sortColumn, sortDirection) });
+        pipeline.push({
+          $facet: {
+            reports: [{ $skip: skip }, { $limit: limit }],
+            totalCount: [{ $count: "count" }],
+          },
+        });
+
+        const [aggregateResult, barangays, categories] = await Promise.all([
+          HazardReport.aggregate(pipeline),
+          HazardReport.distinct("barangay", { isArchived: archiveFilter }),
+          HazardReport.distinct("category", { isArchived: archiveFilter }),
+        ]);
+        const [result] = aggregateResult;
+        const reports = result?.reports ?? [];
+        const total = result?.totalCount?.[0]?.count ?? 0;
+
+        res.status(200).json({
+          reports,
+          pagination: {
+            page,
+            limit,
+            total,
+            totalPages: Math.max(1, Math.ceil(total / limit)),
+          },
+          filters: {
+            barangays: barangays.sort(),
+            categories: categories.sort(),
+          },
+        });
+        return;
+      }
+
       const reports = await HazardReport.aggregate([
+        {
+          $match: {
+            isArchived: { $ne: true },
+          },
+        },
         {
           $addFields: {
             priorityWeight: {
@@ -132,13 +297,70 @@ export const getReports = async (
 
       res.status(200).json(reports);
     } else {
-      const reports = await HazardReport.find({ citizenId: userId }).sort({
+      const query = { citizenId: userId, isArchived: { $ne: true } };
+
+      if (hasPagination) {
+        const [reports, total] = await Promise.all([
+          HazardReport.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit),
+          HazardReport.countDocuments(query),
+        ]);
+
+        res.status(200).json({
+          reports,
+          pagination: {
+            page,
+            limit,
+            total,
+            totalPages: Math.max(1, Math.ceil(total / limit)),
+          },
+        });
+        return;
+      }
+
+      const reports = await HazardReport.find(query).sort({
         createdAt: -1,
       });
       res.status(200).json(reports);
     }
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch hazard reports", error });
+  }
+};
+
+export const archiveReport = async (
+  req: AuthRequest,
+  res: Response,
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const adminId = req.user?.id;
+
+    if (!adminId) {
+      res.status(401).json({ message: "Unauthorized. Admin ID missing." });
+      return;
+    }
+
+    const admin = await Admin.findById(adminId);
+    if (!admin) {
+      res.status(404).json({ message: "Admin not found." });
+      return;
+    }
+
+    const report = await HazardReport.findById(id);
+    if (!report) {
+      res.status(404).json({ message: "Hazard report not found." });
+      return;
+    }
+
+    report.isArchived = !report.isArchived;
+
+    const updatedReport = await report.save();
+    res.status(200).json(updatedReport);
+  } catch (error: any) {
+    res.status(500).json({
+      message: "Failed to archive report",
+      error: error.message,
+    });
   }
 };
 
@@ -239,6 +461,11 @@ export const getAnalytics = async (
   try {
     const analyticsData = await HazardReport.aggregate([
       {
+        $match: {
+          isArchived: { $ne: true },
+        },
+      },
+      {
         $facet: {
           byStatus: [{ $group: { _id: "$status", count: { $sum: 1 } } }],
           byBarangay: [
@@ -288,6 +515,27 @@ export const getAnalytics = async (
   } catch (error: any) {
     res.status(500).json({
       message: "Failed to fetch analytics data",
+      error: error.message,
+    });
+  }
+};
+
+export const getPublicReports = async (
+  req: AuthRequest,
+  res: Response,
+): Promise<void> => {
+  try {
+    const reports = await HazardReport.find({
+      isArchived: { $ne: true },
+      status: { $in: ACTIVE_PUBLIC_STATUSES },
+    })
+      .select("title description category severity barangay location status createdAt")
+      .sort({ createdAt: -1 });
+      
+    res.status(200).json(reports);
+  } catch (error: any) {
+    res.status(500).json({
+      message: "Failed to fetch public reports",
       error: error.message,
     });
   }

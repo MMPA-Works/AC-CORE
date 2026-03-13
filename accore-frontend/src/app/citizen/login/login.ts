@@ -20,7 +20,7 @@ import { toast } from 'ngx-sonner';
     HlmButtonImports,
     HlmInputImports,
     HlmLabelImports,
-    HlmToasterImports
+    HlmToasterImports,
   ],
   templateUrl: './login.html',
 })
@@ -53,12 +53,17 @@ export class Login implements OnInit {
     this.http.post('http://localhost:5000/api/auth/citizen/google', { token }).subscribe({
       next: (response: any) => {
         localStorage.setItem('token', response.token);
-        toast.success('Login successful!', { description: 'Redirecting to your dashboard...' });
+        toast.success('Login successful!');
         this.router.navigate(['/dashboard']);
       },
-      error: () => {
+      error: (err) => {
         this.isLoading.set(false);
-        toast.error('Google login failed', { description: 'Please try again.' });
+
+        if (err.status === 429) {
+          toast.error('Too many login attempts. Please try again later.');
+        } else {
+          toast.error(err.error?.message || 'Google login failed');
+        }
       },
     });
   }
@@ -74,12 +79,17 @@ export class Login implements OnInit {
     this.http.post('http://localhost:5000/api/auth/citizen/login', this.loginForm.value).subscribe({
       next: (response: any) => {
         localStorage.setItem('token', response.token);
-        toast.success('Login successful!', { description: 'Redirecting to your dashboard...' });
+        toast.success('Login successful!');
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
         this.isLoading.set(false);
-        toast.error('Login failed', { description: err.error?.message || 'Check your credentials.' });
+
+        if (err.status === 429) {
+          toast.error('Too many login attempts. Please try again later.');
+        } else {
+          toast.error(err.error?.message || 'Login failed');
+        }
       },
     });
   }

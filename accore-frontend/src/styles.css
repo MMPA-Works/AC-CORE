@@ -5,6 +5,8 @@
 
 @import '@spartan-ng/brain/hlm-tailwind-preset.css';
 @import "leaflet/dist/leaflet.css";
+@import "leaflet.markercluster/dist/MarkerCluster.css";
+@import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 @import '@angular/cdk/overlay-prebuilt.css';
 
 :root {
@@ -16,7 +18,6 @@
     
   --radius: 0.625rem;
   
-  /* Backgrounds: Pure white and very light warm gray */
   --background: oklch(1 0 0);
   --foreground: oklch(0.15 0.01 28);
   --card: oklch(1 0 0);
@@ -24,77 +25,70 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.15 0.01 28);
   
-  /* Primary: Angeles City Red */
-  --primary: oklch(0.51 0.19 28);
-  --primary-foreground: oklch(1 0 0);
+  /* Primary: #ac1001 (Red) */
+  --primary: hsl(4 98% 34%);
+  --primary-foreground: hsl(0 0% 100%);
   
-  /* Secondary: Mustard Yellow */
-  --secondary: oklch(0.77 0.16 70);
-  --secondary-foreground: oklch(0.15 0.01 28);
+  /* Secondary: #f99b36 (Yellow/Orange) */
+  --secondary: hsl(31 94% 59%);
+  --secondary-foreground: hsl(0 0% 10%);
   
-  /* Muted elements: Warm grays to complement the red */
   --muted: oklch(0.96 0.01 28);
   --muted-foreground: oklch(0.55 0.02 28);
   --accent: oklch(0.96 0.01 28);
-  --accent-foreground: oklch(0.51 0.19 28);
+  --accent-foreground: hsl(4 98% 34%);
   
-  /* States and borders */
   --destructive: oklch(0.6 0.2 25);
   --border: oklch(0.90 0.01 28);
   --input: oklch(0.90 0.01 28);
-  --ring: oklch(0.77 0.16 70); /* Yellow focus ring */
+  --ring: hsl(31 94% 59%); 
   
-  /* Sidebar */
   --sidebar: oklch(1 0 0);
   --sidebar-foreground: oklch(0.15 0.01 28);
-  --sidebar-primary: oklch(0.51 0.19 28);
-  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-primary: hsl(4 98% 34%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
   --sidebar-accent: oklch(0.96 0.01 28);
-  --sidebar-accent-foreground: oklch(0.51 0.19 28);
+  --sidebar-accent-foreground: hsl(4 98% 34%);
   --sidebar-border: oklch(0.90 0.01 28);
-  --sidebar-ring: oklch(0.77 0.16 70);
+  --sidebar-ring: hsl(31 94% 59%);
 }
 
 :root.dark {
   color-scheme: dark;
 
-  /* Dark mode: Deep warm grays instead of pure black */
   --background: oklch(0.15 0.01 28);
-  --foreground: oklch(0.98 0 0);
+  --foreground: hsl(0 0% 98%);
   --card: oklch(0.18 0.01 28);
-  --card-foreground: oklch(0.98 0 0);
+  --card-foreground: hsl(0 0% 98%);
   --popover: oklch(0.18 0.01 28);
-  --popover-foreground: oklch(0.98 0 0);
+  --popover-foreground: hsl(0 0% 98%);
   
-  /* Primary: Slightly brighter red for dark mode contrast */
-  --primary: oklch(0.60 0.19 28);
-  --primary-foreground: oklch(1 0 0);
+  /* Primary: #ac1001 (Red) */
+  --primary: hsl(4 98% 34%);
+  --primary-foreground: hsl(0 0% 100%);
   
-  /* Secondary: Mustard Yellow */
-  --secondary: oklch(0.77 0.16 70);
-  --secondary-foreground: oklch(0.15 0.01 28);
+  /* Secondary: #f99b36 (Yellow/Orange) */
+  --secondary: hsl(31 94% 59%);
+  --secondary-foreground: hsl(0 0% 10%);
   
-  /* Muted elements */
   --muted: oklch(0.25 0.01 28);
   --muted-foreground: oklch(0.70 0.02 28);
   --accent: oklch(0.25 0.01 28);
-  --accent-foreground: oklch(0.98 0 0);
+  --accent-foreground: hsl(0 0% 98%);
   
-  /* States and borders */
   --destructive: oklch(0.70 0.19 22);
   --border: oklch(0.25 0.01 28);
   --input: oklch(0.25 0.01 28);
-  --ring: oklch(0.77 0.16 70);
+  --ring: hsl(31 94% 59%);
   
-  /* Sidebar */
   --sidebar: oklch(0.18 0.01 28);
-  --sidebar-foreground: oklch(0.98 0 0);
-  --sidebar-primary: oklch(0.60 0.19 28);
-  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-foreground: hsl(0 0% 98%);
+  --sidebar-primary: hsl(4 98% 34%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
   --sidebar-accent: oklch(0.25 0.01 28);
-  --sidebar-accent-foreground: oklch(0.98 0 0);
+  --sidebar-accent-foreground: hsl(0 0% 98%);
   --sidebar-border: oklch(0.25 0.01 28);
-  --sidebar-ring: oklch(0.77 0.16 70);
+  --sidebar-ring: hsl(31 94% 59%);
 }
 
 @layer base {
@@ -144,9 +138,6 @@
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12) !important;
 }
 
-/* Sleek frosted glass close button. 
-  It floats over the image for perfect contrast. 
-*/
 .leaflet-popup-close-button {
   top: 14px !important;
   right: 14px !important;
@@ -167,9 +158,6 @@
   padding: 0 !important; 
 }
 
-/* Clean hover state. 
-  No spinning, just a subtle lift and color change. 
-*/
 .leaflet-popup-close-button:hover {
   background: rgba(255, 255, 255, 1) !important;
   color: #ef4444 !important; 
@@ -177,54 +165,10 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
 }
 
-/* 
-Sonner 
-*/
-/* Sonner Error Icon Color */
 [data-sonner-toast][data-type='error'] [data-icon] {
   color: #dc2626 !important;
 }
 
-/* Toast Container: control spacing between multiple toasts */
-[data-sonner-toaster] {
-  --toast-close-button-start: 0;
-  --toast-close-button-end: unset;
-  --gap: 1px; /* Reduce the gap between stacked toasts */
-}
-
-/* Toast Card Styling: remove extra spacing inside cards */
-[data-sonner-toast] {
-  margin: 0 !important;       /* Remove extra margin around card */
-  padding: 0.5rem !important; /* Tighten padding inside card */
-  line-height: 1;
-}
-
-/* Optional: tighten description spacing */
-[data-sonner-toast] [data-description] {
-  margin-top: 0.25rem;
-  margin-bottom: 0.25rem;
-}
-
-/* Optional: tighten action button spacing */
-[data-sonner-toast] [data-action] {
-  margin-top: 0.25rem;
-}
-
-/* Optional: lighten error toast background */
-[data-sonner-toast][data-type='error'] {
-  background: #fef2f2;
-  border-color: #fecaca;
-  color: #991b1b;
-}
-
-/* Sonner Success Icon Color */
 [data-sonner-toast][data-type='success'] [data-icon] {
-  color: #16a34a !important; /* A clean Tailwind-style green-600 */
-}
-
-/* Optional: success toast background and border to match the error style */
-[data-sonner-toast][data-type='success'] {
-  background: #f0fdf4; /* green-50 */
-  border-color: #bbf7d0; /* green-200 */
-  color: #166534; /* green-800 */
+  color: #16a34a !important;
 }

@@ -1,9 +1,29 @@
 <div class="flex h-screen w-full overflow-hidden bg-gray-50/50">
   
-  <app-sidebar class="shrink-0 h-full"></app-sidebar>
+  <app-sidebar #sidebar class="shrink-0 h-full"></app-sidebar>
 
-  <main class="flex-1 h-full min-h-0 relative overflow-y-auto overflow-x-hidden">
-    <router-outlet></router-outlet>
-  </main>
-  
+  <div class="flex-1 flex flex-col h-full min-h-0 relative overflow-hidden">
+    
+    <header class="flex lg:hidden items-center justify-between bg-white border-b border-gray-200 h-16 px-5 shrink-0 shadow-sm z-10">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-sm">
+          <lucide-icon name="shield-alert" class="text-white w-4 h-4"></lucide-icon>
+        </div>
+        <span class="text-lg font-extrabold tracking-tight text-gray-900 leading-none">AC-CORE</span>
+      </div>
+      
+      <button 
+        (click)="sidebar.toggleMobile()" 
+        class="p-2 -mr-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+        aria-label="Open Menu"
+      >
+        <lucide-icon name="menu" class="w-6 h-6"></lucide-icon>
+      </button>
+    </header>
+
+    <main class="flex-1 relative overflow-y-auto overflow-x-hidden">
+      <router-outlet></router-outlet>
+    </main>
+    
+  </div>
 </div>
