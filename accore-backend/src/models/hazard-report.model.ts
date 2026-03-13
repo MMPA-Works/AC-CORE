@@ -1,5 +1,5 @@
-import mongoose, { Schema, Document } from 'mongoose';
-import { ANGELES_CITY_BARANGAYS } from '../utils/constants';
+import mongoose, { Schema, Document } from "mongoose";
+import { ANGELES_CITY_BARANGAYS } from "../utils/constants";
 
 export interface IHazardReport extends Document {
   citizenId: mongoose.Types.ObjectId;
@@ -16,6 +16,7 @@ export interface IHazardReport extends Document {
   };
   status: string;
   imageURL: string;
+  verifications: mongoose.Types.ObjectId[];
   statusHistory: {
     status: string;
     updatedBy: mongoose.Types.ObjectId;
@@ -30,7 +31,7 @@ const hazardReportSchema: Schema = new Schema(
   {
     citizenId: {
       type: Schema.Types.ObjectId,
-      ref: 'Citizen',
+      ref: "Citizen",
       required: true,
     },
     title: {
@@ -45,12 +46,18 @@ const hazardReportSchema: Schema = new Schema(
     category: {
       type: String,
       required: true,
-      enum: ['Pothole', 'Clogged Drain', 'Fallen Tree', 'Streetlight Out', 'Flooding'],
+      enum: [
+        "Pothole",
+        "Clogged Drain",
+        "Fallen Tree",
+        "Streetlight Out",
+        "Flooding",
+      ],
     },
     severity: {
       type: String,
       required: true,
-      enum: ['Low', 'Medium', 'Critical'],
+      enum: ["Low", "Medium", "Critical"],
     },
     barangay: {
       type: String,
@@ -68,11 +75,11 @@ const hazardReportSchema: Schema = new Schema(
     location: {
       type: {
         type: String,
-        enum: ['Point'], 
+        enum: ["Point"],
         required: true,
       },
       coordinates: {
-        type: [Number], 
+        type: [Number],
         required: true,
       },
     },
@@ -80,27 +87,40 @@ const hazardReportSchema: Schema = new Schema(
       type: String,
       required: true,
       // Updated to match the new 4-step tracker
-      enum: ['Reported', 'Under Review', 'In Progress', 'Resolved'],
-      default: 'Reported',
+      enum: ["Reported", "Under Review", "In Progress", "Resolved"],
+      default: "Reported",
     },
     imageURL: {
       type: String,
       required: true,
     },
+    verifications: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Citizen",
+      },
+    ],
     statusHistory: [
       {
         status: { type: String, required: true },
-        updatedBy: { type: Schema.Types.ObjectId, ref: 'Admin', required: true },
+        updatedBy: {
+          type: Schema.Types.ObjectId,
+          ref: "Admin",
+          required: true,
+        },
         adminName: { type: String, required: true },
-        updatedAt: { type: Date, default: Date.now }
-      }
-    ]
+        updatedAt: { type: Date, default: Date.now },
+      },
+    ],
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-hazardReportSchema.index({ location: '2dsphere' });
+hazardReportSchema.index({ location: "2dsphere" });
 
-export default mongoose.model<IHazardReport>('HazardReport', hazardReportSchema);
+export default mongoose.model<IHazardReport>(
+  "HazardReport",
+  hazardReportSchema,
+);

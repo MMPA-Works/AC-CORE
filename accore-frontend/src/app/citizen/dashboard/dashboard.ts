@@ -14,95 +14,8 @@ import 'leaflet.markercluster';
   standalone: true,
   imports: [RouterModule, CommonModule, CitizenHeaderComponent, CitizenFooterComponent],
   templateUrl: './dashboard.html',
-  encapsulation: ViewEncapsulation.None,
-  styles: [`
-    .leaflet-popup-content-wrapper {
-      border-radius: 12px;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    }
-    .leaflet-popup-content {
-      margin: 0;
-      width: 240px !important;
-    }
-    .ac-core-cluster {
-      background: transparent;
-      border: 0;
-    }
-    .ac-core-cluster-shell {
-      display: flex;
-      height: 100%;
-      justify-content: center;
-      align-items: flex-start;
-      width: 100%;
-    }
-    .ac-core-cluster-pin {
-      align-items: center;
-      background: linear-gradient(135deg, #cf2e1d 0%, #ac1001 68%, #7f0c01 100%);
-      border: 2px solid rgba(255, 255, 255, 0.95);
-      border-radius: 50% 50% 50% 0;
-      box-shadow: 0 14px 28px rgba(127, 12, 1, 0.28);
-      display: flex;
-      justify-content: center;
-      position: relative;
-      transform: rotate(-45deg);
-      width: 100%;
-      height: 100%;
-    }
-    .ac-core-cluster-pin::before {
-      background: rgba(172, 16, 1, 0.22);
-      border-radius: 50% 50% 50% 0;
-      content: '';
-      inset: -5px;
-      position: absolute;
-      z-index: -1;
-    }
-    .ac-core-cluster-count {
-      align-items: center;
-      color: #ffffff;
-      display: flex;
-      font-weight: 800;
-      justify-content: center;
-      letter-spacing: -0.02em;
-      transform: rotate(45deg);
-    }
-    .ac-core-cluster--small {
-      height: 34px;
-      width: 34px;
-    }
-    .ac-core-cluster--small .ac-core-cluster-count {
-      font-size: 11px;
-    }
-    .ac-core-cluster--medium {
-      height: 40px;
-      width: 40px;
-    }
-    .ac-core-cluster--medium .ac-core-cluster-pin {
-      background: linear-gradient(135deg, #d83b29 0%, #b51202 65%, #870d01 100%);
-      box-shadow: 0 18px 34px rgba(127, 12, 1, 0.3);
-    }
-    .ac-core-cluster--medium .ac-core-cluster-pin::before {
-      background: rgba(172, 16, 1, 0.24);
-      inset: -6px;
-    }
-    .ac-core-cluster--medium .ac-core-cluster-count {
-      font-size: 12px;
-    }
-    .ac-core-cluster--large {
-      height: 46px;
-      width: 46px;
-    }
-    .ac-core-cluster--large .ac-core-cluster-pin {
-      background: linear-gradient(135deg, #bf1b0b 0%, #930d01 70%, #650900 100%);
-      box-shadow: 0 22px 38px rgba(96, 7, 0, 0.34);
-    }
-    .ac-core-cluster--large .ac-core-cluster-pin::before {
-      background: rgba(127, 12, 1, 0.28);
-      inset: -7px;
-    }
-    .ac-core-cluster--large .ac-core-cluster-count {
-      font-size: 14px;
-    }
-  `]
+  styleUrls: ['./dashboard.css'],
+  encapsulation: ViewEncapsulation.None
 })
 export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
   private hazardReportService = inject(HazardReportService);
@@ -121,11 +34,13 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
   resolvedReports = 0;
   impactTitle = 'Civic Starter';
   firstName = 'Citizen';
+  currentUserId: string | null = null;
   cityInsights: { category: string, count: number, weeklyCount: number, percentage: number }[] = [];
 
   ngOnInit() {
     if (isPlatformBrowser(this.platformId)) {
       this.firstName = this.authService.getFirstName() || 'Citizen';
+      this.currentUserId = this.authService.getUserId(); 
       this.fetchMyReports();
     }
   }
@@ -154,7 +69,7 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
         this.isRecentLoading = false;
         this.cdr.detectChanges();
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Failed to fetch personal reports', error);
         this.isRecentLoading = false;
         this.cdr.detectChanges();
@@ -174,7 +89,7 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
 
         this.cdr.detectChanges();
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Failed to load public city reports', error);
         this.isInsightsLoading = false;
         this.cdr.detectChanges();
@@ -280,6 +195,39 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
     });
 
     this.map.addLayer(this.markerClusterGroup);
+
+    this.map.on('popupopen', (e: any) => {
+      const popupNode = e.popup.getElement();
+      const verifyBtn = popupNode.querySelector('.verify-btn');
+      
+      if (verifyBtn) {
+        verifyBtn.addEventListener('click', (event: Event) => {
+          const target = event.target as HTMLElement;
+          const reportId = target.getAttribute('data-report-id');
+          if (reportId) {
+            this.handleVerifyClick(reportId, target);
+          }
+        });
+      }
+    });
+  }
+
+  handleVerifyClick(reportId: string, buttonElement: HTMLElement) {
+    buttonElement.style.opacity = '0.5';
+    buttonElement.style.pointerEvents = 'none';
+    buttonElement.innerText = 'Updating...';
+
+    this.hazardReportService.toggleVerify(reportId).subscribe({
+      next: () => {
+        this.fetchCityMapData();
+      },
+      error: (err: any) => {
+        console.error('Failed to verify report', err);
+        buttonElement.style.opacity = '1';
+        buttonElement.style.pointerEvents = 'auto';
+        buttonElement.innerText = 'Verify Issue';
+      }
+    });
   }
 
   getMarkerColor(severity: string | undefined): string {
@@ -312,6 +260,10 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
       const lng = report.location.coordinates[0];
       const lat = report.location.coordinates[1];
       const markerColor = this.getMarkerColor(report.severity);
+      
+      const verifications = report.verifications || [];
+      const verificationCount = verifications.length;
+      const hasVerified = this.currentUserId ? verifications.includes(this.currentUserId) : false;
 
       const customIcon = L.divIcon({
         className: 'bg-transparent border-0',
@@ -343,9 +295,12 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
           </div>
 
           <div style="margin-top: 8px; padding-top: 12px; border-top: 1px solid #e5e5e5; display: flex; align-items: center; justify-content: space-between;">
-            <span style="font-size: 11px; color: #737373; font-weight: 600;">2 citizens verified</span>
-            <button onclick="alert('Verification feature coming soon!')" style="background-color: #171717; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; font-family: 'Google Sans', sans-serif;">
-              Verify
+            <span style="font-size: 11px; color: #737373; font-weight: 600;">${verificationCount} citizens verified</span>
+            <button 
+              class="verify-btn" 
+              data-report-id="${report._id}"
+              style="background-color: ${hasVerified ? '#16a34a' : '#171717'}; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; font-family: 'Google Sans', sans-serif; transition: background-color 0.2s;">
+              ${hasVerified ? 'Verified' : 'Verify Issue'}
             </button>
           </div>
         </div>

@@ -32,7 +32,11 @@ const ACTIVE_PUBLIC_STATUSES = [
   "In Progress",
 ];
 
-const parsePositiveInt = (value: unknown, fallback: number, max = 100): number => {
+const parsePositiveInt = (
+  value: unknown,
+  fallback: number,
+  max = 100,
+): number => {
   const parsed = Number.parseInt(String(value ?? ""), 10);
 
   if (!Number.isFinite(parsed) || parsed <= 0) {
@@ -68,7 +72,10 @@ const buildAdminMatch = (query: Request["query"]) => {
   if (severity && severity !== "All") filters.severity = severity;
   if (status && status !== "All") filters.status = status;
   if (search) {
-    const searchRegex = new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+    const searchRegex = new RegExp(
+      search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+      "i",
+    );
     const searchFilters: Record<string, unknown>[] = [
       { title: searchRegex },
       { category: searchRegex },
@@ -197,7 +204,8 @@ export const getReports = async (
       return;
     }
 
-    const hasPagination = req.query.page !== undefined || req.query.limit !== undefined;
+    const hasPagination =
+      req.query.page !== undefined || req.query.limit !== undefined;
     const page = parsePositiveInt(req.query.page, 1);
     const limit = parsePositiveInt(req.query.limit, 10);
     const skip = (page - 1) * limit;
@@ -206,7 +214,8 @@ export const getReports = async (
       if (hasPagination) {
         const filters = buildAdminMatch(req.query);
         const sortColumn = normalizeQueryValue(req.query.sortColumn);
-        const sortDirection = normalizeQueryValue(req.query.sortDirection) === "asc" ? 1 : -1;
+        const sortDirection =
+          normalizeQueryValue(req.query.sortDirection) === "asc" ? 1 : -1;
         const pipeline: any[] = [];
         const archiveFilter = filters.isArchived;
 
@@ -218,19 +227,23 @@ export const getReports = async (
           $addFields: {
             severityWeight: {
               $switch: {
-                branches: Object.entries(SEVERITY_WEIGHT).map(([label, weight]) => ({
-                  case: { $eq: ["$severity", label] },
-                  then: weight,
-                })),
+                branches: Object.entries(SEVERITY_WEIGHT).map(
+                  ([label, weight]) => ({
+                    case: { $eq: ["$severity", label] },
+                    then: weight,
+                  }),
+                ),
                 default: 0,
               },
             },
             statusWeight: {
               $switch: {
-                branches: Object.entries(STATUS_WEIGHT).map(([label, weight]) => ({
-                  case: { $eq: ["$status", label] },
-                  then: weight,
-                })),
+                branches: Object.entries(STATUS_WEIGHT).map(
+                  ([label, weight]) => ({
+                    case: { $eq: ["$status", label] },
+                    then: weight,
+                  }),
+                ),
                 default: 0,
               },
             },
@@ -301,7 +314,10 @@ export const getReports = async (
 
       if (hasPagination) {
         const [reports, total] = await Promise.all([
-          HazardReport.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit),
+          HazardReport.find(query)
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit),
           HazardReport.countDocuments(query),
         ]);
 
@@ -375,7 +391,7 @@ export const getReportById = async (req: AuthRequest, res: Response) => {
 
     const report = await HazardReport.findById(req.params.id).populate(
       "citizenId",
-      "firstName lastName"
+      "firstName lastName",
     );
 
     if (!report) {
@@ -383,12 +399,16 @@ export const getReportById = async (req: AuthRequest, res: Response) => {
     }
 
     const ownerId =
-      typeof report.citizenId === "object" && report.citizenId !== null && "_id" in report.citizenId
+      typeof report.citizenId === "object" &&
+      report.citizenId !== null &&
+      "_id" in report.citizenId
         ? String((report.citizenId as any)._id)
         : String(report.citizenId);
 
     if (userRole !== "admin" && ownerId !== userId) {
-      return res.status(403).json({ message: "Forbidden. You can only view your own reports." });
+      return res
+        .status(403)
+        .json({ message: "Forbidden. You can only view your own reports." });
     }
 
     res.status(200).json(report);
@@ -488,9 +508,13 @@ export const getAnalytics = async (
             },
           ],
           activeHotspots: [
-            { $match: { status: { $in: ["Reported", "Under Review", "In Progress"] } } },
-            { $project: { title: 1, severity: 1, location: 1 } }
-          ]
+            {
+              $match: {
+                status: { $in: ["Reported", "Under Review", "In Progress"] },
+              },
+            },
+            { $project: { title: 1, severity: 1, location: 1 } },
+          ],
         },
       },
     ]);
@@ -498,9 +522,10 @@ export const getAnalytics = async (
     const [data] = analyticsData;
 
     const activeStatuses = ["Reported", "Under Review", "In Progress"];
-    const totalActive = data?.byStatus
-      .filter((s: any) => activeStatuses.includes(s._id))
-      .reduce((sum: number, s: any) => sum + s.count, 0) || 0;
+    const totalActive =
+      data?.byStatus
+        .filter((s: any) => activeStatuses.includes(s._id))
+        .reduce((sum: number, s: any) => sum + s.count, 0) || 0;
 
     const result = {
       totalActive,
@@ -529,14 +554,73 @@ export const getPublicReports = async (
       isArchived: { $ne: true },
       status: { $in: ACTIVE_PUBLIC_STATUSES },
     })
-      .select("title description category severity barangay location status createdAt")
+      .select(
+        "title description category severity barangay location status createdAt verifications",
+      )
       .sort({ createdAt: -1 });
-      
+
     res.status(200).json(reports);
   } catch (error: any) {
     res.status(500).json({
       message: "Failed to fetch public reports",
       error: error.message,
     });
+  }
+};
+
+export const toggleVerify = async (
+  req: AuthRequest,
+  res: Response,
+): Promise<void> => {
+  try {
+    const reportId = req.params.id;
+    // Check for both id and _id depending on how your JWT payload is structured
+    const userId = req.user?.id || req.user?._id;
+
+    if (!userId) {
+      res
+        .status(401)
+        .json({ message: "Unauthorized. User ID not found in token." });
+      return;
+    }
+
+    const report = await HazardReport.findById(reportId);
+
+    if (!report) {
+      res.status(404).json({ message: "Report not found" });
+      return;
+    }
+
+    // Safely initialize the array if it doesn't exist for older reports
+    if (!report.verifications) {
+      report.verifications = [];
+    }
+
+    // Clean out any null/undefined values that might have sneaked into the DB
+    report.verifications = report.verifications.filter((id) => id != null);
+
+    // Safely check if the user has already verified
+    const hasVerified = report.verifications.some(
+      (id) => id && id.toString() === userId.toString(),
+    );
+
+    if (hasVerified) {
+      // User already verified, so we remove their ID (un-verify)
+      report.verifications = report.verifications.filter(
+        (id) => id && id.toString() !== userId.toString(),
+      );
+    } else {
+      // User has not verified, so we add their ID
+      report.verifications.push(userId as any);
+    }
+
+    await report.save();
+
+    res.status(200).json(report);
+  } catch (error: any) {
+    console.error("Error toggling verification:", error);
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
   }
 };
