@@ -1,13 +1,35 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  OnInit,
+  computed,
+  signal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { EMPTY, Subject, catchError, debounceTime, distinctUntilChanged, map, merge, switchMap, takeUntil, tap } from 'rxjs';
+import {
+  EMPTY,
+  Subject,
+  catchError,
+  debounceTime,
+  distinctUntilChanged,
+  map,
+  merge,
+  switchMap,
+  takeUntil,
+  tap,
+} from 'rxjs';
 
 import { HazardReportService } from '../../services/hazard-report';
 import { ExportService } from '../../services/export';
-import { HazardReport, HazardReportPageQuery, PaginatedHazardReportResponse } from '../../shared/models/hazard-report';
+import {
+  HazardReport,
+  HazardReportPageQuery,
+  PaginatedHazardReportResponse,
+} from '../../shared/models/hazard-report';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';
 import { BrnSelectImports } from '@spartan-ng/brain/select';
@@ -30,11 +52,11 @@ import { toast } from 'ngx-sonner';
     HlmSelectImports,
     HlmTableImports,
     HlmPaginationImports,
-    HlmScrollAreaImports
+    HlmScrollAreaImports,
   ],
   providers: [HazardReportService],
   templateUrl: './hazard-list.html',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HazardList implements OnInit, OnDestroy {
   reports = signal<HazardReport[]>([]);
@@ -58,7 +80,8 @@ export class HazardList implements OnInit, OnDestroy {
   currentPage = signal<number>(1);
   itemsPerPage = signal<number>(10);
 
-  downstreamRiskIds = signal<Set<string>>(new Set());
+  riskSources = signal<Set<string>>(new Set());
+  riskTargets = signal<Set<string>>(new Set());
 
   private readonly destroy$ = new Subject<void>();
   private readonly reload$ = new Subject<void>();
@@ -72,7 +95,7 @@ export class HazardList implements OnInit, OnDestroy {
     if (this.totalReports() === 0) {
       return 0;
     }
-    return ((this.currentPage() - 1) * this.itemsPerPage()) + 1;
+    return (this.currentPage() - 1) * this.itemsPerPage() + 1;
   });
 
   rangeEnd = computed(() => {
@@ -85,7 +108,7 @@ export class HazardList implements OnInit, OnDestroy {
   constructor(
     private hazardService: HazardReportService,
     private exportService: ExportService,
-    private router: Router
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
@@ -97,23 +120,25 @@ export class HazardList implements OnInit, OnDestroy {
         this.searchTerm.set(search);
         this.currentPage.set(1);
       }),
-      map(() => void 0)
+      map(() => void 0),
     );
 
-    merge(this.reload$, searchReload$).pipe(
-      tap(() => this.isLoading.set(true)),
-      switchMap(() =>
-        this.hazardService.getReportsPage(this.buildPageQuery()).pipe(
-          catchError((err) => {
-            this.handleLoadError(err);
-            return EMPTY;
-          })
-        )
-      ),
-      takeUntil(this.destroy$)
-    ).subscribe((response) => {
-      this.applyResponse(response);
-    });
+    merge(this.reload$, searchReload$)
+      .pipe(
+        tap(() => this.isLoading.set(true)),
+        switchMap(() =>
+          this.hazardService.getReportsPage(this.buildPageQuery()).pipe(
+            catchError((err) => {
+              this.handleLoadError(err);
+              return EMPTY;
+            }),
+          ),
+        ),
+        takeUntil(this.destroy$),
+      )
+      .subscribe((response) => {
+        this.applyResponse(response);
+      });
 
     this.loadDownstreamRisks();
     this.reload$.next();
@@ -127,19 +152,28 @@ export class HazardList implements OnInit, OnDestroy {
   }
 
   private loadDownstreamRisks(): void {
-    this.hazardService.getDownstreamRisks().pipe(
-      takeUntil(this.destroy$)
-    ).subscribe({
-      next: (risks) => {
-        const riskIds = new Set<string>();
-        Object.keys(risks).forEach(sourceId => {
-          riskIds.add(sourceId);
-          risks[sourceId].forEach(target => riskIds.add(target._id));
-        });
-        this.downstreamRiskIds.set(riskIds);
-      },
-      error: (err) => console.error('Failed to load downstream risks:', err)
-    });
+    this.hazardService
+      .getDownstreamRisks()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (risks) => {
+          const sources = new Set<string>();
+          const targets = new Set<string>();
+
+          Object.entries(risks).forEach(([sourceId, group]) => {
+            sources.add(sourceId);
+            group.forEach((report) => {
+              if (report._id !== sourceId) {
+                targets.add(report._id);
+              }
+            });
+          });
+
+          this.riskSources.set(sources);
+          this.riskTargets.set(targets);
+        },
+        error: (err) => console.error('Failed to load downstream risks:', err),
+      });
   }
 
   private buildPageQuery(): HazardReportPageQuery {

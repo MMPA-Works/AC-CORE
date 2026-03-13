@@ -36,102 +36,8 @@ import { LucideAngularModule } from 'lucide-angular';
     LucideAngularModule,
   ],
   templateUrl: './analytics-dashboard.html',
+  styleUrls: ['./analytics-dashboard.css'], // Linking the new CSS file here
   encapsulation: ViewEncapsulation.None,
-  styles: [
-    `
-      .leaflet-popup-content-wrapper {
-        border-radius: 12px;
-        box-shadow:
-          0 10px 15px -3px rgba(0, 0, 0, 0.1),
-          0 4px 6px -2px rgba(0, 0, 0, 0.05);
-      }
-      .leaflet-popup-content {
-        margin: 0;
-        width: 240px !important;
-      }
-
-      .ac-core-cluster {
-        background: transparent;
-        border: 0;
-      }
-      .ac-core-cluster-shell {
-        display: flex;
-        height: 100%;
-        justify-content: center;
-        align-items: flex-start;
-        width: 100%;
-      }
-      .ac-core-cluster-pin {
-        align-items: center;
-        background: linear-gradient(135deg, #ef4444 0%, #d93829 68%, #b91c1c 100%);
-        border: 2px solid rgba(255, 255, 255, 0.95);
-        border-radius: 50% 50% 50% 0;
-        box-shadow: 0 10px 24px rgba(217, 56, 41, 0.35);
-        display: flex;
-        justify-content: center;
-        position: relative;
-        transform: rotate(-45deg);
-        width: 100%;
-        height: 100%;
-      }
-      .ac-core-cluster-pin::before {
-        background: rgba(217, 56, 41, 0.15);
-        border-radius: 50% 50% 50% 0;
-        content: '';
-        inset: -5px;
-        position: absolute;
-        z-index: -1;
-      }
-      .ac-core-cluster-count {
-        align-items: center;
-        color: #ffffff;
-        display: flex;
-        font-weight: 800;
-        justify-content: center;
-        transform: rotate(45deg);
-      }
-
-      .ac-core-cluster--small {
-        height: 34px;
-        width: 34px;
-      }
-      .ac-core-cluster--small .ac-core-cluster-count {
-        font-size: 11px;
-      }
-
-      .ac-core-cluster--medium {
-        height: 40px;
-        width: 40px;
-      }
-      .ac-core-cluster--medium .ac-core-cluster-pin {
-        background: linear-gradient(135deg, #f97316 0%, #f07c2b 65%, #ea580c 100%);
-        box-shadow: 0 12px 28px rgba(240, 124, 43, 0.35);
-      }
-      .ac-core-cluster--medium .ac-core-cluster-pin::before {
-        background: rgba(240, 124, 43, 0.15);
-        inset: -6px;
-      }
-      .ac-core-cluster--medium .ac-core-cluster-count {
-        font-size: 12px;
-      }
-
-      .ac-core-cluster--large {
-        height: 46px;
-        width: 46px;
-      }
-      .ac-core-cluster--large .ac-core-cluster-pin {
-        background: linear-gradient(135deg, #b91c1c 0%, #991b1b 70%, #7f1d1d 100%);
-        box-shadow: 0 14px 32px rgba(153, 27, 27, 0.35);
-      }
-      .ac-core-cluster--large .ac-core-cluster-pin::before {
-        background: rgba(153, 27, 27, 0.15);
-        inset: -7px;
-      }
-      .ac-core-cluster--large .ac-core-cluster-count {
-        font-size: 14px;
-      }
-    `,
-  ],
 })
 export class AnalyticsDashboard implements OnInit, OnDestroy {
   private hazardService = inject(HazardReportService);
@@ -321,7 +227,6 @@ export class AnalyticsDashboard implements OnInit, OnDestroy {
 
           const verificationCount = report.verifications?.length || 0;
 
-          // Clean, flat UI fixing the undefined bug and bad layout
           const popupContent = `
             <div style="font-family: 'Google Sans', sans-serif; display: flex; flex-direction: column; gap: 10px; min-width: 220px; padding-top: 4px;">
               <div style="padding-right: 16px;">
@@ -345,12 +250,16 @@ export class AnalyticsDashboard implements OnInit, OnDestroy {
                   ${report.status || 'Active'}
                 </span>
 
-                ${verificationCount > 0 ? `
+                ${
+                  verificationCount > 0
+                    ? `
                   <span style="display: inline-flex; align-items: center; gap: 3px; background-color: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 700;">
                     <svg style="width: 10px; height: 10px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     ${verificationCount} Verified
                   </span>
-                ` : ''}
+                `
+                    : ''
+                }
               </div>
             </div>
           `;
@@ -360,10 +269,54 @@ export class AnalyticsDashboard implements OnInit, OnDestroy {
       });
 
       this.markerClusterGroup.addLayers(markers);
+      
+      this.loadRiskPaths();
 
       setTimeout(() => {
         if (this.map) this.map.invalidateSize();
       }, 500);
+    });
+  }
+
+  private loadRiskPaths(): void {
+    this.hazardService.getDownstreamRisks().subscribe({
+      next: (risks) => {
+        this.ngZone.runOutsideAngular(() => {
+          if (!this.map) return;
+
+          Object.entries(risks).forEach(([sourceId, group]) => {
+            const source = group.find((r: any) => r._id === sourceId);
+            if (!source) return;
+
+            group.forEach((target: any) => {
+              if (target._id !== sourceId) {
+                const latlngs: L.LatLngExpression[] = [
+                  [source.location.coordinates[1], source.location.coordinates[0]],
+                  [target.location.coordinates[1], target.location.coordinates[0]]
+                ];
+
+                const line = L.polyline(latlngs, {
+                  color: '#c03e30',
+                  weight: 4,
+                  dashArray: '10, 10',
+                  opacity: 0.9
+                }).addTo(this.map!);
+
+                // Improved the description here to be highly informative
+                line.bindPopup(`
+                  <div class="p-1 font-sans">
+                    <span class="text-[10px] font-bold text-[#c03e30] uppercase tracking-wider">Geospatial Flow Risk</span>
+                    <p class="text-xs mt-1 font-medium text-gray-700 leading-relaxed">
+                      Predictive routing indicates a downstream water flow from <b>${source.title || source.category}</b> directly affecting <b>${target.title || target.category}</b>.
+                    </p>
+                  </div>
+                `);
+              }
+            });
+          });
+        });
+      },
+      error: (err) => console.error('Failed to load risk paths:', err)
     });
   }
 
