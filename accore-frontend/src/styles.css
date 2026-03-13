@@ -9,6 +9,28 @@
 @import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 @import '@angular/cdk/overlay-prebuilt.css';
 
+/* FIX: Prevent the browser's default scrollbar. 
+   This ensures the ONLY scrollbar is the one in your admin-layout.html 
+*/
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden !important; 
+}
+
+app-root {
+  display: block;
+  height: 100%;
+  overflow: hidden; /* Ensure root doesn't scroll */
+}
+
+/* Ensure the Angular root and layout components fill the screen height */
+app-root, app-admin-layout {
+  display: block;
+  height: 100%;
+}
+
 :root {
   color-scheme: light;
 

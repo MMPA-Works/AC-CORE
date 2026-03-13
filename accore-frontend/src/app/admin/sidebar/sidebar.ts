@@ -108,12 +108,19 @@ import { HazardReportService } from '../../services/hazard-report';
             <div class="w-9 h-9 rounded-full bg-white flex items-center justify-center shrink-0 shadow-sm overflow-hidden">
               <img [src]="currentUser().profileImage" alt="Administrator Profile Picture" class="w-full h-full object-cover">
             </div>
+
             <div 
               class="ml-3 flex flex-col transition-opacity duration-300 whitespace-nowrap"
               [ngClass]="{'opacity-0 hidden': isCollapsed(), 'opacity-100': !isCollapsed()}"
             >
-              <span class="text-sm font-bold text-gray-900 truncate">{{ currentUser().firstName }}</span>
-              <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider truncate">{{ currentUser().role }}</span>
+              <!-- FULL NAME -->
+              <span class="text-sm font-bold text-gray-900 truncate">
+                {{ currentUser().firstName }} {{ currentUser().lastName }}
+              </span>
+
+              <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider truncate">
+                {{ currentUser().role }}
+              </span>
             </div>
           </div>
           
@@ -131,6 +138,7 @@ import { HazardReportService } from '../../services/hazard-report';
   `
 })
 export class SidebarComponent implements OnInit {
+
   private router = inject(Router);
   private authService = inject(AuthService);
   private hazardReportService = inject(HazardReportService);
@@ -177,11 +185,11 @@ export class SidebarComponent implements OnInit {
     this.hazardReportService.getReports().subscribe({
       next: (reports) => {
         const reportedCount = reports.filter(r => r.status === 'Reported').length;
-        
-        this.mainLinks.update(links => 
-          links.map(link => 
-            link.id === 'hazards' 
-              ? { ...link, badge: reportedCount > 0 ? reportedCount.toString() : '' } 
+
+        this.mainLinks.update(links =>
+          links.map(link =>
+            link.id === 'hazards'
+              ? { ...link, badge: reportedCount > 0 ? reportedCount.toString() : '' }
               : link
           )
         );
@@ -204,12 +212,14 @@ export class SidebarComponent implements OnInit {
     if (token) {
       try {
         const decoded: any = jwtDecode(token);
+
         this.currentUser.set({
           firstName: decoded.firstName || 'System',
           lastName: decoded.lastName || 'Admin',
           role: 'Administrator',
           profileImage: 'assets/placeholder-avatar.png'
         });
+
       } catch (error) {
         console.error('Token decode failed', error);
       }
