@@ -5,13 +5,14 @@ import { HazardReportService } from '../../services/hazard-report';
 import { HazardReport } from '../../shared/models/hazard-report';
 import { AuthService } from '../../shared/auth';
 import { CitizenHeaderComponent } from '../components/citizen-header/citizen-header';
+import { CitizenFooterComponent } from '../components/citizen-footer/citizen-footer';
 import * as L from 'leaflet';
 import 'leaflet.markercluster';
 
 @Component({
   selector: 'app-citizen-dashboard',
   standalone: true,
-  imports: [RouterModule, CommonModule, CitizenHeaderComponent],
+  imports: [RouterModule, CommonModule, CitizenHeaderComponent, CitizenFooterComponent],
   templateUrl: './dashboard.html',
   encapsulation: ViewEncapsulation.None,
   styles: [`
