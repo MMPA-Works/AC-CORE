@@ -1,4 +1,12 @@
-import { Component, inject, OnInit, OnDestroy, signal, ChangeDetectorRef, NgZone } from '@angular/core';
+import {
+  Component,
+  inject,
+  OnInit,
+  OnDestroy,
+  signal,
+  ChangeDetectorRef,
+  NgZone,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -23,9 +31,19 @@ import * as L from 'leaflet';
   selector: 'app-report',
   standalone: true,
   imports: [
-    CommonModule, ReactiveFormsModule, RouterModule, LucideAngularModule,
-    HlmButtonImports, HlmInputImports, HlmLabelImports,
-    BrnSelectImports, HlmSelectImports, HlmTextareaImports, HlmSpinnerImports, CitizenHeaderComponent, CitizenFooterComponent
+    CommonModule,
+    ReactiveFormsModule,
+    RouterModule,
+    LucideAngularModule,
+    HlmButtonImports,
+    HlmInputImports,
+    HlmLabelImports,
+    BrnSelectImports,
+    HlmSelectImports,
+    HlmTextareaImports,
+    HlmSpinnerImports,
+    CitizenHeaderComponent,
+    CitizenFooterComponent,
   ],
   templateUrl: './report.html',
 })
@@ -49,11 +67,11 @@ export class Report implements OnInit, OnDestroy {
   selectedFile: File | null = null;
 
   reportForm = this.fb.group({
-    title: ['', [Validators.required, Validators.maxLength(100)]],
+    title: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
     category: ['', Validators.required],
     severity: ['', Validators.required],
     barangay: [{ value: '', disabled: true }, Validators.required],
-    description: ['', Validators.required],
+    description: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(1000)]],
     latitude: [APP_CONFIG.map.defaultLat],
     longitude: [APP_CONFIG.map.defaultLng],
   });
@@ -71,14 +89,14 @@ export class Report implements OnInit, OnDestroy {
 
   private initMap() {
     const start: [number, number] = [APP_CONFIG.map.defaultLat, APP_CONFIG.map.defaultLng];
-    
-    this.map = L.map('map', { 
+
+    this.map = L.map('map', {
       scrollWheelZoom: APP_CONFIG.map.scrollWheel,
-      zoomControl: false 
+      zoomControl: false,
     }).setView(start, APP_CONFIG.map.defaultZoom);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap'
+      attribution: '© OpenStreetMap',
     }).addTo(this.map);
 
     const teardropPin = L.divIcon({
@@ -101,19 +119,18 @@ export class Report implements OnInit, OnDestroy {
     this.marker.on('dragend', () => {
       this.ngZone.run(() => this.handlePinMovement());
     });
-    
+
     this.map.on('click', (e) => {
       this.marker?.setLatLng(e.latlng);
       this.ngZone.run(() => this.handlePinMovement());
     });
 
-    // Auto-locate on load
     this.locateUserManual();
   }
 
   locateUserManual() {
-    if (this.isLocating()) return; // Prevent spamming
-    
+    if (this.isLocating()) return;
+
     if (!('geolocation' in navigator)) {
       this.statusMessage.set('GPS is not supported by your browser.');
       this.isError.set(true);
@@ -121,41 +138,39 @@ export class Report implements OnInit, OnDestroy {
     }
 
     this.isLocating.set(true);
-    this.statusMessage.set(''); // Clear any previous errors
+    this.statusMessage.set('');
 
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const coords: [number, number] = [pos.coords.latitude, pos.coords.longitude];
-        
-        // Visual feedback: Fly to location
+
         this.map?.flyTo(coords, APP_CONFIG.map.activeZoom, {
           animate: true,
-          duration: 1.5
+          duration: 1.5,
         });
 
         this.marker?.setLatLng(coords);
-        
-        // Trigger the backend call for Barangay detection
+
         this.ngZone.run(() => this.handlePinMovement());
       },
       (err) => {
         this.isLocating.set(false);
         this.isError.set(true);
-        
+
         const errorMessages: Record<number, string> = {
           1: 'Permission denied. Please allow location access.',
           2: 'Position unavailable. Check your signal.',
-          3: 'GPS request timed out.'
+          3: 'GPS request timed out.',
         };
-        
+
         this.statusMessage.set(errorMessages[err.code] || 'Could not find your location.');
         this.cdr.detectChanges();
       },
-      { 
-        enableHighAccuracy: true, 
-        timeout: 8000, 
-        maximumAge: 0 
-      }
+      {
+        enableHighAccuracy: true,
+        timeout: 8000,
+        maximumAge: 0,
+      },
     );
   }
 
@@ -165,7 +180,7 @@ export class Report implements OnInit, OnDestroy {
 
     this.reportForm.patchValue({ latitude: pos.lat, longitude: pos.lng });
     this.isLocating.set(true);
-    this.cdr.detectChanges(); 
+    this.cdr.detectChanges();
 
     this.barangayService.getNearestBarangay(pos.lng, pos.lat).subscribe({
       next: (res) => {
@@ -182,12 +197,12 @@ export class Report implements OnInit, OnDestroy {
         this.statusMessage.set('Location not recognized. Pin within city boundaries.');
         this.isLocating.set(false);
         this.cdr.detectChanges();
-      }
+      },
     });
   }
 
   private setupAutoSuggest() {
-    this.reportForm.get('category')?.valueChanges.subscribe(cat => {
+    this.reportForm.get('category')?.valueChanges.subscribe((cat) => {
       if (cat && APP_CONFIG.severityMapping[cat]) {
         this.reportForm.patchValue({ severity: APP_CONFIG.severityMapping[cat] });
       }
@@ -197,7 +212,7 @@ export class Report implements OnInit, OnDestroy {
   async onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     if (!input.files?.length) return;
-    
+
     const file = input.files.item(0);
     if (!file) return;
 
@@ -205,7 +220,7 @@ export class Report implements OnInit, OnDestroy {
     try {
       const compressed = await imageCompression(file, APP_CONFIG.image);
       this.selectedFile = new File([compressed], file.name, { type: file.type });
-      
+
       const reader = new FileReader();
       reader.onload = () => this.imagePreview.set(reader.result as string);
       reader.readAsDataURL(this.selectedFile);
@@ -242,12 +257,15 @@ export class Report implements OnInit, OnDestroy {
         this.isSubmitting.set(false);
         this.statusMessage.set('Submission failed. Check your network or image size.');
         this.isError.set(true);
-      }
+      },
     });
   }
 
   private reset() {
-    this.reportForm.reset({ latitude: APP_CONFIG.map.defaultLat, longitude: APP_CONFIG.map.defaultLng });
+    this.reportForm.reset({
+      latitude: APP_CONFIG.map.defaultLat,
+      longitude: APP_CONFIG.map.defaultLng,
+    });
     this.removeImage();
     this.marker?.setLatLng([APP_CONFIG.map.defaultLat, APP_CONFIG.map.defaultLng]);
   }

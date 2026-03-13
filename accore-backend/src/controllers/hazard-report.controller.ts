@@ -5,6 +5,11 @@ import Admin from "../models/admin.model";
 import { v2 as cloudinary } from "cloudinary";
 import { PRIORITY_COMMERCIAL_ZONES } from "../utils/constants";
 import { findDownstreamRisks } from "../utils/geo.utils";
+import NodeCache from "node-cache";
+
+// Initialize cache with a 10-minute (600 seconds) Time-To-Live
+const analyticsCache = new NodeCache({ stdTTL: 600 });
+const ANALYTICS_CACHE_KEY = "dashboard_analytics";
 
 interface AuthRequest extends Request {
   user?: {
@@ -12,19 +17,6 @@ interface AuthRequest extends Request {
     role: string;
   };
 }
-
-const SEVERITY_WEIGHT: Record<string, number> = {
-  Low: 1,
-  Medium: 2,
-  Critical: 3,
-};
-
-const STATUS_WEIGHT: Record<string, number> = {
-  Reported: 1,
-  "Under Review": 2,
-  "In Progress": 3,
-  Resolved: 4,
-};
 
 const ACTIVE_PUBLIC_STATUSES = [
   "Reported",
@@ -72,6 +64,7 @@ const buildAdminMatch = (query: Request["query"]) => {
   if (category && category !== "All") filters.category = category;
   if (severity && severity !== "All") filters.severity = severity;
   if (status && status !== "All") filters.status = status;
+
   if (search) {
     const searchRegex = new RegExp(
       search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
@@ -95,12 +88,15 @@ const buildAdminMatch = (query: Request["query"]) => {
   return filters;
 };
 
-const buildAdminSort = (sortColumn: string | null, sortDirection: 1 | -1) => {
+const buildAdminSort = (
+  sortColumn: string | null,
+  sortDirection: 1 | -1,
+): Record<string, 1 | -1> => {
   switch (sortColumn) {
     case "severity":
-      return { severityWeight: sortDirection, createdAt: -1 as const };
+      return { severity: sortDirection, createdAt: -1 };
     case "status":
-      return { statusWeight: sortDirection, createdAt: -1 as const };
+      return { status: sortDirection, createdAt: -1 };
     case "createdAt":
     default:
       return { createdAt: sortDirection };
@@ -111,8 +107,6 @@ export const createReport = async (
   req: AuthRequest,
   res: Response,
 ): Promise<void> => {
-  console.log("1. Controller reached successfully. Processing image...");
-
   try {
     const citizenId = req.user?.id;
 
@@ -122,7 +116,6 @@ export const createReport = async (
     }
 
     if (!req.file) {
-      console.log("Error: No image file received.");
       res.status(400).json({ message: "Image file is required." });
       return;
     }
@@ -130,12 +123,10 @@ export const createReport = async (
     const b64 = Buffer.from(req.file.buffer).toString("base64");
     const dataURI = "data:" + req.file.mimetype + ";base64," + b64;
 
-    console.log("2. Uploading image to Cloudinary...");
     const uploadResponse = await cloudinary.uploader.upload(dataURI, {
       folder: "accore_hazards",
     });
 
-    console.log("3. Image uploaded. Saving data to MongoDB...");
     const {
       title,
       description,
@@ -181,10 +172,11 @@ export const createReport = async (
     });
 
     const savedReport = await newReport.save();
-    console.log("4. Success! Hazard report saved.");
+
+    analyticsCache.del(ANALYTICS_CACHE_KEY);
+
     res.status(201).json(savedReport);
   } catch (error: any) {
-    console.error("CRITICAL ERROR SAVING REPORT:", error);
     res.status(500).json({
       message: "Failed to create hazard report",
       error: error.message,
@@ -217,56 +209,19 @@ export const getReports = async (
         const sortColumn = normalizeQueryValue(req.query.sortColumn);
         const sortDirection =
           normalizeQueryValue(req.query.sortDirection) === "asc" ? 1 : -1;
-        const pipeline: any[] = [];
+        const sortCriteria = buildAdminSort(sortColumn, sortDirection);
         const archiveFilter = filters.isArchived;
 
-        if (Object.keys(filters).length) {
-          pipeline.push({ $match: filters });
-        }
-
-        pipeline.push({
-          $addFields: {
-            severityWeight: {
-              $switch: {
-                branches: Object.entries(SEVERITY_WEIGHT).map(
-                  ([label, weight]) => ({
-                    case: { $eq: ["$severity", label] },
-                    then: weight,
-                  }),
-                ),
-                default: 0,
-              },
-            },
-            statusWeight: {
-              $switch: {
-                branches: Object.entries(STATUS_WEIGHT).map(
-                  ([label, weight]) => ({
-                    case: { $eq: ["$status", label] },
-                    then: weight,
-                  }),
-                ),
-                default: 0,
-              },
-            },
-          },
-        });
-
-        pipeline.push({ $sort: buildAdminSort(sortColumn, sortDirection) });
-        pipeline.push({
-          $facet: {
-            reports: [{ $skip: skip }, { $limit: limit }],
-            totalCount: [{ $count: "count" }],
-          },
-        });
-
-        const [aggregateResult, barangays, categories] = await Promise.all([
-          HazardReport.aggregate(pipeline),
+        // Run queries in parallel for better performance
+        const [reports, total, barangays, categories] = await Promise.all([
+          HazardReport.find(filters)
+            .sort(sortCriteria as any)
+            .skip(skip)
+            .limit(limit),
+          HazardReport.countDocuments(filters),
           HazardReport.distinct("barangay", { isArchived: archiveFilter }),
           HazardReport.distinct("category", { isArchived: archiveFilter }),
         ]);
-        const [result] = aggregateResult;
-        const reports = result?.reports ?? [];
-        const total = result?.totalCount?.[0]?.count ?? 0;
 
         res.status(200).json({
           reports,
@@ -417,6 +372,7 @@ export const getReportById = async (req: AuthRequest, res: Response) => {
     res.status(500).json({ message: "Server error retrieving the report" });
   }
 };
+
 export const updateReportStatus = async (
   req: AuthRequest,
   res: Response,
@@ -431,7 +387,6 @@ export const updateReportStatus = async (
       return;
     }
 
-    // Updated validation array
     const validStatuses = [
       "Reported",
       "Under Review",
@@ -466,6 +421,8 @@ export const updateReportStatus = async (
 
     const updatedReport = await report.save();
 
+    analyticsCache.del(ANALYTICS_CACHE_KEY);
+
     res.status(200).json(updatedReport);
   } catch (error: any) {
     res.status(500).json({
@@ -480,6 +437,12 @@ export const getAnalytics = async (
   res: Response,
 ): Promise<void> => {
   try {
+    const cachedData = analyticsCache.get(ANALYTICS_CACHE_KEY);
+    if (cachedData) {
+      res.status(200).json(cachedData);
+      return;
+    }
+
     const analyticsData = await HazardReport.aggregate([
       {
         $match: {
@@ -508,7 +471,6 @@ export const getAnalytics = async (
               },
             },
           ],
-          // Inside getAnalytics function, update the activeHotspots array:
           activeHotspots: [
             {
               $match: {
@@ -546,6 +508,8 @@ export const getAnalytics = async (
       recentActivity: data?.recentActivity || [],
       activeHotspots: data?.activeHotspots || [],
     };
+
+    analyticsCache.set(ANALYTICS_CACHE_KEY, result);
 
     res.status(200).json(result);
   } catch (error: any) {
@@ -585,7 +549,6 @@ export const toggleVerify = async (
 ): Promise<void> => {
   try {
     const reportId = req.params.id;
-    // Check for both id and _id depending on how your JWT payload is structured
     const userId = req.user?.id || req.user?._id;
 
     if (!userId) {
@@ -602,26 +565,21 @@ export const toggleVerify = async (
       return;
     }
 
-    // Safely initialize the array if it doesn't exist for older reports
     if (!report.verifications) {
       report.verifications = [];
     }
 
-    // Clean out any null/undefined values that might have sneaked into the DB
     report.verifications = report.verifications.filter((id) => id != null);
 
-    // Safely check if the user has already verified
     const hasVerified = report.verifications.some(
       (id) => id && id.toString() === userId.toString(),
     );
 
     if (hasVerified) {
-      // User already verified, so we remove their ID (un-verify)
       report.verifications = report.verifications.filter(
         (id) => id && id.toString() !== userId.toString(),
       );
     } else {
-      // User has not verified, so we add their ID
       report.verifications.push(userId as any);
     }
 
@@ -629,7 +587,6 @@ export const toggleVerify = async (
 
     res.status(200).json(report);
   } catch (error: any) {
-    console.error("Error toggling verification:", error);
     res
       .status(500)
       .json({ message: "Internal server error", error: error.message });
@@ -638,21 +595,21 @@ export const toggleVerify = async (
 
 export const getDownstreamGroupings = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const activeWaterReports = await HazardReport.find({
       category: { $in: ["Flooding", "Clogged Drain"] },
       status: { $in: ["Reported", "Under Review", "In Progress"] },
       isArchived: false,
-    }).sort({ elevation: -1 }); 
+    }).sort({ elevation: -1 });
 
     const groupedReports: Record<string, any[]> = {};
     const processedIds = new Set<string>();
 
     activeWaterReports.forEach((sourceReport) => {
       const sourceId = sourceReport._id.toString();
-      
+
       if (processedIds.has(sourceId)) return;
 
       const downstreamGroup = [sourceReport];
@@ -660,14 +617,14 @@ export const getDownstreamGroupings = async (
 
       activeWaterReports.forEach((targetReport) => {
         const targetId = targetReport._id.toString();
-        
+
         if (sourceId === targetId || processedIds.has(targetId)) return;
 
         const isRisk = findDownstreamRisks(
           sourceReport.location.coordinates,
           sourceReport.elevation,
           targetReport.location.coordinates,
-          targetReport.elevation
+          targetReport.elevation,
         );
 
         if (isRisk) {
