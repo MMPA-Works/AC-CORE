@@ -1,19 +1,13 @@
 <div class="space-y-4">
-  <div class="rounded-xl bg-muted/25 px-3 py-4 md:px-5">
-    <ol class="relative grid grid-cols-4 gap-0">
-      <div class="pointer-events-none absolute left-[12.5%] right-[12.5%] top-[18px] -translate-y-1/2 md:top-5">
-        <div class="relative h-0.5 bg-border">
-          <div
-            class="absolute left-0 top-0 h-full bg-primary transition-all duration-300"
-            [style.width]="progressWidth()"
-          ></div>
-        </div>
-      </div>
+  <div class="relative rounded-xl bg-muted/25 px-3 py-4 md:px-5">
+    <div class="absolute left-10 right-10 top-8 h-0.5 bg-border md:left-14 md:right-14"></div>
+    <div class="absolute left-10 top-8 h-0.5 bg-primary transition-all duration-300 md:left-14" [style.width]="progressWidth()"></div>
 
+    <ol class="relative grid grid-cols-4 gap-2">
       @for (step of steps; track step; let index = $index) {
         <li class="flex flex-col items-center gap-2 text-center">
           <span
-            class="relative z-10 flex h-9 w-9 items-center justify-center rounded-full border text-sm font-semibold transition-colors shadow-sm md:h-10 md:w-10"
+            class="flex h-9 w-9 items-center justify-center rounded-full border text-sm font-semibold transition-colors shadow-sm md:h-10 md:w-10"
             [ngClass]="{
               'border-primary bg-primary text-primary-foreground': isComplete(index) || isCurrent(index),
               'border-border bg-card text-muted-foreground': !isComplete(index) && !isCurrent(index)

@@ -9,7 +9,6 @@ export interface IHazardReport extends Document {
   severity: string;
   barangay: string;
   isPossibleDuplicate: boolean;
-  isArchived: boolean;
   location: {
     type: string;
     coordinates: number[];
@@ -58,10 +57,6 @@ const hazardReportSchema: Schema = new Schema(
       enum: ANGELES_CITY_BARANGAYS,
     },
     isPossibleDuplicate: {
-      type: Boolean,
-      default: false,
-    },
-    isArchived: {
       type: Boolean,
       default: false,
     },

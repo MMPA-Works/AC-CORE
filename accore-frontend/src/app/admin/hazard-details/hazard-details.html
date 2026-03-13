@@ -173,10 +173,10 @@
               <h3 class="text-sm font-semibold text-slate-900 mb-1">Update Status</h3>
               <p class="text-xs text-slate-500 mb-4">Advance this report to the next phase.</p>
               
-               <div class="flex flex-col gap-3">
-                 <brn-select class="w-full" placeholder="Select Status" [ngModel]="pendingStatus()" (ngModelChange)="pendingStatus.set($event)">
-                   <hlm-select-trigger class="w-full bg-white border-slate-200 hover:bg-slate-50 transition-colors">
-                     <hlm-select-value />
+              <div class="flex flex-col gap-3">
+                <brn-select class="w-full" placeholder="Select Status" [ngModel]="pendingStatus()" (ngModelChange)="pendingStatus.set($event)">
+                  <hlm-select-trigger class="w-full bg-white border-slate-200 hover:bg-slate-50 transition-colors">
+                    <hlm-select-value />
                   </hlm-select-trigger>
                   <hlm-select-content class="w-full bg-white border-slate-200 shadow-lg rounded-lg">
                     <hlm-option value="Reported">Reported</hlm-option>
@@ -185,23 +185,13 @@
                     <hlm-option value="Resolved">Resolved</hlm-option>
                   </hlm-select-content>
                 </brn-select>
-                 
-                 <button hlmBtn class="w-full font-medium bg-primary hover:bg-primary/90 text-primary-foreground" (click)="saveStatus()" [disabled]="pendingStatus() === reportData.status">
-                   Apply Update
-                 </button>
-
-                 <button
-                   hlmBtn
-                   variant="outline"
-                   class="w-full border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
-                   (click)="toggleArchive()"
-                   [disabled]="isArchiving()"
-                 >
-                   {{ reportData.isArchived ? 'Restore Report' : 'Archive Report' }}
-                 </button>
-               </div>
-             </div>
-           </div>
+                
+                <button hlmBtn class="w-full font-medium bg-primary hover:bg-primary/90 text-primary-foreground" (click)="saveStatus()" [disabled]="pendingStatus() === reportData.status">
+                  Apply Update
+                </button>
+              </div>
+            </div>
+          </div>
 
         </div>
       </div>

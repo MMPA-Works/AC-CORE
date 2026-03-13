@@ -45,17 +45,17 @@ export class Login {
     this.authService.login(this.loginForm.value).subscribe({
       next: () => {
         this.isLoading.set(false);
-        toast.success('Welcome back!');
+        toast.success('Welcome back!', {
+          description: 'Redirecting to dashboard...'
+        });
         this.router.navigate(['/admin/dashboard']);
       },
       error: (err) => {
         this.isLoading.set(false);
-        
-        if (err.status === 429) {
-          toast.error('Too many login attempts. Please try again later.');
-        } else {
-          toast.error(err.error?.message || 'Invalid credentials');
-        }
+        // The CSS override in styles.css will handle the red icon
+        toast.error('Invalid credentials', {
+          description: 'Email or password is incorrect.'
+        });
       }
     });
   }

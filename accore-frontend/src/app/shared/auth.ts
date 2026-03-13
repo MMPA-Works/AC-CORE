@@ -54,20 +54,6 @@ export class AuthService {
     }
   }
 
-  getFirstName(): string | null {
-    const token = this.getToken();
-    if (!token) {
-      return null;
-    }
-
-    try {
-      const decoded: any = jwtDecode(token);
-      return decoded.firstName || null;
-    } catch (error) {
-      return null;
-    }
-  }
-
   logout(): void {
     localStorage.removeItem('adminToken');
     localStorage.removeItem('token');

@@ -1,16 +1,15 @@
-<div class="min-h-screen bg-background flex flex-col font-sans text-foreground">
+<div class="min-h-screen bg-background flex flex-col pb-24 font-sans text-foreground">
   <app-citizen-header class="sticky top-0 z-50 block w-full"></app-citizen-header>
 
   <main class="mx-auto flex w-full max-w-6xl flex-col gap-12 px-4 py-8 md:px-6 md:py-12">
     <header class="space-y-4">
       <div
-        class="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-primary"
+        class="inline-flex items-center gap-2 rounded-full border border-yellow-200 bg-yellow-50 px-3 py-1 text-xs font-bold uppercase tracking-wider text-yellow-700"
       >
-        <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-primary"></span>
+        <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-yellow-500"></span>
         24/7 Response Portal
       </div>
-      
-      <h1 class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent text-3xl font-extrabold tracking-tight sm:text-4xl md:text-5xl pb-1">
+      <h1 class="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl md:text-5xl">
         Emergency Directory
       </h1>
       <p class="max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
@@ -33,11 +32,11 @@
             @for (contact of category.contacts; track contact.name) {
               <div
                 hlmCard
-                class="group flex flex-col overflow-hidden border-border bg-card shadow-sm transition-all duration-300 hover:border-secondary hover:shadow-md"
+                class="group flex flex-col overflow-hidden border-border bg-card shadow-sm transition-all duration-300 hover:border-yellow-400 hover:shadow-md"
               >
                 <div class="flex-1 p-5 sm:p-6">
                   <h3
-                    class="text-lg font-bold leading-snug text-foreground transition-all duration-300 group-hover:bg-gradient-to-r group-hover:from-primary group-hover:to-secondary group-hover:bg-clip-text group-hover:text-transparent"
+                    class="text-lg font-bold leading-snug text-foreground transition-colors group-hover:text-primary"
                   >
                     {{ contact.name }}
                   </h3>
@@ -51,21 +50,21 @@
                     <a
                       hlmBtn
                       variant="outline"
-                      class="group/btn flex h-auto min-h-[3rem] w-full flex-col items-start justify-center gap-1.5 rounded-lg border-border bg-background px-4 py-3 text-foreground transition-all duration-300 hover:border-secondary hover:bg-secondary/10 sm:flex-row sm:items-center sm:justify-between sm:py-2"
+                      class="group/btn flex h-12 w-full items-center justify-between rounded-lg border-border bg-background px-4 text-foreground transition-all duration-300 hover:border-yellow-300 hover:bg-yellow-50 hover:text-yellow-800"
                       [href]="'tel:' + hotline.tel"
                       aria-label="Call {{ contact.name }} at {{ hotline.number }}"
                     >
                       <span
-                        class="text-xs font-semibold uppercase tracking-wider text-muted-foreground transition-colors group-hover/btn:text-secondary"
+                        class="text-xs font-semibold uppercase tracking-wider text-muted-foreground transition-colors group-hover/btn:text-yellow-600"
                       >
                         {{ hotline.label }}
                       </span>
-                      <div class="flex items-center gap-2 text-sm font-bold sm:text-base transition-colors group-hover/btn:text-secondary">
+                      <div class="flex items-center gap-2 text-sm font-bold sm:text-base">
                         <ng-icon
                           hlm
                           name="lucidePhone"
                           size="sm"
-                          class="text-muted-foreground transition-colors group-hover/btn:text-secondary"
+                          class="text-muted-foreground transition-colors group-hover/btn:text-yellow-600"
                         ></ng-icon>
                         {{ hotline.number }}
                       </div>
@@ -94,7 +93,7 @@
           @for (faq of faqs; track faq.question) {
             <hlm-accordion-item class="border-b border-border">
               <h3 class="contents">
-                <button hlmAccordionTrigger class="text-left hover:text-primary transition-colors">
+                <button hlmAccordionTrigger>
                   {{ faq.question }}
                   <ng-icon name="lucideChevronDown" hlm hlmAccIcon />
                 </button>
@@ -110,5 +109,4 @@
       </div>
     </section>
   </main>
-  <app-citizen-footer></app-citizen-footer>
 </div>
