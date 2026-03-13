@@ -58,6 +58,8 @@ export class HazardList implements OnInit, OnDestroy {
   currentPage = signal<number>(1);
   itemsPerPage = signal<number>(10);
 
+  downstreamRiskIds = signal<Set<string>>(new Set());
+
   private readonly destroy$ = new Subject<void>();
   private readonly reload$ = new Subject<void>();
   private readonly searchInput$ = new Subject<string>();
@@ -70,7 +72,6 @@ export class HazardList implements OnInit, OnDestroy {
     if (this.totalReports() === 0) {
       return 0;
     }
-
     return ((this.currentPage() - 1) * this.itemsPerPage()) + 1;
   });
 
@@ -78,7 +79,6 @@ export class HazardList implements OnInit, OnDestroy {
     if (this.totalReports() === 0) {
       return 0;
     }
-
     return Math.min(this.currentPage() * this.itemsPerPage(), this.totalReports());
   });
 
@@ -115,6 +115,7 @@ export class HazardList implements OnInit, OnDestroy {
       this.applyResponse(response);
     });
 
+    this.loadDownstreamRisks();
     this.reload$.next();
   }
 
@@ -123,6 +124,22 @@ export class HazardList implements OnInit, OnDestroy {
     this.destroy$.complete();
     this.reload$.complete();
     this.searchInput$.complete();
+  }
+
+  private loadDownstreamRisks(): void {
+    this.hazardService.getDownstreamRisks().pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (risks) => {
+        const riskIds = new Set<string>();
+        Object.keys(risks).forEach(sourceId => {
+          riskIds.add(sourceId);
+          risks[sourceId].forEach(target => riskIds.add(target._id));
+        });
+        this.downstreamRiskIds.set(riskIds);
+      },
+      error: (err) => console.error('Failed to load downstream risks:', err)
+    });
   }
 
   private buildPageQuery(): HazardReportPageQuery {

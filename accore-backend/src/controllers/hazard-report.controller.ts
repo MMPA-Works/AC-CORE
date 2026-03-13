@@ -4,6 +4,7 @@ import HazardReport from "../models/hazard-report.model";
 import Admin from "../models/admin.model";
 import { v2 as cloudinary } from "cloudinary";
 import { PRIORITY_COMMERCIAL_ZONES } from "../utils/constants";
+import { findDownstreamRisks } from "../utils/geo.utils";
 
 interface AuthRequest extends Request {
   user?: {
@@ -632,5 +633,59 @@ export const toggleVerify = async (
     res
       .status(500)
       .json({ message: "Internal server error", error: error.message });
+  }
+};
+
+export const getDownstreamGroupings = async (
+  req: AuthRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const activeWaterReports = await HazardReport.find({
+      category: { $in: ["Flooding", "Clogged Drain"] },
+      status: { $in: ["Reported", "Under Review", "In Progress"] },
+      isArchived: false,
+    }).sort({ elevation: -1 }); 
+
+    const groupedReports: Record<string, any[]> = {};
+    const processedIds = new Set<string>();
+
+    activeWaterReports.forEach((sourceReport) => {
+      const sourceId = sourceReport._id.toString();
+      
+      if (processedIds.has(sourceId)) return;
+
+      const downstreamGroup = [sourceReport];
+      processedIds.add(sourceId);
+
+      activeWaterReports.forEach((targetReport) => {
+        const targetId = targetReport._id.toString();
+        
+        if (sourceId === targetId || processedIds.has(targetId)) return;
+
+        const isRisk = findDownstreamRisks(
+          sourceReport.location.coordinates,
+          sourceReport.elevation,
+          targetReport.location.coordinates,
+          targetReport.elevation
+        );
+
+        if (isRisk) {
+          downstreamGroup.push(targetReport);
+          processedIds.add(targetId);
+        }
+      });
+
+      if (downstreamGroup.length > 1) {
+        groupedReports[sourceId] = downstreamGroup;
+      }
+    });
+
+    res.status(200).json(groupedReports);
+  } catch (error: any) {
+    res.status(500).json({
+      message: "Failed to fetch downstream groupings",
+      error: error.message,
+    });
   }
 };
