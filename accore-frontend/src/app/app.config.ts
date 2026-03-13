@@ -51,6 +51,7 @@ import {
   Search,
   Hammer,
   TrendingUp,
+  Grip
 } from 'lucide-angular';
 
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
@@ -126,6 +127,7 @@ export const appConfig: ApplicationConfig = {
         Search,
         Hammer,
         TrendingUp,
+        Grip
       }),
     ),
 

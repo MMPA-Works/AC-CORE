@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { AuthService } from '../../../shared/auth';
@@ -9,10 +9,16 @@ import { AuthService } from '../../../shared/auth';
   standalone: true,
   imports: [CommonModule, RouterModule, LucideAngularModule],
   templateUrl: './citizen-header.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    class: 'sticky top-0 z-50 block w-full'
+  }
 })
 export class CitizenHeaderComponent {
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
+
+  isMobileMenuOpen = signal<boolean>(false);
 
   readonly navItems = [
     {
@@ -43,6 +49,24 @@ export class CitizenHeaderComponent {
 
   isActive(aliases: readonly string[]): boolean {
     return aliases.some((alias) => this.router.url === alias || this.router.url.startsWith(`${alias}/`));
+  }
+
+  toggleMenu(): void {
+    this.isMobileMenuOpen.update((isOpen) => !isOpen);
+    this.handleBodyScroll();
+  }
+
+  closeMenu(): void {
+    this.isMobileMenuOpen.set(false);
+    this.handleBodyScroll();
+  }
+
+  private handleBodyScroll(): void {
+    if (this.isMobileMenuOpen()) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
   }
 
   onLogout(): void {
