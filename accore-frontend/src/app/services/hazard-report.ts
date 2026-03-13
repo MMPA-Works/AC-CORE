@@ -35,6 +35,13 @@ export class HazardReportService {
     });
   }
 
+  getDownstreamRisks(): Observable<Record<string, HazardReport[]>> {
+    return this.http.get<Record<string, HazardReport[]>>(
+      `${this.apiUrl}/downstream-risks`,
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
   // Fetches public map markers without requiring admin privileges
   getAllPublicReports(): Observable<HazardReport[]> {
     return this.http.get<HazardReport[]>(`${this.apiUrl}/public`, {

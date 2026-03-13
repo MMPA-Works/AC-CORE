@@ -10,6 +10,7 @@ export interface IHazardReport extends Document {
   barangay: string;
   isPossibleDuplicate: boolean;
   isArchived: boolean;
+  elevation: number;
   location: {
     type: string;
     coordinates: number[];
@@ -71,6 +72,11 @@ const hazardReportSchema: Schema = new Schema(
     isArchived: {
       type: Boolean,
       default: false,
+    },
+    elevation: {
+      type: Number,
+      default: 0,
+      required: true,
     },
     location: {
       type: {

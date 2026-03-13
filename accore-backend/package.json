@@ -10,6 +10,7 @@
     "seed:admin": "tsx src/scripts/seed-admin.ts"
   },
   "dependencies": {
+    "@turf/turf": "^7.3.4",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.2",
     "cloudinary": "^2.8.0",
