@@ -1,11 +1,10 @@
-import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { Component, OnDestroy, OnInit, PLATFORM_ID, computed, effect, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmSpinnerImports } from '@spartan-ng/helm/spinner';
-import * as L from 'leaflet';
 import { HazardReportService } from '../../services/hazard-report';
 import { AuthService } from '../../shared/auth';
 import { HazardReport } from '../../shared/models/hazard-report';
@@ -37,13 +36,11 @@ type HazardReportDetail = Omit<HazardReport, 'citizenId'> & {
   ],
   templateUrl: './report-details.html',
 })
-export class ReportDetails implements OnInit, OnDestroy {
+export class ReportDetails implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-  private readonly platformId = inject(PLATFORM_ID);
   private readonly authService = inject(AuthService);
   private readonly hazardReportService = inject(HazardReportService);
-  private miniMap: L.Map | undefined;
 
   readonly report = signal<HazardReportDetail | null>(null);
   readonly isLoading = signal(true);
@@ -97,17 +94,6 @@ export class ReportDetails implements OnInit, OnDestroy {
     return entries;
   });
 
-  constructor() {
-    effect(() => {
-      const currentReport = this.report();
-      if (!currentReport || !isPlatformBrowser(this.platformId) || !this.hasCoordinates(currentReport)) {
-        return;
-      }
-
-      setTimeout(() => this.initializeMiniMap(currentReport), 0);
-    });
-  }
-
   ngOnInit(): void {
     const reportId = this.route.snapshot.paramMap.get('id');
 
@@ -151,13 +137,6 @@ export class ReportDetails implements OnInit, OnDestroy {
 
   goBack(): void {
     this.router.navigate(['/citizen/my-reports']);
-  }
-
-  ngOnDestroy(): void {
-    if (this.miniMap) {
-      this.miniMap.remove();
-      this.miniMap = undefined;
-    }
   }
 
   markImageAsBroken(): void {
@@ -268,49 +247,6 @@ export class ReportDetails implements OnInit, OnDestroy {
     }
 
     return `${latitude.toFixed(5)}, ${longitude.toFixed(5)}`;
-  }
-
-  hasCoordinates(report: HazardReportDetail | null): boolean {
-    if (!report) {
-      return false;
-    }
-
-    const [longitude, latitude] = report.location?.coordinates ?? [];
-    return typeof latitude === 'number' && typeof longitude === 'number';
-  }
-
-  private initializeMiniMap(report: HazardReportDetail): void {
-    if (!this.hasCoordinates(report)) {
-      return;
-    }
-
-    const [longitude, latitude] = report.location.coordinates;
-
-    if (this.miniMap) {
-      this.miniMap.remove();
-    }
-
-    this.miniMap = L.map('citizen-report-minimap', {
-      attributionControl: false,
-      dragging: false,
-      doubleClickZoom: false,
-      scrollWheelZoom: false,
-      zoomControl: false,
-      boxZoom: false,
-      keyboard: false,
-      touchZoom: false,
-    }).setView([latitude, longitude], 16);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(this.miniMap);
-    L.circleMarker([latitude, longitude], {
-      radius: 8,
-      color: '#ffffff',
-      weight: 3,
-      fillColor: '#c21807',
-      fillOpacity: 1,
-    }).addTo(this.miniMap);
-
-    setTimeout(() => this.miniMap?.invalidateSize(), 100);
   }
 
   private getReportOwnerId(report: HazardReportDetail): string | null {

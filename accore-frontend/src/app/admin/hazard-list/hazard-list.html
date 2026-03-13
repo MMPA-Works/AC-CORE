@@ -1,286 +1,176 @@
-<div class="min-h-screen bg-slate-50/50 text-foreground font-sans p-4 sm:p-6 lg:p-8 pb-24 flex flex-col">
-  <div class="w-full max-w-[1400px] mx-auto flex flex-col gap-6">
+<div class="min-h-screen bg-slate-50 text-foreground font-sans py-10">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col gap-6">
     
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 px-1">
-      <div class="flex items-center gap-4">
-        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shrink-0 shadow-sm">
-          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-        </div>
-        <div>
-          <h2 class="text-3xl font-extrabold tracking-tight text-gray-900">Incident Reports</h2>
-          <p class="text-base text-gray-500 mt-0.5">Manage, filter, and track all hazards.</p>
-        </div>
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div>
+        <h2 class="text-3xl font-bold tracking-tight text-slate-900">Incident Reports</h2>
+        <p class="text-sm text-muted-foreground mt-1">Manage, filter, and track all reported hazards.</p>
       </div>
-      
-      <button hlmBtn class="gap-2 bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:text-gray-900 shadow-sm transition-all rounded-xl" (click)="exportToCSV()">
+      <button hlmBtn variant="outline" class="gap-2" (click)="exportToCSV()">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
         Export CSV
       </button>
     </div>
 
-    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col overflow-hidden">
-      <div class="flex flex-col gap-4 px-5 pt-5 pb-1 lg:flex-row lg:items-end lg:justify-between">
-        <div class="inline-flex self-start rounded-xl border border-gray-200 bg-gray-50 p-1">
-          <button
-            hlmBtn
-            variant="ghost"
-            class="h-9 rounded-lg px-4 text-sm font-medium transition-colors"
-            [class.bg-white]="!isArchivedView()"
-            [class.text-gray-900]="!isArchivedView()"
-            [class.shadow-sm]="!isArchivedView()"
-            [class.text-gray-500]="isArchivedView()"
-            (click)="setArchiveView('active')"
-          >
-            Active Reports
-          </button>
-          <button
-            hlmBtn
-            variant="ghost"
-            class="h-9 rounded-lg px-4 text-sm font-medium transition-colors"
-            [class.bg-white]="isArchivedView()"
-            [class.text-gray-900]="isArchivedView()"
-            [class.shadow-sm]="isArchivedView()"
-            [class.text-gray-500]="!isArchivedView()"
-            (click)="setArchiveView('archived')"
-          >
-            Archived Reports
-          </button>
-        </div>
-
-        <div class="flex w-full max-w-2xl flex-col gap-1.5 lg:ml-auto">
-          <div class="relative">
-            <svg class="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-4.35-4.35m1.85-5.15a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"></path>
-            </svg>
-            <input
-              type="text"
-              class="h-11 w-full rounded-xl border border-gray-200 bg-gray-50 pl-11 pr-4 text-sm text-gray-900 shadow-none outline-none transition-colors placeholder:text-gray-400 focus:border-primary focus:bg-white"
-              placeholder="Search by title, category, barangay, status, severity, or report ID"
-              [ngModel]="searchDraft()"
-              (ngModelChange)="onSearchDraftChange($event)"
-            />
-          </div>
-        </div>
-      </div>
+    <div class="bg-card rounded-xl border border-border shadow-sm flex flex-col overflow-hidden">
       
-      <div class="p-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 bg-white border-b border-gray-100">
-        
-        <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Barangay</label>
-          <brn-select class="w-full" [ngModel]="filterBarangay()" (ngModelChange)="onFilterChange('barangay', $event)">
-            <hlm-select-trigger class="w-full bg-gray-50 border-gray-200 shadow-none hover:border-primary/50 transition-colors">
-              <hlm-select-value placeholder="All Barangays" />
-            </hlm-select-trigger>
-            <hlm-select-content class="w-56 bg-white border-gray-200 shadow-lg rounded-xl overflow-hidden">
-              <ng-scrollbar hlm class="h-[200px]" appearance="compact">
-                @for (b of availableBarangays(); track b) {
-                  <hlm-option [value]="b" class="cursor-pointer hover:bg-gray-100">{{ b }}</hlm-option>
-                }
-              </ng-scrollbar>
-            </hlm-select-content>
-          </brn-select>
-        </div>
+      <div class="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 bg-slate-50/50 border-b border-border">
+        <brn-select class="w-full" [ngModel]="filterBarangay()" (ngModelChange)="onFilterChange('barangay', $event)">
+          <hlm-select-trigger class="w-full bg-card border-border">
+            <hlm-select-value placeholder="All Barangays" />
+          </hlm-select-trigger>
+          <hlm-select-content class="bg-card border-border shadow-lg">
+            @for (b of availableBarangays(); track b) {
+              <hlm-option [value]="b">{{ b }}</hlm-option>
+            }
+          </hlm-select-content>
+        </brn-select>
 
-        <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Category</label>
-          <brn-select class="w-full" [ngModel]="filterCategory()" (ngModelChange)="onFilterChange('category', $event)">
-            <hlm-select-trigger class="w-full bg-gray-50 border-gray-200 shadow-none hover:border-primary/50 transition-colors">
-              <hlm-select-value placeholder="All Categories" />
-            </hlm-select-trigger>
-            <hlm-select-content class="bg-white border-gray-200 shadow-lg rounded-xl">
-              <ng-scrollbar hlm class="h-[200px]" appearance="compact">
-                @for (c of availableCategories(); track c) {
-                  <hlm-option [value]="c" class="cursor-pointer hover:bg-gray-100">{{ c }}</hlm-option>
-                }
-              </ng-scrollbar>
-            </hlm-select-content>
-          </brn-select>
-        </div>
+        <brn-select class="w-full" [ngModel]="filterCategory()" (ngModelChange)="onFilterChange('category', $event)">
+          <hlm-select-trigger class="w-full bg-card border-border">
+            <hlm-select-value placeholder="All Categories" />
+          </hlm-select-trigger>
+          <hlm-select-content class="bg-card border-border shadow-lg">
+            @for (c of availableCategories(); track c) {
+              <hlm-option [value]="c">{{ c }}</hlm-option>
+            }
+          </hlm-select-content>
+        </brn-select>
 
-        <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Severity</label>
-          <brn-select class="w-full" [ngModel]="filterSeverity()" (ngModelChange)="onFilterChange('severity', $event)">
-            <hlm-select-trigger class="w-full bg-gray-50 border-gray-200 shadow-none hover:border-primary/50 transition-colors">
-              <hlm-select-value placeholder="All Severities" />
-            </hlm-select-trigger>
-            <hlm-select-content class="bg-white border-gray-200 shadow-lg rounded-xl">
-              <hlm-option value="All" class="cursor-pointer hover:bg-gray-100">All Severities</hlm-option>
-              <hlm-option value="Critical" class="cursor-pointer hover:bg-gray-100 text-red-600 font-medium">Critical</hlm-option>
-              <hlm-option value="Medium" class="cursor-pointer hover:bg-gray-100 text-orange-600 font-medium">Medium</hlm-option>
-              <hlm-option value="Low" class="cursor-pointer hover:bg-gray-100 text-emerald-600 font-medium">Low</hlm-option>
-            </hlm-select-content>
-          </brn-select>
-        </div>
+        <brn-select class="w-full" [ngModel]="filterSeverity()" (ngModelChange)="onFilterChange('severity', $event)">
+          <hlm-select-trigger class="w-full bg-card border-border">
+            <hlm-select-value placeholder="All Severities" />
+          </hlm-select-trigger>
+          <hlm-select-content class="bg-card border-border shadow-lg">
+            <hlm-option value="All">All Severities</hlm-option>
+            <hlm-option value="Critical">Critical</hlm-option>
+            <hlm-option value="Medium">Medium</hlm-option>
+            <hlm-option value="Low">Low</hlm-option>
+          </hlm-select-content>
+        </brn-select>
 
-        <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Status</label>
-          <brn-select class="w-full" [ngModel]="filterStatus()" (ngModelChange)="onFilterChange('status', $event)">
-            <hlm-select-trigger class="w-full bg-gray-50 border-gray-200 shadow-none hover:border-primary/50 transition-colors">
-              <hlm-select-value placeholder="All Statuses" />
-            </hlm-select-trigger>
-            <hlm-select-content class="bg-white border-gray-200 shadow-lg rounded-xl">
-              <hlm-option value="All" class="cursor-pointer hover:bg-gray-100">All Statuses</hlm-option>
-              <hlm-option value="Reported" class="cursor-pointer hover:bg-gray-100">Reported</hlm-option>
-              <hlm-option value="Under Review" class="cursor-pointer hover:bg-gray-100">Under Review</hlm-option>
-              <hlm-option value="In Progress" class="cursor-pointer hover:bg-gray-100">In Progress</hlm-option>
-              <hlm-option value="Resolved" class="cursor-pointer hover:bg-gray-100">Resolved</hlm-option>
-            </hlm-select-content>
-          </brn-select>
-        </div>
+        <brn-select class="w-full" [ngModel]="filterStatus()" (ngModelChange)="onFilterChange('status', $event)">
+          <hlm-select-trigger class="w-full bg-card border-border">
+            <hlm-select-value placeholder="All Statuses" />
+          </hlm-select-trigger>
+          <hlm-select-content class="bg-card border-border shadow-lg">
+            <hlm-option value="All">All Statuses</hlm-option>
+            <hlm-option value="Reported">Reported</hlm-option>
+            <hlm-option value="Under Review">Under Review</hlm-option>
+            <hlm-option value="In Progress">In Progress</hlm-option>
+            <hlm-option value="Resolved">Resolved</hlm-option>
+          </hlm-select-content>
+        </brn-select>
       </div>
 
-      <div class="overflow-x-auto" [class.opacity-60]="isLoading()">
-        <div hlmTableContainer class="min-w-[800px] w-full">
-          <table hlmTable class="w-full">
-            <thead hlmTHead>
-              <tr hlmTr class="bg-white border-b border-gray-200">
-                <th hlmTh class="text-xs font-semibold text-gray-500 uppercase tracking-wider py-4 pl-5">Title / Category</th>
-                <th hlmTh class="text-xs font-semibold text-gray-500 uppercase tracking-wider py-4">Barangay</th>
-                
-                <th hlmTh class="cursor-pointer hover:bg-gray-50 transition-colors select-none group py-4" (click)="toggleSort('severity')">
-                  <div class="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    Severity
-                    <span class="text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                      @if (sortColumn() === 'severity') {
-                        <span class="opacity-100">{{ sortDirection() === 'asc' ? '↑' : '↓' }}</span>
-                      } @else {
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path></svg>
-                      }
-                    </span>
-                  </div>
-                </th>
-                
-                <th hlmTh class="cursor-pointer hover:bg-gray-50 transition-colors select-none group py-4" (click)="toggleSort('status')">
-                  <div class="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    Status
-                    <span class="text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                      @if (sortColumn() === 'status') {
-                        <span class="opacity-100">{{ sortDirection() === 'asc' ? '↑' : '↓' }}</span>
-                      } @else {
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path></svg>
-                      }
-                    </span>
-                  </div>
-                </th>
-
-                <th hlmTh class="cursor-pointer hover:bg-gray-50 transition-colors select-none group py-4" (click)="toggleSort('createdAt')">
-                  <div class="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    Date Reported
-                    <span class="text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                      @if (sortColumn() === 'createdAt') {
-                        <span class="opacity-100">{{ sortDirection() === 'asc' ? '↑' : '↓' }}</span>
-                      } @else {
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path></svg>
-                      }
-                    </span>
-                  </div>
-                </th>
-                
-                <th hlmTh class="justify-end w-[140px] text-xs font-semibold text-gray-500 uppercase tracking-wider py-4 pr-6">Actions</th>
-              </tr>
-            </thead>
-            <tbody hlmTBody>
-              @for (report of reports(); track report._id) {
-                <tr hlmTr class="transition-colors hover:bg-gray-50/80 border-b border-gray-100 group/row">
-                  <td hlmTd class="py-4 pl-5">
-                    <div class="font-semibold text-gray-900 truncate max-w-[200px] sm:max-w-[250px] md:max-w-[300px] lg:max-w-[400px]" [title]="report.title || report.category">
-                      {{ report.title || report.category }}
-                    </div>
-                    <div class="text-xs text-gray-500 mt-0.5">{{ report.category }}</div>
-                  </td>
-                  <td hlmTd class="py-4 text-gray-600 font-medium">{{ report.barangay }}</td>
-                  
-                  <td hlmTd class="py-4">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border"
-                          [ngClass]="{
-                            'bg-red-50 text-red-700 border-red-200': report.severity === 'Critical',
-                            'bg-orange-50 text-orange-700 border-orange-200': report.severity === 'Medium',
-                            'bg-emerald-50 text-emerald-700 border-emerald-200': report.severity === 'Low'
-                          }">
-                      <span class="w-1.5 h-1.5 rounded-full mr-1.5"
-                            [ngClass]="{
-                              'bg-red-500': report.severity === 'Critical',
-                              'bg-orange-500': report.severity === 'Medium',
-                              'bg-emerald-500': report.severity === 'Low'
-                            }"></span>
-                      {{ report.severity }}
-                    </span>
-                  </td>
-                  
-                  <td hlmTd class="py-4">
-                    <span hlmBadge variant="outline" class="bg-white font-medium text-xs px-2.5 py-0.5"
-                          [ngClass]="{
-                            'text-primary border-primary/30 bg-primary/5': report.status === 'Reported',
-                            'text-blue-600 border-blue-200 bg-blue-50': report.status === 'Under Review' || report.status === 'In Progress',
-                            'text-emerald-600 border-emerald-200 bg-emerald-50': report.status === 'Resolved'
-                          }">
-                      {{ report.status }}
-                    </span>
-                  </td>
-                  <td hlmTd class="py-4 text-gray-500 text-sm">{{ report.createdAt | date: 'MMM d, y, h:mm a' }}</td>
-                  
-                  <td hlmTd class="justify-end py-4 pr-6">
-                    <button hlmBtn variant="ghost" class="inline-flex items-center text-gray-400 group-hover/row:text-primary hover:bg-primary/10 px-3 transition-colors rounded-lg" (click)="viewDetails(report._id)">
-                      View Details
-                      <svg class="w-4 h-4 ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                    </button>
-                  </td>
-                </tr>
-              } @empty {
-                <tr hlmTr>
-                  <td hlmTd colspan="6" class="justify-center py-16 text-gray-400">
-                    @if (isLoading()) {
-                      <div class="flex flex-col items-center justify-center gap-3 w-full">
-                        <div class="w-10 h-10 rounded-full border-2 border-primary/20 border-t-primary animate-spin"></div>
-                        <p class="font-medium text-gray-500">Loading reports...</p>
-                      </div>
+      <div hlmTableContainer class="flex-1">
+        <table hlmTable class="w-full">
+          <thead hlmTHead>
+<tr hlmTr class="bg-slate-50 border-b border-border">
+              <th hlmTh>Title / Category</th>
+              <th hlmTh>Barangay</th>
+              
+              <th hlmTh class="cursor-pointer hover:bg-slate-100 transition-colors select-none group" (click)="toggleSort('severity')">
+                <div class="flex items-center gap-2">
+                  Severity
+                  <span class="text-slate-400 group-hover:text-slate-600">
+                    @if (sortColumn() === 'severity') {
+                      {{ sortDirection() === 'asc' ? '↑' : '↓' }}
                     } @else {
-                      <div class="flex flex-col items-center justify-center gap-3 w-full">
-                        <div class="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center">
-                          <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
-                        </div>
-                        <p class="font-medium">{{ isArchivedView() ? 'No archived reports found matching your criteria.' : 'No reports found matching your criteria.' }}</p>
-                      </div>
+                      <svg class="w-3 h-3 opacity-0 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path></svg>
                     }
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
+                  </span>
+                </div>
+              </th>
+              
+              <th hlmTh class="cursor-pointer hover:bg-slate-100 transition-colors select-none group" (click)="toggleSort('status')">
+                <div class="flex items-center gap-2">
+                  Status
+                  <span class="text-slate-400 group-hover:text-slate-600">
+                    @if (sortColumn() === 'status') {
+                      {{ sortDirection() === 'asc' ? '↑' : '↓' }}
+                    } @else {
+                      <svg class="w-3 h-3 opacity-0 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path></svg>
+                    }
+                  </span>
+                </div>
+              </th>
+
+              <th hlmTh class="cursor-pointer hover:bg-slate-100 transition-colors select-none group" (click)="toggleSort('createdAt')">
+                <div class="flex items-center gap-2">
+                  Date Reported
+                  <span class="text-slate-400 group-hover:text-slate-600">
+                    @if (sortColumn() === 'createdAt') {
+                      {{ sortDirection() === 'asc' ? '↑' : '↓' }}
+                    } @else {
+                      <svg class="w-3 h-3 opacity-0 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path></svg>
+                    }
+                  </span>
+                </div>
+              </th>
+              
+              <th hlmTh class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody hlmTBody>
+            @for (report of paginatedReports(); track report._id) {
+              <tr hlmTr class="transition-colors hover:bg-slate-50">
+                <td hlmTd class="font-medium text-slate-900">{{ report.title || report.category }}</td>
+                <td hlmTd class="text-slate-600">{{ report.barangay }}</td>
+                <td hlmTd>
+                  <span [class.text-primary]="report.severity === 'Critical'" [class.font-bold]="report.severity === 'Critical'" [class.text-secondary]="report.severity === 'Medium'">
+                    {{ report.severity }}
+                  </span>
+                </td>
+                <td hlmTd>
+                  <span hlmBadge variant="outline" class="bg-white text-slate-600 shadow-sm">{{ report.status }}</span>
+                </td>
+                <td hlmTd class="text-slate-500">{{ report.createdAt | date: 'MMM d, y, h:mm a' }}</td>
+                <td hlmTd class="text-right">
+                  <button hlmBtn variant="ghost" class="text-slate-500 hover:text-primary hover:bg-primary/5 px-3 transition-colors" (click)="viewDetails(report._id)">
+                    View
+                    <svg class="w-4 h-4 ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr hlmTr>
+                <td hlmTd colspan="6" class="text-center py-12 text-slate-500">
+                  <div class="flex flex-col items-center justify-center gap-2">
+                    <svg class="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
+                    <p>No reports match your filters.</p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
       </div>
 
       @if (totalPages() > 1) {
-        <div class="p-4 sm:px-6 border-t border-gray-200 bg-white grid grid-cols-1 lg:grid-cols-3 gap-4 items-center">
-          
-          <div class="text-sm font-medium text-gray-500 text-center lg:text-left order-2 lg:order-1">
-            Showing <span class="text-gray-900">{{ rangeStart() }}</span> to <span class="text-gray-900">{{ rangeEnd() }}</span> of <span class="text-gray-900">{{ totalReports() }}</span> entries
-          </div>
-          
-          <div class="flex justify-center order-1 lg:order-2">
-            <nav hlmPagination>
-              <ul hlmPaginationContent class="gap-1.5 flex flex-wrap justify-center">
+        <div class="p-4 border-t border-border bg-white flex items-center justify-between">
+          <span class="text-sm text-muted-foreground">
+            Showing {{ ((currentPage() - 1) * itemsPerPage()) + 1 }} to {{ (currentPage() * itemsPerPage() < sortedReports().length) ? (currentPage() * itemsPerPage()) : sortedReports().length }} of {{ sortedReports().length }} entries
+          </span>
+          <nav hlmPagination>
+            <ul hlmPaginationContent class="gap-1">
+              <li hlmPaginationItem>
+                <button hlmPaginationPrevious (click)="prevPage()" [disabled]="currentPage() === 1" class="cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">Previous</button>
+              </li>
+              
+              @for (page of getPageArray(); track page) {
                 <li hlmPaginationItem>
-                  <button hlmPaginationPrevious (click)="prevPage()" [disabled]="currentPage() === 1" class="cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed bg-white border-gray-200 hover:bg-gray-50 text-gray-600 rounded-lg shadow-sm text-sm h-9 px-3 transition-colors">Prev</button>
+                  <button hlmPaginationLink (click)="goToPage(page)" [class.bg-accent]="page === currentPage()" class="cursor-pointer">
+                    {{ page }}
+                  </button>
                 </li>
-                
-                @for (page of getPageArray(); track page) {
-                  <li hlmPaginationItem>
-                    <button hlmPaginationLink (click)="goToPage(page)" [class.bg-primary]="page === currentPage()" [class.text-white]="page === currentPage()" [class.border-primary]="page === currentPage()" class="cursor-pointer bg-white border-gray-200 hover:bg-gray-50 text-gray-600 rounded-lg shadow-sm text-sm w-9 h-9 transition-colors">
-                      {{ page }}
-                    </button>
-                  </li>
-                }
+              }
 
-                <li hlmPaginationItem>
-                  <button hlmPaginationNext (click)="nextPage()" [disabled]="currentPage() === totalPages()" class="cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed bg-white border-gray-200 hover:bg-gray-50 text-gray-600 rounded-lg shadow-sm text-sm h-9 px-3 transition-colors">Next</button>
-                </li>
-              </ul>
-            </nav>
-          </div>
-          
-          <div class="hidden lg:block order-3"></div>
-          
+              <li hlmPaginationItem>
+                <button hlmPaginationNext (click)="nextPage()" [disabled]="currentPage() === totalPages()" class="cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">Next</button>
+              </li>
+            </ul>
+          </nav>
         </div>
       }
     </div>

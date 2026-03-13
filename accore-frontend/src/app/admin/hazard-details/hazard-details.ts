@@ -1,7 +1,7 @@
 import { Component, OnInit, signal, effect, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import * as L from 'leaflet';
 
 import { HazardReportService } from '../../services/hazard-report';
@@ -30,7 +30,6 @@ import { toast } from 'ngx-sonner';
 export class HazardDetails implements OnInit {
   report = signal<any>(null);
   pendingStatus = signal<HazardReportStatus | ''>('');
-  isArchiving = signal<boolean>(false);
   private mapInstance: L.Map | undefined;
 
   readonly STATUS_PIPELINE: HazardReportStatus[] = ['Reported', 'Under Review', 'In Progress', 'Resolved'];
@@ -66,7 +65,6 @@ export class HazardDetails implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router,
     private location: Location,
     private hazardService: HazardReportService
   ) {
@@ -124,38 +122,6 @@ export class HazardDetails implements OnInit {
         }
       });
     }
-  }
-
-  toggleArchive(): void {
-    const currentReport = this.report();
-    if (!currentReport || this.isArchiving()) {
-      return;
-    }
-
-    this.isArchiving.set(true);
-    this.hazardService.archiveReport(currentReport._id).subscribe({
-      next: (updatedReport) => {
-        this.report.set({
-          ...updatedReport,
-          citizenId: currentReport.citizenId
-        });
-
-        this.isArchiving.set(false);
-
-        if (updatedReport.isArchived) {
-          toast.success('Report archived successfully');
-          this.router.navigate(['/admin/hazards']);
-          return;
-        }
-
-        toast.success('Report restored successfully');
-      },
-      error: (err) => {
-        console.error('Error archiving report:', err);
-        this.isArchiving.set(false);
-        toast.error('Failed to archive report');
-      }
-    });
   }
 
   private getMarkerColor(status: string): string {

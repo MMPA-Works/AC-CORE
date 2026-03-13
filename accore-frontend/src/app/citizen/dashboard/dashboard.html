@@ -1,262 +1,74 @@
-<div class="min-h-screen bg-neutral-50 flex flex-col font-sans">
+<div class="min-h-screen bg-muted/30">
   <app-citizen-header></app-citizen-header>
 
-  <main class="flex-1 mx-auto w-full max-w-[1500px] px-4 py-8 sm:px-5 lg:px-6 space-y-10">
+  <main class="mx-auto max-w-4xl space-y-8 px-4 py-6 md:px-6 md:py-8">
+    <section class="flex flex-col items-center space-y-4 rounded-xl border border-border bg-card p-6 text-center shadow-sm">
+      <h1 class="text-2xl font-bold text-foreground">Welcome Back</h1>
+      <p class="max-w-2xl text-muted-foreground">
+        File a new hazard report or jump into your dedicated tracking page to monitor every report you have submitted.
+      </p>
 
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-neutral-200">
-      <div class="space-y-2">
-        <h1 class="text-3xl sm:text-4xl font-extrabold text-neutral-900 tracking-tight">
-          Welcome back, {{ firstName }}
-        </h1>
-        <p class="text-lg text-neutral-500 max-w-2xl">
-          Here is the latest incident data for Angeles City. Please check the live map before submitting a new report to
-          help us prevent duplicates.
-        </p>
-      </div>
-      <a routerLink="/citizen/report"
-        class="inline-flex shrink-0 items-center justify-center rounded-xl bg-red-600 px-8 py-3.5 text-sm font-bold text-white shadow-md transition-colors hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2">
-        <svg class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
-          aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-        </svg>
-        Report a Hazard
-      </a>
-    </div>
-
-    <div class="grid grid-cols-1 xl:grid-cols-[minmax(0,1.75fr)_minmax(320px,0.8fr)] gap-6 items-stretch">
-      <section
-        class="relative h-[500px] rounded-3xl overflow-hidden shadow-sm border border-neutral-200 bg-neutral-100 z-0">
-        <div #mapContainer class="absolute inset-0 z-0"></div>
-
-        <div
-          class="absolute top-5 left-5 z-10 max-w-[280px] rounded-xl border border-neutral-100 bg-white/95 p-3 shadow-md backdrop-blur-md">
-          <p class="text-xs font-extrabold uppercase tracking-[0.24em] text-red-600">Nearby Hazards</p>
-          <h2 class="mt-1.5 text-lg font-extrabold leading-tight text-neutral-900">Check active reports before creating
-            a new one.</h2>
-        </div>
-
-        <div
-          class="absolute bottom-6 left-6 z-10 bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-lg border border-neutral-100 pointer-events-auto">
-          <h3 class="text-xs font-extrabold text-neutral-500 mb-3 uppercase tracking-wider">Severity Legend</h3>
-          <div class="flex flex-col gap-2.5">
-            <div class="flex items-center gap-3"><span
-                class="w-3.5 h-3.5 rounded-full bg-red-600 shadow-sm border border-neutral-200"></span><span
-                class="text-sm font-medium text-neutral-700">Critical</span></div>
-            <div class="flex items-center gap-3"><span
-                class="w-3.5 h-3.5 rounded-full bg-orange-500 shadow-sm border border-neutral-200"></span><span
-                class="text-sm font-medium text-neutral-700">Medium</span></div>
-            <div class="flex items-center gap-3"><span
-                class="w-3.5 h-3.5 rounded-full bg-yellow-500 shadow-sm border border-neutral-200"></span><span
-                class="text-sm font-medium text-neutral-700">Low</span></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="flex h-[500px] flex-col rounded-3xl bg-white border border-neutral-200 p-6 shadow-sm">
-        <h2 class="text-xl font-bold text-neutral-900 mb-1">Your Civic Impact</h2>
-        <p class="text-sm text-neutral-500 mb-6">Your contribution to community safety.</p>
-
-        <div class="grid grid-cols-3 gap-3">
-          <div class="rounded-2xl border border-neutral-200 bg-white px-4 py-5 text-center shadow-sm">
-            <div class="mx-auto flex h-11 w-11 items-center justify-center rounded-2xl bg-red-50 text-red-600">
-              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
-                aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 17l6-6 4 4 8-8" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M14 7h7v7" />
-              </svg>
-            </div>
-            <p class="mt-4 text-3xl font-extrabold text-neutral-900">{{ totalReports }}</p>
-            <p class="mt-2 text-xs font-medium leading-5 text-neutral-500">Reports Submitted</p>
-          </div>
-
-          <div class="rounded-2xl border border-neutral-200 bg-white px-4 py-5 text-center shadow-sm">
-            <div class="mx-auto flex h-11 w-11 items-center justify-center rounded-2xl bg-orange-50 text-orange-600">
-              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
-                aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <p class="mt-4 text-3xl font-extrabold text-neutral-900">{{ resolvedReports }}</p>
-            <p class="mt-2 text-xs font-medium leading-5 text-neutral-500">Issues Resolved</p>
-          </div>
-
-          <div class="rounded-2xl border border-neutral-200 bg-white px-4 py-5 text-center shadow-sm">
-            <div class="mx-auto flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-50 text-amber-600">
-              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
-                aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M12 15l-3.5 2 1-4-3-2.5 4-.3L12 6l1.5 4.2 4 .3-3 2.5 1 4z" />
-              </svg>
-            </div>
-            <p class="mt-4 text-3xl font-extrabold text-neutral-900">{{ totalReports > 0 ? (resolvedReports /
-              totalReports * 100 | number:'1.0-0') : 0 }}</p>
-            <p class="mt-2 text-xs font-medium leading-5 text-neutral-500">Safety Score</p>
-          </div>
-        </div>
-
-        <div class="mt-8">
-          <div class="mb-2 flex items-center justify-between text-sm font-medium text-neutral-700">
-            <span>Community Contribution</span>
-            <span>{{ totalReports > 0 ? (resolvedReports / totalReports * 100 | number:'1.0-0') : 0 }}%</span>
-          </div>
-          <div class="h-3 rounded-full bg-neutral-100 overflow-hidden">
-            <div class="h-full rounded-full bg-gradient-to-r from-red-600 via-red-500 to-orange-400"
-              [style.width.%]="totalReports > 0 ? (resolvedReports / totalReports * 100) : 0"></div>
-          </div>
-        </div>
-
-        <div class="mt-auto rounded-xl border border-rose-100 bg-rose-50/80 p-3.5">
-          <p class="text-xs font-bold uppercase tracking-[0.22em] text-red-600">Current Rank</p>
-          <p class="mt-1 text-lg font-bold text-neutral-900">{{ impactTitle }}</p>
-          <p class="mt-2 text-xs leading-5 text-neutral-600">
-            Great work. You helped resolve
-            <span class="font-bold text-red-600">{{ resolvedReports }}</span>
-            hazard{{ resolvedReports === 1 ? '' : 's' }} in your community so far.
-          </p>
-        </div>
-      </section>
-    </div>
-
-    <section class="rounded-3xl bg-white p-6 shadow-sm">
-      <div class="mb-6">
-        <h2 class="text-2xl font-bold text-neutral-900">City Insights</h2>
-        <p class="mt-1 text-sm text-neutral-500">Hazard trends across Angeles City</p>
-      </div>
-
-      <div *ngIf="isInsightsLoading" class="flex flex-col items-center justify-center py-10 text-neutral-400">
-        <svg class="h-6 w-6 animate-spin text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none"
-          viewBox="0 0 24 24" aria-hidden="true">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor"
-            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-          </path>
-        </svg>
-        <span class="mt-3 text-sm font-medium">Loading real-time data...</span>
-      </div>
-
-      <div *ngIf="!isInsightsLoading && cityInsights.length === 0"
-        class="flex flex-col items-center justify-center rounded-3xl border border-dashed border-neutral-200 bg-neutral-50 py-12 text-neutral-400">
-        <div class="flex h-12 w-12 items-center justify-center rounded-full bg-white mb-3 shadow-sm">
-          <svg class="h-6 w-6 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
-            aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-          </svg>
-        </div>
-        <p class="text-sm font-bold text-neutral-700">No Trends Yet</p>
-        <p class="text-xs text-center mt-1">There is no active hazard data to display right now.</p>
-      </div>
-
-      <div *ngIf="!isInsightsLoading && cityInsights.length > 0"
-        class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-        <article *ngFor="let insight of cityInsights"
-          class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
-          <div class="flex items-start justify-between gap-3">
-            <div [ngSwitch]="insight.category.toLowerCase()"
-              class="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50 text-red-600">
-              <svg *ngSwitchCase="'fallen tree'" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="m17 14 3 3.32C20.46 17.85 20.12 18 19.5 18H4.5c-.62 0-.96-.15-.5-.68L7 14" />
-                <path d="m15 9 3 3.48c.45.51.1 1.02-.5 1.02H6.5c-.6 0-.95-.51-.5-1.02L9 9" />
-                <path d="m12.5 3 3 3.96C15.96 7.49 15.6 8 15 8H9c-.6 0-.96-.51-.5-1.04L11.5 3c.28-.36.72-.36 1 0Z" />
-                <path d="M12 22v-4" />
-              </svg>
-              <svg *ngSwitchCase="'clogged drain'" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round">
-                <path
-                  d="M2 6c.6 0 1.2-.2 1.8-.6.6-.4 1.2-.6 1.8-.6.6 0 1.2.2 1.8.6.6.4 1.2.6 1.8.6.6 0 1.2-.2 1.8-.6.6-.4 1.2-.6 1.8-.6.6 0 1.2.2 1.8.6.6.4 1.2.6 1.8.6.6 0 1.2-.2 1.8-.6.6-.4 1.2-.6 1.8-.6v14c-.6 0-1.2.2-1.8.6-.6.4-1.2.6-1.8.6-.6 0-1.2-.2-1.8-.6-.6-.4-1.2-.6-1.8-.6-.6 0-1.2.2-1.8.6-.6.4-1.2.6-1.8.6-.6 0-1.2-.2-1.8-.6-.6-.4-1.2-.6-1.8-.6-.6 0-1.2.2-1.8.6-.6.4-1.2.6-1.8.6Z" />
-              </svg>
-              <svg *ngSwitchCase="'pothole'" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="m20.9 18.55-8-15.98a1 1 0 0 0-1.8 0l-8 15.98" />
-                <path d="M4 14h16" />
-                <path d="M3 20h18" />
-              </svg>
-              <svg *ngSwitchCase="'flooding'" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 22a8 8 0 0 0 8-8c0-2-3-9-7-12a1 1 0 0 0-2 0c-4 3-7 10-7 12a8 8 0 0 0 8 8z" />
-              </svg>
-              <svg *ngSwitchDefault class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
-                <line x1="12" y1="9" x2="12" y2="13" />
-                <line x1="12" y1="17" x2="12.01" y2="17" />
-              </svg>
-            </div>
-            <span class="inline-flex items-center rounded-full bg-red-50 px-2.5 py-1 text-xs font-bold text-red-600">
-              {{ insight.percentage }}%
-            </span>
-          </div>
-
-          <div class="mt-5">
-            <h3 class="text-2xl font-bold text-neutral-900 capitalize">{{ insight.category }}</h3>
-            <p class="mt-3 text-4xl font-black tracking-tight text-neutral-900">{{ insight.count }}</p>
-            <p class="mt-2 text-sm text-neutral-500">
-              {{ insight.weeklyCount }} reported this week
-            </p>
-          </div>
-        </article>
+      <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+        <a routerLink="/citizen/report" hlmBtn class="w-full sm:w-auto">
+          Report a New Hazard
+        </a>
+        <a routerLink="/citizen/my-reports" hlmBtn variant="outline" class="w-full sm:w-auto">
+          My Reports
+        </a>
       </div>
     </section>
 
-    <div class="grid grid-cols-1 gap-6">
-      <section
-        class="flex flex-col rounded-3xl bg-white border border-neutral-200 shadow-sm hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between border-b border-neutral-100 px-6 py-5">
-          <div>
-            <h2 class="text-xl font-bold text-neutral-900">Recent Activity</h2>
-            <p class="text-sm text-neutral-500 mt-1">Your latest report history.</p>
-          </div>
-          <a routerLink="/citizen/my-reports"
-            class="text-sm font-bold text-red-600 hover:text-red-700 transition-colors">View all</a>
+    <section class="space-y-4">
+      <div class="flex items-center justify-between gap-3">
+        <div>
+          <h2 class="text-xl font-semibold text-foreground">Recent Reports</h2>
+          <p class="text-sm text-muted-foreground">A quick preview of your latest submissions.</p>
         </div>
 
-        <div class="flex-1 overflow-hidden">
-          <div *ngIf="isRecentLoading" class="flex h-full flex-col items-center justify-center p-8 text-neutral-400">
-            <svg class="h-8 w-8 animate-spin text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none"
-              viewBox="0 0 24 24" aria-hidden="true">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-              </path>
-            </svg>
-          </div>
+        <a routerLink="/citizen/my-reports" class="text-sm font-semibold text-primary hover:underline">
+          View all
+        </a>
+      </div>
 
-          <ul *ngIf="!isRecentLoading && myReports.length > 0" class="divide-y divide-neutral-100">
-            <li *ngFor="let report of myReports"
-              class="flex items-center justify-between px-6 py-4 hover:bg-neutral-50 transition-colors">
-              <div class="min-w-0 flex-1 pr-4">
-                <p class="truncate text-sm font-bold text-neutral-900">{{ report.title }}</p>
-                <p class="mt-1 truncate text-xs text-neutral-500">{{ report.barangay }} • {{ report.createdAt |
-                  date:'MMM d, y' }}</p>
-              </div>
-              <span
-                class="inline-flex items-center justify-center rounded-lg px-3 py-1.5 text-xs font-bold uppercase tracking-wider"
-                [ngClass]="{
-                  'bg-neutral-100 text-neutral-600': report.status === 'Reported',
-                  'bg-blue-50 text-blue-700': report.status === 'Dispatched' || report.status === 'In Progress' || report.status === 'Under Review',
-                  'bg-green-50 text-green-700': report.status === 'Resolved'
-                }">
-                {{ report.status }}
-              </span>
-            </li>
-          </ul>
+      <div class="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+        <div *ngIf="isLoading" class="flex items-center justify-center gap-3 p-8 text-muted-foreground">
+          <svg class="h-6 w-6 animate-spin text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Loading reports...
+        </div>
 
-          <div *ngIf="!isRecentLoading && myReports.length === 0"
-            class="flex h-full flex-col items-center justify-center px-6 py-12 text-center text-neutral-400">
-            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-neutral-100 mb-3">
-              <svg class="h-6 w-6 text-neutral-400" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
+        <div *ngIf="errorMessage" class="p-8 text-center text-destructive">
+          {{ errorMessage }}
+        </div>
+
+        <ng-container *ngIf="!isLoading && !errorMessage">
+          <div *ngFor="let report of myReports" class="flex items-center justify-between gap-4 border-b border-border px-4 py-4 last:border-b-0 transition-colors hover:bg-muted/40">
+            <div class="min-w-0">
+              <h3 class="font-medium text-foreground">{{ report.title }}</h3>
+              <p class="text-sm text-muted-foreground">{{ report.barangay }} • {{ report.createdAt | date:'mediumDate' }}</p>
             </div>
-            <p class="text-sm font-bold text-neutral-700">No Recent Activity</p>
-            <p class="text-xs mt-1">You have not submitted any hazard reports yet.</p>
+            <span
+              class="shrink-0 rounded-full px-3 py-1 text-xs font-semibold"
+              [ngClass]="{
+                'bg-primary/10 text-primary': report.status === 'Reported',
+                'bg-secondary/20 text-foreground': report.status === 'Dispatched',
+                'bg-green-500/10 text-green-700': report.status === 'Resolved'
+              }"
+            >
+              {{ report.status }}
+            </span>
           </div>
-        </div>
-      </section>
-    </div>
+
+          <div *ngIf="myReports.length === 0" class="flex flex-col items-center p-8 text-center text-muted-foreground">
+            <svg xmlns="http://www.w3.org/2000/svg" class="mb-3 h-12 w-12 text-border" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <p>You have not submitted any reports yet.</p>
+          </div>
+        </ng-container>
+      </div>
+    </section>
   </main>
-  <app-citizen-footer></app-citizen-footer>
 </div>

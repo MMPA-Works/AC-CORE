@@ -39,12 +39,7 @@ export const googleLogin = async (req: Request, res: Response): Promise<void> =>
 
     // Generate custom JWT for AC-CORE session
     const jwtToken = jwt.sign(
-      {
-        id: citizen._id,
-        role: 'citizen',
-        firstName: citizen.firstName,
-        lastName: citizen.lastName,
-      },
+      { id: citizen._id, role: 'citizen' },
       process.env.JWT_SECRET as string,
       { expiresIn: '7d' }
     );
@@ -87,12 +82,7 @@ export const registerCitizen = async (req: Request, res: Response): Promise<void
 
     // Generate custom JWT so the user is authenticated automatically
     const jwtToken = jwt.sign(
-      {
-        id: newCitizen._id,
-        role: 'citizen',
-        firstName: newCitizen.firstName,
-        lastName: newCitizen.lastName,
-      },
+      { id: newCitizen._id, role: 'citizen' },
       process.env.JWT_SECRET as string,
       { expiresIn: '7d' }
     );
@@ -129,12 +119,7 @@ export const loginCitizen = async (req: Request, res: Response): Promise<void> =
     }
 
     const jwtToken = jwt.sign(
-      {
-        id: citizen._id,
-        role: 'citizen',
-        firstName: citizen.firstName,
-        lastName: citizen.lastName,
-      },
+      { id: citizen._id, role: 'citizen' },
       process.env.JWT_SECRET as string,
       { expiresIn: '7d' }
     );
