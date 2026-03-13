@@ -1,4 +1,15 @@
-import { Component, inject, OnDestroy, OnInit, PLATFORM_ID, ChangeDetectorRef, AfterViewInit, ViewChild, ElementRef, ViewEncapsulation } from '@angular/core';
+import {
+  Component,
+  inject,
+  OnDestroy,
+  OnInit,
+  PLATFORM_ID,
+  ChangeDetectorRef,
+  AfterViewInit,
+  ViewChild,
+  ElementRef,
+  ViewEncapsulation,
+} from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { HazardReportService } from '../../services/hazard-report';
@@ -6,6 +17,7 @@ import { HazardReport } from '../../shared/models/hazard-report';
 import { AuthService } from '../../shared/auth';
 import { CitizenHeaderComponent } from '../components/citizen-header/citizen-header';
 import { CitizenFooterComponent } from '../components/citizen-footer/citizen-footer';
+import { HttpClient } from '@angular/common/http';
 import * as L from 'leaflet';
 import 'leaflet.markercluster';
 
@@ -15,13 +27,14 @@ import 'leaflet.markercluster';
   imports: [RouterModule, CommonModule, CitizenHeaderComponent, CitizenFooterComponent],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.css'],
-  encapsulation: ViewEncapsulation.None
+  encapsulation: ViewEncapsulation.None,
 })
 export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
   private hazardReportService = inject(HazardReportService);
   private authService = inject(AuthService);
   private platformId = inject(PLATFORM_ID);
   private cdr = inject(ChangeDetectorRef);
+  private http = inject(HttpClient);
 
   @ViewChild('mapContainer', { static: false }) mapContainer!: ElementRef;
   private map: L.Map | undefined;
@@ -35,13 +48,16 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
   impactTitle = 'Civic Starter';
   firstName = 'Citizen';
   currentUserId: string | null = null;
-  cityInsights: { category: string, count: number, weeklyCount: number, percentage: number }[] = [];
+  cityInsights: { category: string; count: number; weeklyCount: number; percentage: number }[] = [];
+
+  weather: any = null;
 
   ngOnInit() {
     if (isPlatformBrowser(this.platformId)) {
       this.firstName = this.authService.getFirstName() || 'Citizen';
-      this.currentUserId = this.authService.getUserId(); 
+      this.currentUserId = this.authService.getUserId();
       this.fetchMyReports();
+      this.fetchWeather();
     }
   }
 
@@ -59,13 +75,25 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
     this.map?.remove();
   }
 
+  fetchWeather() {
+    this.http.get('http://localhost:5000/api/weather').subscribe({
+      next: (data) => {
+        this.weather = data;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Failed to load weather widget data', err);
+      },
+    });
+  }
+
   fetchMyReports() {
     this.hazardReportService.getReports().subscribe({
       next: (data) => {
         this.totalReports = data.length;
         this.resolvedReports = data.filter((report) => report.status === 'Resolved').length;
         this.calculateImpactRank(this.totalReports);
-        this.myReports = data.slice(0, 3);
+        this.myReports = data.slice(0, 4);
         this.isRecentLoading = false;
         this.cdr.detectChanges();
       },
@@ -93,7 +121,7 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
         console.error('Failed to load public city reports', error);
         this.isInsightsLoading = false;
         this.cdr.detectChanges();
-      }
+      },
     });
   }
 
@@ -130,10 +158,10 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
         category,
         count: values.count,
         weeklyCount: values.weeklyCount,
-        percentage: Math.round((values.count / total) * 100)
+        percentage: Math.round((values.count / total) * 100),
       }))
       .sort((a, b) => b.count - a.count)
-      .slice(0, 4);
+      .slice(0, 3); // Limited to 3 items as requested
   }
 
   calculateImpactRank(count: number) {
@@ -154,16 +182,19 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
     }
 
     this.map = L.map(this.mapContainer.nativeElement, {
-      zoomControl: false
+      zoomControl: false, // Disable the default zoom control
     }).setView([15.145, 120.588], 13);
 
-    L.control.zoom({
-      position: 'topright'
-    }).addTo(this.map);
+    // Add zoom control to the bottom right instead
+    L.control
+      .zoom({
+        position: 'bottomright',
+      })
+      .addTo(this.map);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
-      attribution: '© OpenStreetMap contributors'
+      attribution: '© OpenStreetMap contributors',
     }).addTo(this.map);
 
     this.markerClusterGroup = L.markerClusterGroup({
@@ -173,11 +204,12 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
       disableClusteringAtZoom: 17,
       iconCreateFunction: (cluster) => {
         const count = cluster.getChildCount();
-        const sizeClass = count < 10
-          ? 'ac-core-cluster--small'
-          : count < 25
-            ? 'ac-core-cluster--medium'
-            : 'ac-core-cluster--large';
+        const sizeClass =
+          count < 10
+            ? 'ac-core-cluster--small'
+            : count < 25
+              ? 'ac-core-cluster--medium'
+              : 'ac-core-cluster--large';
 
         return L.divIcon({
           html: `
@@ -199,7 +231,7 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
     this.map.on('popupopen', (e: any) => {
       const popupNode = e.popup.getElement();
       const verifyBtn = popupNode.querySelector('.verify-btn');
-      
+
       if (verifyBtn) {
         verifyBtn.addEventListener('click', (event: Event) => {
           const target = event.target as HTMLElement;
@@ -226,7 +258,7 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
         buttonElement.style.opacity = '1';
         buttonElement.style.pointerEvents = 'auto';
         buttonElement.innerText = 'Verify Issue';
-      }
+      },
     });
   }
 
@@ -253,14 +285,18 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
     const markers: L.Marker[] = [];
 
     reports.forEach((report) => {
-      if (!report.location || !report.location.coordinates || report.location.coordinates.length < 2) {
+      if (
+        !report.location ||
+        !report.location.coordinates ||
+        report.location.coordinates.length < 2
+      ) {
         return;
       }
 
       const lng = report.location.coordinates[0];
       const lat = report.location.coordinates[1];
       const markerColor = this.getMarkerColor(report.severity);
-      
+
       const verifications = report.verifications || [];
       const verificationCount = verifications.length;
       const hasVerified = this.currentUserId ? verifications.includes(this.currentUserId) : false;
@@ -275,7 +311,7 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
         </div>`,
         iconSize: [32, 32],
         iconAnchor: [16, 32],
-        popupAnchor: [0, -32]
+        popupAnchor: [0, -32],
       });
 
       const popupContent = `
@@ -306,9 +342,7 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
         </div>
       `;
 
-      markers.push(
-        L.marker([lat, lng], { icon: customIcon }).bindPopup(popupContent)
-      );
+      markers.push(L.marker([lat, lng], { icon: customIcon }).bindPopup(popupContent));
     });
 
     this.markerClusterGroup.addLayers(markers);
