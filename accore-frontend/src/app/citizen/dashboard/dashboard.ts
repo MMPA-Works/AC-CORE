@@ -21,10 +21,14 @@ import { HttpClient } from '@angular/common/http';
 import * as L from 'leaflet';
 import 'leaflet.markercluster';
 
+// Sonner Toast (ngx-sonner version)
+import { HlmToasterImports } from '@spartan-ng/helm/sonner';
+import { toast } from 'ngx-sonner';
+
 @Component({
   selector: 'app-citizen-dashboard',
   standalone: true,
-  imports: [RouterModule, CommonModule, CitizenHeaderComponent, CitizenFooterComponent],
+  imports: [RouterModule, CommonModule, CitizenHeaderComponent, CitizenFooterComponent, HlmToasterImports],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.css'],
   encapsulation: ViewEncapsulation.None,
@@ -161,7 +165,7 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
         percentage: Math.round((values.count / total) * 100),
       }))
       .sort((a, b) => b.count - a.count)
-      .slice(0, 3); // Limited to 3 items as requested
+      .slice(0, 3);
   }
 
   calculateImpactRank(count: number) {
@@ -177,20 +181,13 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
   }
 
   initMap() {
-    if (!this.mapContainer || this.map) {
-      return;
-    }
+    if (!this.mapContainer || this.map) return;
 
     this.map = L.map(this.mapContainer.nativeElement, {
-      zoomControl: false, // Disable the default zoom control
+      zoomControl: false,
     }).setView([15.145, 120.588], 13);
 
-    // Add zoom control to the bottom right instead
-    L.control
-      .zoom({
-        position: 'bottomright',
-      })
-      .addTo(this.map);
+    L.control.zoom({ position: 'bottomright' }).addTo(this.map);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
@@ -204,21 +201,9 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
       disableClusteringAtZoom: 17,
       iconCreateFunction: (cluster) => {
         const count = cluster.getChildCount();
-        const sizeClass =
-          count < 10
-            ? 'ac-core-cluster--small'
-            : count < 25
-              ? 'ac-core-cluster--medium'
-              : 'ac-core-cluster--large';
-
+        const sizeClass = count < 10 ? 'ac-core-cluster--small' : count < 25 ? 'ac-core-cluster--medium' : 'ac-core-cluster--large';
         return L.divIcon({
-          html: `
-            <div class="ac-core-cluster-shell">
-              <div class="ac-core-cluster-pin">
-                <div class="ac-core-cluster-count">${count}</div>
-              </div>
-            </div>
-          `,
+          html: `<div class="ac-core-cluster-shell"><div class="ac-core-cluster-pin"><div class="ac-core-cluster-count">${count}</div></div></div>`,
           className: `ac-core-cluster ${sizeClass}`,
           iconSize: count < 10 ? [34, 34] : count < 25 ? [40, 40] : [46, 46],
           iconAnchor: count < 10 ? [17, 34] : count < 25 ? [20, 40] : [23, 46],
@@ -245,6 +230,8 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
   }
 
   handleVerifyClick(reportId: string, buttonElement: HTMLElement) {
+    const isCurrentlyVerified = buttonElement.innerText === 'Verified';
+
     buttonElement.style.opacity = '0.5';
     buttonElement.style.pointerEvents = 'none';
     buttonElement.innerText = 'Updating...';
@@ -252,59 +239,53 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
     this.hazardReportService.toggleVerify(reportId).subscribe({
       next: () => {
         this.fetchCityMapData();
+        if (isCurrentlyVerified) {
+          toast.success('Report unverified successfully!'); // ❌ Unverified Toast
+        } else {
+          toast.success('Report verified successfully!'); // ✅ Verified Toast
+        }
       },
       error: (err: any) => {
-        console.error('Failed to verify report', err);
+        console.error('Failed to toggle verification', err);
+        toast.error('Failed to update verification. Please try again.');
+      },
+      complete: () => {
         buttonElement.style.opacity = '1';
         buttonElement.style.pointerEvents = 'auto';
-        buttonElement.innerText = 'Verify Issue';
+        buttonElement.innerText = isCurrentlyVerified ? 'Verify Issue' : 'Verified';
       },
     });
   }
 
   getMarkerColor(severity: string | undefined): string {
     switch (severity?.toLowerCase()) {
-      case 'critical':
-        return '#dc2626';
-      case 'medium':
-      case 'high':
-        return '#f97316';
-      case 'low':
-        return '#eab308';
-      default:
-        return '#737373';
+      case 'critical': return '#dc2626';
+      case 'medium': 
+      case 'high': return '#f97316';
+      case 'low': return '#eab308';
+      default: return '#737373';
     }
   }
 
   addMapMarkers(reports: HazardReport[]) {
-    if (!this.map || !this.markerClusterGroup) {
-      return;
-    }
+    if (!this.map || !this.markerClusterGroup) return;
 
     this.markerClusterGroup.clearLayers();
     const markers: L.Marker[] = [];
 
     reports.forEach((report) => {
-      if (
-        !report.location ||
-        !report.location.coordinates ||
-        report.location.coordinates.length < 2
-      ) {
-        return;
-      }
+      if (!report.location || !report.location.coordinates || report.location.coordinates.length < 2) return;
 
       const lng = report.location.coordinates[0];
       const lat = report.location.coordinates[1];
       const markerColor = this.getMarkerColor(report.severity);
-
       const verifications = report.verifications || [];
       const verificationCount = verifications.length;
       const hasVerified = this.currentUserId ? verifications.includes(this.currentUserId) : false;
 
       const customIcon = L.divIcon({
         className: 'bg-transparent border-0',
-        html: `
-        <div style="position: relative; display: flex; justify-content: center; align-items: center; width: 32px; height: 32px; transition: transform 0.2s ease-in-out;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+        html: `<div style="position: relative; display: flex; justify-content: center; align-items: center; width: 32px; height: 32px; transition: transform 0.2s ease-in-out;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
           <div style="width: 24px; height: 24px; background-color: ${markerColor}; border: 2px solid white; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); box-shadow: 0 3px 6px rgba(0,0,0,0.3); display: flex; justify-content: center; align-items: center; z-index: 10;">
             <div style="width: 8px; height: 8px; background: white; border-radius: 50%; transform: rotate(45deg);"></div>
           </div>
@@ -320,7 +301,6 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
             <strong style="font-size: 16px; color: #171717; display: block; text-transform: capitalize;">${report.category || 'Hazard'}</strong>
             <span style="color: #525252; font-size: 12px;">Brgy. ${report.barangay}</span>
           </div>
-
           <div style="display: flex; gap: 6px; margin-top: 4px;">
             <span style="padding: 2px 8px; background-color: ${markerColor}15; color: ${markerColor}; border-radius: 6px; font-size: 10px; font-weight: 800; text-transform: uppercase;">
               ${report.severity || 'Unknown'} Severity
@@ -329,18 +309,14 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
               ${report.status || 'Reported'}
             </span>
           </div>
-
           <div style="margin-top: 8px; padding-top: 12px; border-top: 1px solid #e5e5e5; display: flex; align-items: center; justify-content: space-between;">
             <span style="font-size: 11px; color: #737373; font-weight: 600;">${verificationCount} citizens verified</span>
-            <button 
-              class="verify-btn" 
-              data-report-id="${report._id}"
+            <button class="verify-btn" data-report-id="${report._id}"
               style="background-color: ${hasVerified ? '#16a34a' : '#171717'}; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; font-family: 'Google Sans', sans-serif; transition: background-color 0.2s;">
               ${hasVerified ? 'Verified' : 'Verify Issue'}
             </button>
           </div>
-        </div>
-      `;
+        </div>`;
 
       markers.push(L.marker([lat, lng], { icon: customIcon }).bindPopup(popupContent));
     });
