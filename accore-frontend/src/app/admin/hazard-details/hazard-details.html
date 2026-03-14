@@ -18,7 +18,7 @@
           <div class="min-w-0 flex-1">
             <div class="flex flex-wrap items-center gap-3">
               <h1 class="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
-                {{ reportData.title || reportData.category }}
+                {{ reportData.title || reportData.category | titlecase }}
               </h1>
               <span
                 class="inline-flex rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-[0.16em]"
@@ -149,14 +149,14 @@
                 >
                   <img
                     [src]="reportData.imageURL || 'assets/placeholder.png'"
-                    [alt]="(reportData.title || reportData.category) + ' evidence image'"
+                    [alt]="(reportData.title || reportData.category | titlecase) + ' evidence image'"
                     class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
                   />
                 </button>
                 <hlm-dialog-content *hlmDialogPortal="let ctx" class="flex flex-row items-center justify-center gap-4 border-none bg-transparent p-0 shadow-none sm:max-h-[95vh] sm:max-w-[95vw]">
                   <img
                     [src]="reportData.imageURL || 'assets/placeholder.png'"
-                    [alt]="(reportData.title || reportData.category) + ' evidence image'"
+                    [alt]="(reportData.title || reportData.category | titlecase) + ' evidence image'"
                     class="max-h-[90vh] max-w-[calc(90vw-80px)] rounded-2xl object-contain shadow-2xl"
                   />
                 </hlm-dialog-content>
@@ -166,7 +166,7 @@
                 <button class="h-14 w-20 overflow-hidden rounded-lg border-2 border-red-700 bg-slate-100">
                   <img
                     [src]="reportData.imageURL || 'assets/placeholder.png'"
-                    [alt]="(reportData.title || reportData.category) + ' thumbnail'"
+                    [alt]="(reportData.title || reportData.category | titlecase) + ' thumbnail'"
                     class="h-full w-full object-cover"
                   />
                 </button>

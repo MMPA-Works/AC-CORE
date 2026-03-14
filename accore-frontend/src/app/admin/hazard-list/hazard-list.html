@@ -164,7 +164,7 @@
               @for (report of reports(); track report._id) {
                 <tr hlmTr class="transition-colors hover:bg-gray-50/80 border-b border-gray-100 group/row">
                   <td hlmTd class="py-4 pl-5">
-                    <div class="max-w-[150px] sm:max-w-[200px] md:max-w-[250px] lg:max-w-[300px]" [title]="report.title || report.category">
+                    <div class="max-w-[150px] sm:max-w-[200px] md:max-w-[250px] lg:max-w-[300px]" [title]="report.title || report.category | titlecase">
                       <div class="mb-1 flex flex-wrap items-center gap-2">
                         @if (isGuestReport(report)) {
                           <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 uppercase tracking-wider shadow-sm" title="Submitted without a verified citizen account">
@@ -205,7 +205,7 @@
                       </div>
 
                       <span class="block truncate font-semibold text-gray-900">
-                        {{ report.title || report.category }}
+                        {{ report.title || report.category | titlecase }}
                       </span>
                     </div>
                     <div class="text-xs text-gray-500 mt-0.5">{{ report.category }}</div>
