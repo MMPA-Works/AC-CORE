@@ -31,7 +31,8 @@ export class Login {
 
   loginForm = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
-    password: ['', Validators.required]
+    password: ['', Validators.required],
+    rememberMe: [false]
   });
 
   onSubmit() {
@@ -42,15 +43,25 @@ export class Login {
 
     this.isLoading.set(true);
 
-    this.authService.login(this.loginForm.value).subscribe({
-      next: () => {
+    const { email, password, rememberMe } = this.loginForm.value;
+
+    this.authService.login({ email, password }).subscribe({
+      next: (res: any) => {
         this.isLoading.set(false);
+
+        // Store token based on "Remember Me" choice
+        if (rememberMe) {
+          localStorage.setItem('authToken', res.token);
+        } else {
+          sessionStorage.setItem('authToken', res.token);
+        }
+
         toast.success('Welcome back!');
         this.router.navigate(['/admin/dashboard']);
       },
       error: (err) => {
         this.isLoading.set(false);
-        
+
         if (err.status === 429) {
           toast.error('Too many login attempts. Please try again later.');
         } else {
