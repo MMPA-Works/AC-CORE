@@ -164,47 +164,49 @@
               @for (report of reports(); track report._id) {
                 <tr hlmTr class="transition-colors hover:bg-gray-50/80 border-b border-gray-100 group/row">
                   <td hlmTd class="py-4 pl-5">
-                    <div class="flex items-center max-w-[150px] sm:max-w-[200px] md:max-w-[250px] lg:max-w-[300px]" [title]="report.title || report.category">
-                      <span class="font-semibold text-gray-900 truncate block">
+                    <div class="max-w-[150px] sm:max-w-[200px] md:max-w-[250px] lg:max-w-[300px]" [title]="report.title || report.category">
+                      <div class="mb-1 flex flex-wrap items-center gap-2">
+                        @if (isGuestReport(report)) {
+                          <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 uppercase tracking-wider shadow-sm" title="Submitted without a verified citizen account">
+                            Guest Report
+                          </span>
+                        }
+
+                        @if (report.isPossibleDuplicate) {
+                          <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200 uppercase tracking-wider shadow-sm" title="This report closely matches a recent nearby incident">
+                            Possible Duplicate
+                          </span>
+                        }
+
+                        @if (report.isHighPriority) {
+                          <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-800 border border-red-200 uppercase tracking-wider shadow-sm" title="Weather-triggered high priority alert">
+                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                            </svg>
+                            High Priority
+                          </span>
+                        }
+
+                        @if (riskSources().has(report._id)) {
+                          <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-red-50 text-red-700 border border-red-200 uppercase tracking-wider shadow-sm" title="This is the root cause of downstream flooding">
+                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                            </svg>
+                            Root Source
+                          </span>
+                        } @else if (riskTargets().has(report._id)) {
+                          <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200 uppercase tracking-wider shadow-sm" title="This hazard is caused by upstream flooding">
+                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                            Downstream Effect
+                          </span>
+                        }
+                      </div>
+
+                      <span class="block truncate font-semibold text-gray-900">
                         {{ report.title || report.category }}
                       </span>
-
-                      @if (isGuestReport(report)) {
-                        <span class="ml-2 shrink-0 inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 uppercase tracking-wider shadow-sm" title="Submitted without a verified citizen account">
-                          Guest Report
-                        </span>
-                      }
-
-                      @if (report.isPossibleDuplicate) {
-                        <span class="ml-2 shrink-0 inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200 uppercase tracking-wider shadow-sm" title="This report closely matches a recent nearby incident">
-                          Possible Duplicate
-                        </span>
-                      }
-
-                      @if (report.isHighPriority) {
-                        <span class="ml-2 shrink-0 inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-800 border border-red-200 uppercase tracking-wider shadow-sm" title="Weather-triggered high priority alert">
-                          <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                          </svg>
-                          High Priority
-                        </span>
-                      }
-
-                      @if (riskSources().has(report._id)) {
-                        <span class="ml-2 shrink-0 inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-red-50 text-red-700 border border-red-200 uppercase tracking-wider shadow-sm" title="This is the root cause of downstream flooding">
-                          <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
-                          </svg>
-                          Root Source
-                        </span>
-                      } @else if (riskTargets().has(report._id)) {
-                        <span class="ml-2 shrink-0 inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200 uppercase tracking-wider shadow-sm" title="This hazard is caused by upstream flooding">
-                          <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                          </svg>
-                          Downstream Effect
-                        </span>
-                      }
                     </div>
                     <div class="text-xs text-gray-500 mt-0.5">{{ report.category }}</div>
                     @if (isGuestReport(report) && report.guestContact) {
