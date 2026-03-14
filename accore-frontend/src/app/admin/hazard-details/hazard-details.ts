@@ -50,7 +50,9 @@ export class HazardDetails implements OnInit {
       if (index === 0 && !history) {
         history = {
           updatedAt: rep.createdAt,
-          adminName: rep.citizenId?.firstName ? (rep.citizenId.firstName + ' ' + rep.citizenId.lastName) : 'Citizen Reporter'
+          adminName: rep.citizenId?.firstName
+            ? (rep.citizenId.firstName + ' ' + rep.citizenId.lastName)
+            : (this.isGuestReport(rep) ? 'Guest Reporter' : 'Citizen Reporter')
         };
       }
 
@@ -101,6 +103,18 @@ export class HazardDetails implements OnInit {
     });
   }
 
+  isGuestReport(report: any): boolean {
+    return !report?.citizenId;
+  }
+
+  getArchiveButtonLabel(report: any): string {
+    if (report?.isArchived) {
+      return 'Restore Report';
+    }
+
+    return this.isGuestReport(report) ? 'Flag as Spam' : 'Archive Report';
+  }
+
   saveStatus(): void {
     const currentReport = this.report();
     const newStatus = this.pendingStatus();
@@ -122,6 +136,42 @@ export class HazardDetails implements OnInit {
         }
       });
     }
+  }
+
+  toggleArchive(): void {
+    const currentReport = this.report();
+    if (!currentReport || this.isArchiving()) {
+      return;
+    }
+
+    this.isArchiving.set(true);
+    this.hazardService.archiveReport(currentReport._id).subscribe({
+      next: (updatedReport) => {
+        this.report.set({
+          ...updatedReport,
+          citizenId: currentReport.citizenId
+        });
+
+        this.isArchiving.set(false);
+
+        if (updatedReport.isArchived) {
+          toast.success(
+            this.isGuestReport(currentReport)
+              ? 'Guest report flagged as spam'
+              : 'Report archived successfully'
+          );
+          this.router.navigate(['/admin/hazards']);
+          return;
+        }
+
+        toast.success('Report restored successfully');
+      },
+      error: (err) => {
+        console.error('Error archiving report:', err);
+        this.isArchiving.set(false);
+        toast.error('Failed to archive report');
+      }
+    });
   }
 
   private getMarkerColor(status: string): string {

@@ -4,55 +4,73 @@
 @import 'tailwindcss/utilities.css';
 
 @import '@spartan-ng/brain/hlm-tailwind-preset.css';
-@import "leaflet/dist/leaflet.css";
+@import 'leaflet/dist/leaflet.css';
+@import 'leaflet.markercluster/dist/MarkerCluster.css';
+@import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 @import '@angular/cdk/overlay-prebuilt.css';
+
+/* FIX: Prevent the browser's default scrollbar. 
+   This ensures the ONLY scrollbar is the one in your admin-layout.html 
+*/
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+app-root {
+  display: block;
+  min-height: 100vh; /* This allows the root container to grow with long citizen pages */
+}
+
+app-admin-layout {
+  display: block;
+  height: 100%;
+}
 
 :root {
   color-scheme: light;
 
   --font-sans:
-    'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans',
-    sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-    
+    'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+    'Noto Color Emoji';
+
   --radius: 0.625rem;
-  
-  /* Backgrounds: Pure white and very light warm gray */
+
   --background: oklch(1 0 0);
   --foreground: oklch(0.15 0.01 28);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.15 0.01 28);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.15 0.01 28);
-  
-  /* Primary: Angeles City Red */
-  --primary: oklch(0.51 0.19 28);
-  --primary-foreground: oklch(1 0 0);
-  
-  /* Secondary: Mustard Yellow */
-  --secondary: oklch(0.77 0.16 70);
-  --secondary-foreground: oklch(0.15 0.01 28);
-  
-  /* Muted elements: Warm grays to complement the red */
+
+  /* Primary: #ac1001 (Red) */
+  --primary: hsl(4 98% 34%);
+  --primary-foreground: hsl(0 0% 100%);
+
+  /* Secondary: #f99b36 (Yellow/Orange) */
+  --secondary: hsl(31 94% 59%);
+  --secondary-foreground: hsl(0 0% 10%);
+
   --muted: oklch(0.96 0.01 28);
   --muted-foreground: oklch(0.55 0.02 28);
   --accent: oklch(0.96 0.01 28);
-  --accent-foreground: oklch(0.51 0.19 28);
-  
-  /* States and borders */
+  --accent-foreground: hsl(4 98% 34%);
+
   --destructive: oklch(0.6 0.2 25);
-  --border: oklch(0.90 0.01 28);
-  --input: oklch(0.90 0.01 28);
-  --ring: oklch(0.77 0.16 70); /* Yellow focus ring */
-  
-  /* Sidebar */
+  --border: oklch(0.9 0.01 28);
+  --input: oklch(0.9 0.01 28);
+  --ring: hsl(31 94% 59%);
+
   --sidebar: oklch(1 0 0);
   --sidebar-foreground: oklch(0.15 0.01 28);
   --sidebar-primary: oklch(0.51 0.19 28);
   --sidebar-primary-foreground: oklch(1 0 0);
   --sidebar-accent: oklch(0.96 0.01 28);
-  --sidebar-accent-foreground: oklch(0.51 0.19 28);
-  --sidebar-border: oklch(0.90 0.01 28);
-  --sidebar-ring: oklch(0.77 0.16 70);
+  --sidebar-accent-foreground: hsl(4 98% 34%);
+  --sidebar-border: oklch(0.9 0.01 28);
+  --sidebar-ring: hsl(31 94% 59%);
 }
 
 :root.dark {
@@ -64,29 +82,26 @@
   --card: oklch(0.18 0.01 28);
   --card-foreground: oklch(0.98 0 0);
   --popover: oklch(0.18 0.01 28);
-  --popover-foreground: oklch(0.98 0 0);
-  
-  /* Primary: Slightly brighter red for dark mode contrast */
-  --primary: oklch(0.60 0.19 28);
-  --primary-foreground: oklch(1 0 0);
-  
-  /* Secondary: Mustard Yellow */
-  --secondary: oklch(0.77 0.16 70);
-  --secondary-foreground: oklch(0.15 0.01 28);
-  
-  /* Muted elements */
+  --popover-foreground: hsl(0 0% 98%);
+
+  /* Primary: #ac1001 (Red) */
+  --primary: hsl(4 98% 34%);
+  --primary-foreground: hsl(0 0% 100%);
+
+  /* Secondary: #f99b36 (Yellow/Orange) */
+  --secondary: hsl(31 94% 59%);
+  --secondary-foreground: hsl(0 0% 10%);
+
   --muted: oklch(0.25 0.01 28);
-  --muted-foreground: oklch(0.70 0.02 28);
+  --muted-foreground: oklch(0.7 0.02 28);
   --accent: oklch(0.25 0.01 28);
-  --accent-foreground: oklch(0.98 0 0);
-  
-  /* States and borders */
-  --destructive: oklch(0.70 0.19 22);
+  --accent-foreground: hsl(0 0% 98%);
+
+  --destructive: oklch(0.7 0.19 22);
   --border: oklch(0.25 0.01 28);
   --input: oklch(0.25 0.01 28);
-  --ring: oklch(0.77 0.16 70);
-  
-  /* Sidebar */
+  --ring: hsl(31 94% 59%);
+
   --sidebar: oklch(0.18 0.01 28);
   --sidebar-foreground: oklch(0.98 0 0);
   --sidebar-primary: oklch(0.60 0.19 28);
@@ -107,8 +122,8 @@
 }
 
 @layer base {
-  button, 
-  [type='button'], 
+  button,
+  [type='button'],
   [type='submit'],
   a[hlmBtn] {
     cursor: pointer;
@@ -164,7 +179,7 @@
   text-decoration: none !important;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1) !important;
   transition: all 0.2s ease !important;
-  padding: 0 !important; 
+  padding: 0 !important;
 }
 
 /* Clean hover state. 
@@ -172,7 +187,7 @@
 */
 .leaflet-popup-close-button:hover {
   background: rgba(255, 255, 255, 1) !important;
-  color: #ef4444 !important; 
+  color: #ef4444 !important;
   transform: scale(1.08) !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
 }

@@ -50,6 +50,7 @@ export class Signup implements OnInit {
 
     this.http.post('http://localhost:5000/api/auth/citizen/google', { token }).subscribe({
       next: (response: any) => {
+        localStorage.removeItem('adminToken');
         localStorage.setItem('token', response.token);
         toast.success('Signup successful!', { description: 'Redirecting to dashboard...' });
         this.router.navigate(['/dashboard']);
@@ -69,16 +70,24 @@ export class Signup implements OnInit {
 
     this.isLoading.set(true);
 
-    this.http.post('http://localhost:5000/api/auth/citizen/register', this.signupForm.value).subscribe({
-      next: (response: any) => {
-        localStorage.setItem('token', response.token);
-        toast.success('Account created!', { description: 'Redirecting to dashboard...' });
-        this.router.navigate(['/dashboard']);
-      },
-      error: (err) => {
-        this.isLoading.set(false);
-        toast.error('Signup failed', { description: err.error?.message || 'Please try again.' });
-      },
-    });
+    this.http
+      .post('http://localhost:5000/api/auth/citizen/register', this.signupForm.value)
+      .subscribe({
+        next: (response: any) => {
+          localStorage.removeItem('adminToken');
+          localStorage.setItem('token', response.token);
+          toast.success('Account created!');
+          this.router.navigate(['/dashboard']);
+        },
+        error: (err) => {
+          this.isLoading.set(false);
+
+          if (err.status === 429) {
+            toast.error('Too many signup attempts. Please try again later.');
+          } else {
+            toast.error(err.error?.message || 'Signup failed');
+          }
+        },
+      });
   }
 }

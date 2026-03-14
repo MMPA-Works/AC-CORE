@@ -1,53 +1,169 @@
 <div class="min-h-screen bg-muted/30">
   <app-citizen-header></app-citizen-header>
 
-  <main class="mx-auto max-w-4xl space-y-8 px-4 py-6 md:px-6 md:py-8">
-    <section class="flex flex-col items-center space-y-4 rounded-xl border border-border bg-card p-6 text-center shadow-sm">
-      <h1 class="text-2xl font-bold text-foreground">Welcome Back</h1>
-      <p class="max-w-2xl text-muted-foreground">
-        File a new hazard report or jump into your dedicated tracking page to monitor every report you have submitted.
-      </p>
+  <main class="flex-1 mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 space-y-8">
 
-      <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-        <a routerLink="/citizen/report" hlmBtn class="w-full sm:w-auto">
-          Report a New Hazard
-        </a>
-        <a routerLink="/citizen/my-reports" hlmBtn variant="outline" class="w-full sm:w-auto">
-          My Reports
-        </a>
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-neutral-200">
+      <div class="space-y-1.5">
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-neutral-900 tracking-tight">
+          Welcome back, {{ firstName }}
+        </h1>
+        <p class="text-base text-neutral-500 max-w-2xl">
+          Here is the latest incident data for Angeles City. Please check the live map before submitting a new report.
+        </p>
+      </div>
+      
+      <a routerLink="/citizen/report"
+        class="inline-flex shrink-0 items-center justify-center rounded-xl bg-red-600 px-6 py-3 text-sm font-bold text-white shadow-sm transition-all hover:bg-red-700 hover:shadow focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2">
+        <svg class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+        </svg>
+        Report a Hazard
+      </a>
+    </div>
+
+    <section class="relative h-[450px] w-full rounded-3xl overflow-hidden shadow-sm border border-neutral-200 bg-neutral-100 z-0">
+      <div #mapContainer class="absolute inset-0 z-0"></div>
+
+      <div class="hidden sm:block absolute top-5 left-5 z-10 max-w-[280px] rounded-xl border border-neutral-100 bg-white/95 p-3 shadow-sm backdrop-blur-md pointer-events-none">
+        <p class="text-[10px] font-extrabold uppercase tracking-[0.2em] text-red-600">Nearby Hazards</p>
+        <h2 class="mt-1 text-sm font-bold leading-tight text-neutral-900">Check active reports before creating a new one.</h2>
+      </div>
+
+      <div *ngIf="weather" class="absolute top-4 right-4 sm:top-5 sm:right-5 z-10 flex items-center gap-2 sm:gap-3 rounded-xl border border-neutral-100 bg-white/95 p-1.5 sm:p-2 sm:pr-4 shadow-sm backdrop-blur-md pointer-events-auto">
+        <div class="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-blue-50 border border-blue-100/50 shrink-0">
+           <img [src]="'https://openweathermap.org/img/wn/' + weather.icon + '.png'" alt="Current weather in Angeles City" class="h-6 w-6 sm:h-8 sm:w-8 drop-shadow-sm">
+        </div>
+        <div class="flex flex-col justify-center pr-1 sm:pr-0">
+          <span class="text-xs sm:text-sm font-black leading-none text-neutral-900">{{ weather.temp }}°C</span>
+          <span class="mt-0.5 sm:mt-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-neutral-500 hidden sm:block">{{ weather.description }}</span>
+        </div>
+      </div>
+
+      <div class="absolute bottom-5 left-4 sm:left-5 z-10 bg-white/95 backdrop-blur-md p-2.5 sm:p-3 rounded-xl shadow-sm border border-neutral-100 pointer-events-auto">
+        <h3 class="text-[9px] sm:text-[10px] font-extrabold text-neutral-500 mb-1.5 sm:mb-2 uppercase tracking-wider">Severity</h3>
+        <div class="flex flex-col gap-1.5 sm:gap-2">
+          <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-red-600 shadow-sm border border-white"></span><span class="text-[11px] sm:text-xs font-semibold text-neutral-700">Critical</span></div>
+          <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-orange-500 shadow-sm border border-white"></span><span class="text-[11px] sm:text-xs font-semibold text-neutral-700">Medium</span></div>
+          <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-yellow-500 shadow-sm border border-white"></span><span class="text-[11px] sm:text-xs font-semibold text-neutral-700">Low</span></div>
+        </div>
       </div>
     </section>
 
-    <section class="space-y-4">
-      <div class="flex items-center justify-between gap-3">
-        <div>
-          <h2 class="text-xl font-semibold text-foreground">Recent Reports</h2>
-          <p class="text-sm text-muted-foreground">A quick preview of your latest submissions.</p>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+      
+      <section class="flex flex-col rounded-3xl bg-white border border-neutral-200 p-6 shadow-sm h-full">
+        <h2 class="text-xl font-bold text-neutral-900 mb-1">Your Civic Impact</h2>
+        <p class="text-sm text-neutral-500 mb-6">Your contribution to community safety.</p>
+
+        <div class="flex items-center justify-between mb-6 border-b border-neutral-100 pb-6">
+           <div class="flex items-center gap-4">
+             <div class="w-12 h-12 rounded-full bg-red-50 text-red-600 flex items-center justify-center border border-red-100">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15l-3.5 2 1-4-3-2.5 4-.3L12 6l1.5 4.2 4 .3-3 2.5 1 4z" /></svg>
+             </div>
+             <div>
+               <p class="text-xs font-bold uppercase tracking-wider text-neutral-500">Current Rank</p>
+               <p class="text-lg font-bold text-neutral-900">{{ impactTitle }}</p>
+             </div>
+           </div>
         </div>
 
-        <a routerLink="/citizen/my-reports" class="text-sm font-semibold text-primary hover:underline">
-          View all
-        </a>
-      </div>
-
-      <div class="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-        <div *ngIf="isLoading" class="flex items-center justify-center gap-3 p-8 text-muted-foreground">
-          <svg class="h-6 w-6 animate-spin text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-          Loading reports...
+        <div class="grid grid-cols-2 gap-4 mb-6">
+          <div class="rounded-2xl border border-neutral-100 bg-neutral-50 p-4 text-center">
+            <p class="text-3xl font-black text-neutral-900">{{ totalReports }}</p>
+            <p class="mt-1 text-xs font-medium text-neutral-500">Total Reports</p>
+          </div>
+          <div class="rounded-2xl border border-neutral-100 bg-neutral-50 p-4 text-center">
+            <p class="text-3xl font-black text-neutral-900">{{ resolvedReports }}</p>
+            <p class="mt-1 text-xs font-medium text-neutral-500">Resolved</p>
+          </div>
         </div>
 
-        <div *ngIf="errorMessage" class="p-8 text-center text-destructive">
-          {{ errorMessage }}
+        <div class="mt-auto">
+          <div class="mb-2 flex items-center justify-between text-sm font-medium text-neutral-700">
+            <span>Community Score</span>
+            <span>{{ totalReports > 0 ? (resolvedReports / totalReports * 100 | number:'1.0-0') : 0 }}%</span>
+          </div>
+          <div class="h-3 rounded-full bg-neutral-100 overflow-hidden">
+            <div class="h-full rounded-full bg-gradient-to-r from-red-600 via-red-500 to-orange-400"
+              [style.width.%]="totalReports > 0 ? (resolvedReports / totalReports * 100) : 0"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="flex flex-col rounded-3xl bg-white border border-neutral-200 p-6 shadow-sm h-full">
+        <h2 class="text-xl font-bold text-neutral-900 mb-1">City Insights</h2>
+        <p class="text-sm text-neutral-500 mb-6">Top hazard trends across Angeles.</p>
+
+        <div *ngIf="isInsightsLoading" class="flex flex-1 items-center justify-center text-neutral-400">
+          <svg class="h-6 w-6 animate-spin text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
         </div>
 
-        <ng-container *ngIf="!isLoading && !errorMessage">
-          <div *ngFor="let report of myReports" class="flex items-center justify-between gap-4 border-b border-border px-4 py-4 last:border-b-0 transition-colors hover:bg-muted/40">
-            <div class="min-w-0">
-              <h3 class="font-medium text-foreground">{{ report.title }}</h3>
-              <p class="text-sm text-muted-foreground">{{ report.barangay }} • {{ report.createdAt | date:'mediumDate' }}</p>
+        <div *ngIf="!isInsightsLoading && cityInsights.length === 0" class="flex flex-1 flex-col items-center justify-center rounded-2xl border border-dashed border-neutral-200 bg-neutral-50 p-6 text-center text-neutral-400">
+           <p class="text-sm font-bold text-neutral-700">No Trends Yet</p>
+           <p class="text-xs mt-1">No active hazard data available.</p>
+        </div>
+
+        <div *ngIf="!isInsightsLoading && cityInsights.length > 0" class="flex flex-col gap-3">
+          <div *ngFor="let insight of cityInsights" class="flex items-center justify-between p-4 rounded-2xl border border-neutral-100 bg-neutral-50 hover:border-red-100 hover:bg-white transition-colors">
+            <div class="flex items-center gap-3 border-none">
+              <div [ngSwitch]="insight.category.toLowerCase()" class="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 text-red-600 shrink-0">
+                <!-- category icons unchanged -->
+                <svg *ngSwitchDefault class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+                  <line x1="12" y1="9" x2="12" y2="13" />
+                  <line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-neutral-900 capitalize">{{ insight.category }}</h3>
+                <p class="text-xs text-neutral-500">{{ insight.weeklyCount }} this week</p>
+              </div>
+            </div>
+            <div class="text-right">
+              <p class="text-lg font-black text-neutral-900">{{ insight.count }}</p>
+              <p class="text-[10px] font-bold text-red-600 uppercase tracking-wider">{{ insight.percentage }}%</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="flex flex-col rounded-3xl bg-white border border-neutral-200 shadow-sm h-full overflow-hidden">
+        <div class="flex items-center justify-between border-b border-neutral-100 px-6 py-5">
+          <div>
+            <h2 class="text-xl font-bold text-neutral-900">Recent Activity</h2>
+            <p class="text-sm text-neutral-500 mt-1">Your latest reports.</p>
+          </div>
+          <a routerLink="/citizen/my-reports" class="text-sm font-bold text-red-600 hover:text-red-700 transition-colors">View all</a>
+        </div>
+
+        <div class="flex-1 flex flex-col">
+          <div *ngIf="isRecentLoading" class="flex flex-1 items-center justify-center p-8 text-neutral-400">
+            <svg class="h-8 w-8 animate-spin text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+          </div>
+
+          <ul *ngIf="!isRecentLoading && myReports.length > 0" class="divide-y divide-neutral-100">
+            <li *ngFor="let report of myReports">
+              <a [routerLink]="['/citizen/my-reports', report._id]" class="group flex items-center justify-between px-6 py-4 transition-colors hover:bg-neutral-50">
+                <div class="min-w-0 flex-1 pr-4">
+                  <p class="truncate text-sm font-bold text-neutral-900 group-hover:text-red-600 transition-colors">{{ report.title }}</p>
+                  <p class="mt-1 truncate text-xs text-neutral-500">{{ report.barangay }} • {{ report.createdAt | date:'MMM d, y' }}</p>
+                </div>
+                <span class="inline-flex items-center justify-center rounded-lg px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider"
+                  [ngClass]="{
+                    'bg-neutral-100 text-neutral-600': report.status === 'Reported',
+                    'bg-blue-50 text-blue-700 border border-blue-100': report.status === 'Dispatched' || report.status === 'In Progress' || report.status === 'Under Review',
+                    'bg-green-50 text-green-700 border border-green-100': report.status === 'Resolved'
+                  }">
+                  {{ report.status }}
+                </span>
+              </a>
+            </li>
+          </ul>
+
+          <div *ngIf="!isRecentLoading && myReports.length === 0" class="flex flex-1 flex-col items-center justify-center px-6 py-12 text-center text-neutral-400">
+            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-neutral-100 mb-3">
+              <svg class="h-6 w-6 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
             </div>
             <span
               class="shrink-0 rounded-full px-3 py-1 text-xs font-semibold"
@@ -60,15 +176,11 @@
               {{ report.status }}
             </span>
           </div>
+        </div>
+      </section>
 
-          <div *ngIf="myReports.length === 0" class="flex flex-col items-center p-8 text-center text-muted-foreground">
-            <svg xmlns="http://www.w3.org/2000/svg" class="mb-3 h-12 w-12 text-border" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            <p>You have not submitted any reports yet.</p>
-          </div>
-        </ng-container>
-      </div>
-    </section>
+    </div>
   </main>
+  <app-citizen-footer></app-citizen-footer>
+
 </div>

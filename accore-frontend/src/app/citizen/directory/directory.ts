@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmAccordionImports } from '@spartan-ng/helm/accordion';
@@ -49,7 +49,7 @@ interface FaqItem {
 })
 export class Directory {
   
-  readonly directoryData: ContactCategory[] = [
+  readonly directoryData = signal<ContactCategory[]>([
     {
       categoryName: 'Disaster & Rescue (ACDRRMO)',
       icon: 'lucideSiren',
@@ -144,9 +144,9 @@ export class Directory {
         }
       ]
     }
-  ];
+  ]);
 
-  readonly faqs: FaqItem[] = [
+  readonly faqs = signal<FaqItem[]>([
     { 
       question: 'How do I report a hazard using this portal?', 
       answer: 'Navigate to the Report tab, select the hazard category, provide a brief description, and attach an image. The system automatically tags your location so responders can find the issue quickly.' 
@@ -163,5 +163,5 @@ export class Directory {
       question: 'Will I be updated on my report?', 
       answer: 'Yes. You can view the status of your reports in the My Reports section on your dashboard. The status will update from Reported to In Progress, and finally to Resolved.' 
     }
-  ];
+  ]);
 }

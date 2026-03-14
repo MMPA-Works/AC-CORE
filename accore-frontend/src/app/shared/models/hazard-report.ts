@@ -19,7 +19,8 @@ export interface HazardReportLocation {
 
 export interface HazardReport {
   _id: string;
-  citizenId: string;
+  citizenId: string | null;
+  guestContact?: string | null;
   title: string;
   description: string;
   category: string;
@@ -27,7 +28,12 @@ export interface HazardReport {
   barangay: string;
   location: HazardReportLocation;
   status: HazardReportStatus;
+  isHighPriority?: boolean;
+  isPossibleDuplicate?: boolean;
+  isArchived?: boolean;
   imageURL: string;
+  verifications: string[];
+  hasVerified?: boolean;
   statusHistory: HazardReportStatusHistoryEntry[];
   createdAt: string;
   updatedAt: string;

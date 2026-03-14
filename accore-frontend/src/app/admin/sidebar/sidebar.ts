@@ -13,16 +13,43 @@ import { jwtDecode } from 'jwt-decode';
   standalone: true,
   imports: [CommonModule, LucideAngularModule, HlmBadgeImports, HlmScrollAreaImports, RouterModule],
   template: `
-    <aside class="w-[260px] h-screen bg-gray-50 border-r border-gray-200 flex flex-col shrink-0">
-      
-      <div class="h-20 flex items-center px-6 shrink-0 border-b border-gray-200 bg-white">
-        <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center mr-3 shadow-sm">
-          <lucide-icon name="shield-alert" class="text-white w-4 h-4"></lucide-icon>
-        </div>
-        <div class="flex flex-col">
-          <span class="text-[16px] font-bold tracking-wide text-gray-900 leading-tight">AC-CORE</span>
-          <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">Command Center</span>
-        </div>
+    @if (isMobileOpen()) {
+      <div 
+        class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden transition-opacity"
+        (click)="closeMobile()"
+      ></div>
+    }
+
+    <aside 
+      class="fixed inset-y-0 left-0 z-50 flex flex-col bg-white border-r border-gray-200 transition-all duration-300 ease-in-out shadow-lg lg:shadow-none lg:static lg:h-screen lg:shrink-0"
+      [ngClass]="{
+        'w-64': !isCollapsed(),
+        'w-20': isCollapsed(),
+        'translate-x-0': isMobileOpen(),
+        '-translate-x-full lg:translate-x-0': !isMobileOpen()
+      }"
+    >
+      <div class="h-20 flex items-center justify-between px-5 shrink-0 border-b border-gray-100 transition-all">
+        <a routerLink="/admin/dashboard" class="flex items-center overflow-hidden min-w-0">
+          <div class="w-10 h-10 flex items-center justify-center shrink-0 overflow-hidden">
+            <img
+              src="logo.svg"
+              alt="AC-CORE Angeles City Municipal Maintenance Official Logo"
+              class="h-10 w-10 object-contain"
+            />
+          </div>
+          <div 
+            class="flex flex-col ml-3 transition-opacity duration-300 whitespace-nowrap"
+            [ngClass]="{'opacity-0 hidden': isCollapsed(), 'opacity-100': !isCollapsed()}"
+          >
+            <span class="text-lg font-extrabold tracking-tight text-gray-900 leading-none">AC-CORE</span>
+            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-1">Command Center</span>
+          </div>
+        </a>
+        
+        <button class="lg:hidden p-2 text-gray-400 hover:text-gray-900" (click)="closeMobile()">
+          <lucide-icon name="x" class="w-5 h-5"></lucide-icon>
+        </button>
       </div>
 
       <ng-scrollbar hlm class="flex-1 bg-gray-50" appearance="compact">
@@ -71,8 +98,34 @@ import { jwtDecode } from 'jwt-decode';
         </nav>
       </ng-scrollbar>
 
-      <div class="p-3 shrink-0 bg-white border-t border-gray-200">
-        <div class="flex items-center w-full p-2 rounded-xl hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100 group">
+      <div class="p-4 shrink-0 border-t border-gray-100 flex flex-col gap-2">
+        <button 
+          (click)="toggleCollapse()" 
+          class="hidden lg:flex items-center justify-center w-full py-2 mb-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+        >
+          <lucide-icon [name]="isCollapsed() ? 'chevron-right' : 'chevron-left'" class="w-5 h-5"></lucide-icon>
+        </button>
+
+        <div class="flex items-center justify-between w-full p-2 rounded-xl bg-gray-50 border border-gray-100">
+          <div class="flex items-center overflow-hidden">
+            <div class="w-9 h-9 rounded-full bg-white flex items-center justify-center shrink-0 shadow-sm overflow-hidden">
+              <img [src]="currentUser().profileImage" alt="Administrator Profile Picture" class="w-full h-full object-cover">
+            </div>
+
+            <div 
+              class="ml-3 flex flex-col transition-opacity duration-300 whitespace-nowrap"
+              [ngClass]="{'opacity-0 hidden': isCollapsed(), 'opacity-100': !isCollapsed()}"
+            >
+              <!-- FULL NAME -->
+              <span class="text-sm font-bold text-gray-900 truncate">
+                {{ currentUser().firstName }} {{ currentUser().lastName }}
+              </span>
+
+              <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider truncate">
+                {{ currentUser().role }}
+              </span>
+            </div>
+          </div>
           
           <div class="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center shrink-0 border border-gray-200 overflow-hidden">
             <img [src]="currentUser().profileImage" alt="Administrator profile picture" class="w-full h-full object-cover">
@@ -98,6 +151,7 @@ import { jwtDecode } from 'jwt-decode';
   `
 })
 export class SidebarComponent implements OnInit {
+
   private router = inject(Router);
   private authService = inject(AuthService);
 
@@ -131,6 +185,26 @@ export class SidebarComponent implements OnInit {
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: any) => {
       this.syncActiveNavWithUrl(event.urlAfterRedirects || event.url);
+      this.closeMobile();
+    });
+  }
+
+  private loadPendingReportsCount() {
+    this.hazardReportService.getReports().subscribe({
+      next: (reports) => {
+        const reportedCount = reports.filter(r => r.status === 'Reported').length;
+
+        this.mainLinks.update(links =>
+          links.map(link =>
+            link.id === 'hazards'
+              ? { ...link, badge: reportedCount > 0 ? reportedCount.toString() : '' }
+              : link
+          )
+        );
+      },
+      error: (error) => {
+        console.error('Failed to load reports count:', error);
+      }
     });
   }
 
@@ -145,16 +219,18 @@ export class SidebarComponent implements OnInit {
   }
 
   loadUserData() {
-    const token = this.authService.getToken();
+    const token = this.authService.getAdminToken();
     if (token) {
       try {
         const decoded: any = jwtDecode(token);
+
         this.currentUser.set({
           firstName: decoded.firstName || 'System',
           lastName: decoded.lastName || 'Admin',
           role: 'Administrator',
           profileImage: 'assets/placeholder-avatar.png'
         });
+
       } catch (error) {
         console.error('Token decode failed', error);
       }
@@ -169,5 +245,17 @@ export class SidebarComponent implements OnInit {
   onLogout() {
     this.authService.logout();
     this.router.navigate(['/admin/login']);
+  }
+
+  toggleCollapse() {
+    this.isCollapsed.update(v => !v);
+  }
+
+  toggleMobile() {
+    this.isMobileOpen.update(v => !v);
+  }
+
+  closeMobile() {
+    this.isMobileOpen.set(false);
   }
 }

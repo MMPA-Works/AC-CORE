@@ -1,0 +1,73 @@
+<footer class="mt-auto border-t border-neutral-200 bg-white/95 backdrop-blur-md transform-gpu will-change-transform">
+  <div class="mx-auto max-w-6xl px-4 py-16 md:px-6">
+    <div class="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-5">
+      
+      <div class="space-y-6 lg:col-span-2 lg:pr-8">
+        <div class="flex items-center gap-4">
+          <img src="logo.svg" alt="AC-CORE Angeles City Center for Operational Reporting and Engineering Official Logo" class="h-14 w-14 object-contain opacity-90">
+          <div>
+            <p class="text-xl font-bold tracking-tight text-neutral-900">AC-CORE</p>
+            <p class="mt-0.5 text-[10px] font-medium uppercase leading-tight tracking-wider text-neutral-500">
+              Angeles City Center for<br />Operational Reporting and Engineering
+            </p>
+          </div>
+        </div>
+        <p class="max-w-sm text-sm leading-relaxed text-neutral-500">
+          Empowering our community to report and track local infrastructure hazards in real-time. Together, we keep Angeles safe.
+        </p>
+      </div>
+
+      <div class="flex flex-col gap-4 lg:pl-4">
+        <h4 class="text-xs font-bold uppercase tracking-widest text-neutral-900">Platform</h4>
+        <nav class="flex flex-col gap-3">
+          <a *ngFor="let link of platformLinks" 
+             [routerLink]="link.route" 
+             class="text-sm text-neutral-500 transition-colors hover:text-red-700">
+            {{ link.label }}
+          </a>
+        </nav>
+      </div>
+
+      <div class="flex flex-col gap-4">
+        <h4 class="text-xs font-bold uppercase tracking-widest text-neutral-900">Legal</h4>
+        <nav class="flex flex-col gap-3">
+          <a *ngFor="let link of legalLinks" 
+             [routerLink]="link.route" 
+             class="text-sm text-neutral-500 transition-colors hover:text-red-700">
+            {{ link.label }}
+          </a>
+        </nav>
+      </div>
+
+      <div class="flex flex-col gap-4">
+        <h4 class="text-xs font-bold uppercase tracking-widest text-neutral-900">Emergency Hotlines</h4>
+        <div class="space-y-4">
+          <div class="flex items-start gap-3">
+            <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-red-50 text-red-700">
+              <lucide-icon name="phone" class="h-4 w-4"></lucide-icon>
+            </div>
+            <div>
+              <p class="text-xs font-bold text-neutral-900">ACDRRMO</p>
+              <p class="text-sm text-neutral-500">(045) 322-7796</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-neutral-100 text-neutral-600">
+              <lucide-icon name="shield" class="h-4 w-4"></lucide-icon>
+            </div>
+            <div>
+              <p class="text-xs font-bold text-neutral-900">Police / Fire</p>
+              <p class="text-sm text-neutral-500">911</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-16 border-t border-neutral-200 pt-8 text-center">
+      <p class="text-xs font-medium text-neutral-500">
+        © {{ currentYear }} AC-CORE. Developed for the People of Angeles City.
+      </p>
+    </div>
+  </div>
+</footer>

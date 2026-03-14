@@ -18,7 +18,7 @@
 
         <div class="absolute top-4 right-4 z-20">
           <a
-            routerLink="/dashboard"
+            [routerLink]="closeRoute"
             hlmBtn
             variant="secondary"
             size="icon"
@@ -119,7 +119,40 @@
                 placeholder="Briefly name the issue"
                 class="w-full h-12"
               />
+              @if (reportForm.get('title')?.invalid && reportForm.get('title')?.touched) {
+                <div class="text-red-500 text-xs mt-1 font-medium">
+                  @if (reportForm.get('title')?.errors?.['minlength']) {
+                    <span>Title must be at least 3 characters.</span>
+                  }
+                  @if (reportForm.get('title')?.errors?.['maxlength']) {
+                    <span>Title cannot exceed 100 characters.</span>
+                  }
+                </div>
+              }
             </div>
+
+            @if (isGuestMode) {
+              <div class="space-y-2">
+                <label hlmLabel>Guest Contact (Optional)</label>
+                <input
+                  hlmInput
+                  formControlName="guestContact"
+                  placeholder="Email or 11-digit PH mobile number"
+                  class="w-full h-12"
+                />
+                <p class="text-xs text-slate-500">
+                  This helps city staff reach you if they need clarification about the report.
+                </p>
+                @if (
+                  reportForm.get('guestContact')?.invalid &&
+                  reportForm.get('guestContact')?.touched
+                ) {
+                  <div class="text-red-500 text-xs mt-1 font-medium">
+                    Enter a valid email or PH mobile number.
+                  </div>
+                }
+              </div>
+            }
 
             <div class="space-y-2">
               <label hlmLabel>Description</label>
@@ -130,6 +163,18 @@
                 rows="3"
                 class="w-full"
               ></textarea>
+              @if (
+                reportForm.get('description')?.invalid && reportForm.get('description')?.touched
+              ) {
+                <div class="text-red-500 text-xs mt-1 font-medium">
+                  @if (reportForm.get('description')?.errors?.['minlength']) {
+                    <span>Please provide more details (at least 10 characters).</span>
+                  }
+                  @if (reportForm.get('description')?.errors?.['maxlength']) {
+                    <span>Description cannot exceed 1000 characters.</span>
+                  }
+                </div>
+              }
             </div>
 
             <div class="space-y-3">
@@ -225,4 +270,5 @@
       </main>
     </div>
   </div>
+  <app-citizen-footer></app-citizen-footer>
 </div>

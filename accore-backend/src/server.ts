@@ -8,6 +8,8 @@ import uploadRoutes from './routes/upload.routes';
 import authRoutes from './routes/auth.routes';
 import citizenAuthRoutes from './routes/citizen-auth.routes';
 import barangayRoutes from './routes/barangay.routes';
+import './services/weather.service';
+import { getCurrentWeather } from './services/weather.service';
 
 const app = express();
 
@@ -23,6 +25,15 @@ app.use(express.json());
 
 app.get('/api/health', (req: Request, res: Response) => {
   res.status(200).json({ message: 'AC-CORE Backend API is running smoothly.' });
+});
+
+app.get('/api/weather', (req: Request, res: Response) => {
+  const weather = getCurrentWeather();
+  if (weather) {
+    res.status(200).json(weather);
+  } else {
+    res.status(404).json({ message: 'Weather data not available yet.' });
+  }
 });
 
 app.use('/api/reports', hazardReportRoutes);

@@ -3,51 +3,72 @@
 
   <main class="mx-auto flex max-w-6xl flex-col gap-5 px-4 py-6 md:px-6 md:py-8">
     <section class="space-y-4">
-      <section hlmCard class="gap-0 border-border/80 bg-card">
-        <div hlmCardHeader class="space-y-3 pb-2">
-          <div class="flex flex-wrap items-center gap-2">
-            <p class="text-sm font-semibold uppercase tracking-[0.2em] text-primary">Citizen Portal</p>
-            <span class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">Personal Tracking Dashboard</span>
-          </div>
-          <h1 hlmCardTitle class="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">My Reports</h1>
-        </div>
-        <div hlmCardContent class="flex flex-col gap-5 pb-6">
-          <p hlmCardDescription class="max-w-3xl text-sm leading-7 md:text-base">
-            Track the status of every hazard you submitted, review updates from the city team, and confirm the location and photo tied to each report.
-          </p>
-          <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <div class="flex flex-wrap gap-3">
-              <a routerLink="/citizen/report" hlmBtn>Report New Hazard</a>
-              <span class="inline-flex items-center rounded-md border border-border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
-                Reports are already filtered to your citizen account.
+      <section
+        class="relative overflow-hidden rounded-xl border border-border/80 bg-card p-6 shadow-sm md:p-8"
+      >
+        <div class="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div class="flex max-w-2xl flex-col gap-4">
+            <div class="flex flex-wrap items-center gap-3">
+              <span
+                class="inline-flex items-center rounded-full bg-primary/15 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary ring-1 ring-primary/20"
+              >
+                Citizen Portal
               </span>
             </div>
-            <p class="text-sm text-muted-foreground">
-              {{
-                isLoading()
-                  ? 'Loading your report activity.'
-                  : reports().length
-                    ? 'Showing your most recent submissions and current progress.'
-                    : 'Your report activity will appear here once you start filing hazards.'
-              }}
-            </p>
+
+            <div class="space-y-2">
+              <h1 class="text-3xl font-bold tracking-tight text-foreground md:text-4xl">
+                My Reports
+              </h1>
+              <p class="text-base leading-relaxed text-muted-foreground">
+                Track the status of every hazard you submitted, review updates from the city team,
+                and confirm the location and photo tied to each report.
+              </p>
+            </div>
+          </div>
+
+          <div class="shrink-0 pt-2 lg:pt-0">
+            <a
+              routerLink="/citizen/report"
+              hlmBtn
+              class="group w-full shadow-md transition-all duration-200 hover:-translate-y-0.5 sm:w-auto"
+            >
+              <lucide-icon
+                name="plus"
+                class="mr-2 h-4 w-4 transition-transform duration-300 group-hover:rotate-90"
+              ></lucide-icon>
+              Report New Hazard
+            </a>
           </div>
         </div>
       </section>
 
       <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         @for (card of summaryCards(); track card.label) {
-          <article hlmCard class="gap-0 border-border/80 bg-card transition-all duration-200 ease-out hover:-translate-y-1 hover:border-primary/30 hover:shadow-md">
+          <article
+            hlmCard
+            class="gap-0 border-border/80 bg-card transition-all duration-200 ease-out hover:-translate-y-1 hover:border-primary/30 hover:shadow-md"
+          >
             <div hlmCardContent class="flex min-h-[112px] flex-col gap-4 px-5 py-4">
               <div class="flex items-start justify-between gap-3">
-                <span class="inline-flex w-fit rounded-full px-3 py-1 text-xs font-semibold leading-none" [ngClass]="card.accent">
+                <span
+                  class="inline-flex w-fit rounded-full px-3 py-1 text-xs font-semibold leading-none"
+                  [ngClass]="card.accent"
+                >
                   {{ card.label }}
                 </span>
-                <p class="text-[2rem] font-semibold tracking-tight leading-none" [ngClass]="card.tone">{{ card.value }}</p>
+                <p
+                  class="text-[2rem] font-semibold tracking-tight leading-none"
+                  [ngClass]="card.tone"
+                >
+                  {{ card.value }}
+                </p>
               </div>
               <div class="space-y-1">
                 <p class="text-sm font-medium text-foreground">{{ card.description }}</p>
-                <p class="text-xs leading-5 text-muted-foreground">Live totals based on your submitted hazard reports.</p>
+                <p class="text-xs leading-5 text-muted-foreground">
+                  Live totals based on your submitted hazard reports.
+                </p>
               </div>
             </div>
           </article>
@@ -62,7 +83,10 @@
       </section>
     } @else if (errorMessage()) {
       <section hlmCard class="border-destructive/20 bg-destructive/5">
-        <div hlmCardContent class="flex flex-col gap-4 py-6 text-sm text-destructive md:flex-row md:items-center md:justify-between">
+        <div
+          hlmCardContent
+          class="flex flex-col gap-4 py-6 text-sm text-destructive md:flex-row md:items-center md:justify-between"
+        >
           <div class="flex items-start gap-3">
             <lucide-icon name="alert-triangle" class="mt-0.5 h-5 w-5 shrink-0"></lucide-icon>
             <p>{{ errorMessage() }}</p>
@@ -72,12 +96,16 @@
       </section>
     } @else if (!reports().length) {
       <section hlmCard class="items-center justify-center gap-4 py-12 text-center">
-        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+        <div
+          class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary"
+        >
           <lucide-icon name="clock" class="h-5 w-5"></lucide-icon>
         </div>
         <div class="space-y-1">
           <h2 class="text-lg font-semibold text-foreground">No reports yet</h2>
-          <p class="text-sm text-muted-foreground">Your submitted hazards will appear here as soon as you file one.</p>
+          <p class="text-sm text-muted-foreground">
+            Your submitted hazards will appear here as soon as you file one.
+          </p>
         </div>
         <a routerLink="/citizen/report" hlmBtn>Report a New Hazard</a>
       </section>
@@ -94,17 +122,27 @@
                   loading="lazy"
                   (error)="markImageAsBroken(report._id)"
                 />
-                <div class="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent"></div>
+                <div
+                  class="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent"
+                ></div>
               } @else {
-                <div class="flex h-64 flex-col items-center justify-center gap-2 bg-muted text-sm text-muted-foreground">
+                <div
+                  class="flex h-64 flex-col items-center justify-center gap-2 bg-muted text-sm text-muted-foreground"
+                >
                   <lucide-icon name="image-off" class="h-5 w-5"></lucide-icon>
                   <span>Photo unavailable</span>
                 </div>
               }
 
               <div class="absolute left-4 right-4 top-4 flex items-start justify-between gap-3">
-                <span class="rounded-xl bg-white/95 px-3 py-2 text-sm font-medium text-foreground shadow-sm">#{{ index + 1 }}</span>
-                <span class="inline-flex w-fit rounded-full px-3.5 py-1.5 text-sm font-medium shadow-sm" [ngClass]="getStatusClasses(report.status)">
+                <span
+                  class="rounded-xl bg-white/95 px-3 py-2 text-sm font-medium text-foreground shadow-sm"
+                  >#{{ index + 1 }}</span
+                >
+                <span
+                  class="inline-flex w-fit rounded-full px-3.5 py-1.5 text-sm font-medium shadow-sm"
+                  [ngClass]="getStatusClasses(report.status)"
+                >
                   {{ report.status === 'Dispatched' ? 'In Progress' : report.status }}
                 </span>
               </div>
@@ -112,7 +150,9 @@
 
             <div hlmCardContent class="flex flex-col gap-5 px-5 py-5">
               <div class="space-y-2">
-                <h2 class="text-[2rem] font-semibold tracking-tight leading-tight text-foreground">{{ report.title }}</h2>
+                <h2 class="text-[2rem] font-semibold tracking-tight leading-tight text-foreground">
+                  {{ report.title }}
+                </h2>
               </div>
 
               <dl class="grid gap-4 sm:grid-cols-3">
@@ -128,7 +168,9 @@
                     <lucide-icon name="calendar-days" class="h-4 w-4 text-primary"></lucide-icon>
                     <span>Submitted</span>
                   </dt>
-                  <dd class="text-sm font-semibold text-foreground">{{ report.createdAt | date: 'MMMM d, y' }}</dd>
+                  <dd class="text-sm font-semibold text-foreground">
+                    {{ report.createdAt | date: 'MMMM d, y' }}
+                  </dd>
                 </div>
                 <div class="space-y-1">
                   <dt class="flex items-center gap-2 text-sm text-muted-foreground">
@@ -144,7 +186,11 @@
               </div>
 
               <div class="grid gap-3 sm:grid-cols-2">
-                <a [routerLink]="['/citizen/my-reports', report._id]" hlmBtn class="w-full">
+                <a
+                  [routerLink]="['/citizen/my-reports', report._id]"
+                  hlmBtn
+                  class="w-full transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-md"
+                >
                   View Details
                 </a>
                 <a
@@ -165,4 +211,5 @@
       </section>
     }
   </main>
+  <app-citizen-footer></app-citizen-footer>
 </div>
