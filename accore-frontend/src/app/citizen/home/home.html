@@ -1,27 +1,42 @@
-<nav class="flex items-center justify-between w-full p-4 bg-white border-b border-gray-200">
-  <a routerLink="/" class="flex items-center gap-2">
-    <span class="text-xl font-bold text-red-800">AC-CORE</span>
-  </a>
+<header class="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur-md">
+  <div class="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
 
-  <div class="flex items-center gap-4">
-    <a routerLink="/login" class="text-sm font-medium text-gray-600 hover:text-red-700 transition-colors">Login</a>
-    <a routerLink="/signup" hlmBtn class="bg-red-700 hover:bg-red-800 text-white">Sign Up</a>
+    <a routerLink="/"
+      class="flex items-center gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-md">
+      <img src="logo.svg" alt="AC-CORE Logo" class="h-8 w-8 object-contain">
+      <div class="flex flex-col justify-center text-left">
+        <span class="text-lg font-bold leading-none tracking-tight text-foreground">AC-CORE</span>
+        <span class="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">Angeles City</span>
+      </div>
+    </a>
+
+    <div class="flex items-center gap-4">
+      <a routerLink="/citizen/login"
+        class="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2 py-1">
+        Login
+      </a>
+      <a routerLink="/citizen/signup" hlmBtn class="bg-red-700 hover:bg-red-800 text-white h-9 px-4">
+        Sign Up
+      </a>
+    </div>
   </div>
-</nav>
+</header>
 
-<main class="flex flex-col items-center justify-center min-h-[calc(100vh-73px)] p-6 text-center bg-gray-50">
+<main class="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] p-6 text-center bg-gray-50">
   <h1 class="text-4xl md:text-6xl font-extrabold text-gray-900 tracking-tight max-w-3xl">
     Empowering Angeles City Through <span class="text-red-700">Smart Maintenance</span>
   </h1>
   <p class="mt-6 text-lg md:text-xl text-gray-600 max-w-2xl">
-    Report potholes, clogged drains, and other micro-infrastructure hazards instantly. Help us keep our barangays safe and flood-free.
+    Report potholes, clogged drains, and other micro-infrastructure hazards instantly. Help us keep our barangays safe
+    and flood-free.
   </p>
-  
+
   <div class="flex gap-4 mt-10">
-    <a routerLink="/report" hlmBtn size="lg" class="bg-red-700 hover:bg-red-800 text-white">
+    <a routerLink="/citizen/report" hlmBtn size="lg" class="bg-red-700 hover:bg-red-800 text-white">
       Report an Issue Now
     </a>
-    <a routerLink="/citizen/my-reports" hlmBtn variant="outline" size="lg" class="text-red-700 border-red-700 hover:bg-red-50">
+    <a routerLink="/citizen/my-reports" hlmBtn variant="outline" size="lg"
+      class="text-red-700 border-red-700 hover:bg-red-50">
       Track My Reports
     </a>
   </div>
