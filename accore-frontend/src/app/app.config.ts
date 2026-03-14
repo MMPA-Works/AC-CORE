@@ -5,8 +5,9 @@ import {
 } from '@angular/core';
 
 import { provideRouter } from '@angular/router';
-import { provideHttpClient, withFetch } from '@angular/common/http';
+import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { routes } from './app.routes';
+import { authInterceptor } from './shared/auth.interceptor';
 
 import {
   SocialLoginModule,
@@ -88,7 +89,10 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideZonelessChangeDetection(),
     provideRouter(routes),
-    provideHttpClient(withFetch()),
+    provideHttpClient(
+      withFetch(),
+      withInterceptors([authInterceptor])
+    ),
     provideCharts(withDefaultRegisterables()),
 
     importProvidersFrom(
