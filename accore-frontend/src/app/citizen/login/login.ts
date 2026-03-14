@@ -35,6 +35,7 @@ export class Login implements OnInit {
   loginForm = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', Validators.required],
+    rememberMe: [false],
   });
 
   ngOnInit() {
@@ -52,8 +53,19 @@ export class Login implements OnInit {
 
     this.http.post('http://localhost:5000/api/auth/citizen/google', { token }).subscribe({
       next: (response: any) => {
+        this.isLoading.set(false);
+
+        // Clear admin token
         localStorage.removeItem('adminToken');
-        localStorage.setItem('token', response.token);
+
+        // Store citizen token based on Remember Me
+        const rememberMe = this.loginForm.value.rememberMe;
+        if (rememberMe) {
+          localStorage.setItem('token', response.token);
+        } else {
+          sessionStorage.setItem('token', response.token);
+        }
+
         toast.success('Login successful!');
         this.router.navigate(['/dashboard']);
       },
@@ -79,8 +91,19 @@ export class Login implements OnInit {
 
     this.http.post('http://localhost:5000/api/auth/citizen/login', this.loginForm.value).subscribe({
       next: (response: any) => {
+        this.isLoading.set(false);
+
+        // Clear admin token
         localStorage.removeItem('adminToken');
-        localStorage.setItem('token', response.token);
+
+        // Store citizen token based on Remember Me
+        const rememberMe = this.loginForm.value.rememberMe;
+        if (rememberMe) {
+          localStorage.setItem('token', response.token);
+        } else {
+          sessionStorage.setItem('token', response.token);
+        }
+
         toast.success('Login successful!');
         this.router.navigate(['/dashboard']);
       },
