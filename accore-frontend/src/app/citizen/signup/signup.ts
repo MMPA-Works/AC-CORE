@@ -31,6 +31,7 @@ export class Signup implements OnInit {
   private fb = inject(FormBuilder);
 
   isLoading = signal(false);
+  showPassword = signal(false);
 
   signupForm = this.fb.group({
     firstName: ['', Validators.required],
@@ -45,6 +46,10 @@ export class Signup implements OnInit {
     });
   }
 
+  togglePassword() {
+    this.showPassword.update((val) => !val);
+  }
+
   handleGoogleSignup(token: string) {
     this.isLoading.set(true);
 
@@ -57,7 +62,6 @@ export class Signup implements OnInit {
       },
       error: (err) => {
         this.isLoading.set(false);
-
         if (err.status === 429) {
           toast.error('Too many signup attempts. Please try again later.');
         } else {
@@ -86,7 +90,6 @@ export class Signup implements OnInit {
         },
         error: (err) => {
           this.isLoading.set(false);
-
           if (err.status === 429) {
             toast.error('Too many signup attempts. Please try again later.');
           } else {
