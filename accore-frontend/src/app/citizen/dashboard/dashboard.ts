@@ -12,9 +12,9 @@ import {
 } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HazardReportService } from '../../services/hazard-report';
 import { HazardReport } from '../../shared/models/hazard-report';
+import { AuthService } from '../../shared/auth';
 import { CitizenHeaderComponent } from '../components/citizen-header/citizen-header';
 import { CitizenFooterComponent } from '../components/citizen-footer/citizen-footer';
 import { HttpClient } from '@angular/common/http';
@@ -33,11 +33,16 @@ import { toast } from 'ngx-sonner';
   styleUrls: ['./dashboard.css'],
   encapsulation: ViewEncapsulation.None,
 })
-export class Dashboard implements OnInit {
+export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
   private hazardReportService = inject(HazardReportService);
+  private authService = inject(AuthService);
   private platformId = inject(PLATFORM_ID);
   private cdr = inject(ChangeDetectorRef);
   private http = inject(HttpClient);
+
+  @ViewChild('mapContainer', { static: false }) mapContainer!: ElementRef;
+  private map: L.Map | undefined;
+  private markerClusterGroup: L.MarkerClusterGroup | undefined;
 
   myReports: HazardReport[] = [];
   isRecentLoading = true;

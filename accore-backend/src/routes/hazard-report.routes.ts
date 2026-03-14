@@ -5,6 +5,7 @@ import {
   getReports,
   getReportById,
   updateReportStatus,
+  archiveReport,
   getAnalytics,
   getPublicReports,
   toggleVerify,

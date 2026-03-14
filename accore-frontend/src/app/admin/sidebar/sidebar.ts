@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit } from '@angular/core';
+import { Component, signal, inject, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
@@ -7,11 +7,18 @@ import { HlmBadgeImports } from '@spartan-ng/helm/badge';
 import { HlmScrollAreaImports } from '@spartan-ng/helm/scroll-area';
 import { AuthService } from '../../shared/auth';
 import { jwtDecode } from 'jwt-decode';
+import { HazardReportService } from '../../services/hazard-report';
 
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, HlmBadgeImports, HlmScrollAreaImports, RouterModule],
+  imports: [
+    CommonModule,
+    LucideAngularModule,
+    HlmBadgeImports,
+    HlmScrollAreaImports,
+    RouterModule
+  ],
   template: `
     @if (isMobileOpen()) {
       <div 
@@ -52,49 +59,43 @@ import { jwtDecode } from 'jwt-decode';
         </button>
       </div>
 
-      <ng-scrollbar hlm class="flex-1 bg-gray-50" appearance="compact">
-        <nav class="px-4 py-6 space-y-8">
-          
-          <div>
-            <h4 class="px-3 text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-3">Overview</h4>
-            <div class="space-y-1">
-              @for (item of mainLinks(); track item.id) {
-                <button
-                  (click)="navigate(item.route, item.id)"
-                  class="w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 group"
-                  [ngClass]="activeNav() === item.id 
-                    ? 'bg-white text-primary shadow-sm border border-gray-200' 
-                    : 'text-gray-500 hover:bg-gray-200/50 hover:text-gray-900 border border-transparent'"
+      <ng-scrollbar hlm class="flex-1" appearance="compact">
+        <nav class="px-3 py-6 space-y-6">
+          <div class="space-y-1.5">
+            @for (item of mainLinks(); track item.id) {
+              <button
+                (click)="navigate(item.route, item.id)"
+                class="w-full flex items-center px-3 py-3 rounded-xl transition-all duration-200 group relative"
+                [ngClass]="activeNav() === item.id 
+                  ? 'bg-primary/10 text-primary font-semibold' 
+                  : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900'"
+                [title]="isCollapsed() ? item.label : ''"
+              >
+                <lucide-icon 
+                  [name]="item.icon" 
+                  class="w-5 h-5 shrink-0 transition-transform group-hover:scale-110" 
+                  [ngClass]="activeNav() === item.id ? 'text-primary' : 'text-gray-400 group-hover:text-gray-600'"
+                  [strokeWidth]="activeNav() === item.id ? 2.5 : 2"
+                ></lucide-icon>
+                
+                <span 
+                  class="ml-3 text-sm tracking-wide whitespace-nowrap transition-all duration-300"
+                  [ngClass]="{'opacity-0 w-0 hidden': isCollapsed(), 'opacity-100 w-auto': !isCollapsed()}"
                 >
-                  <lucide-icon [name]="item.icon" class="w-[18px] h-[18px] mr-3" [strokeWidth]="activeNav() === item.id ? 2.5 : 2"></lucide-icon>
-                  <span class="text-[13px] font-medium tracking-wide">{{ item.label }}</span>
-                  
-                  @if (item.badge) {
-                    <span class="ml-auto bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-md shadow-sm">
-                      {{ item.badge }}
-                    </span>
-                  }
-                </button>
-              }
-            </div>
-          </div>
+                  {{ item.label }}
+                </span>
 
-          <div>
-            <h4 class="px-3 text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-3">Manage</h4>
-            <div class="space-y-1">
-              @for (item of managementLinks(); track item.id) {
-                <button
-                  (click)="navigate(item.route, item.id)"
-                  class="w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 group text-gray-500 hover:bg-gray-200/50 hover:text-gray-900 border border-transparent"
-                  [ngClass]="activeNav() === item.id ? 'bg-white text-primary shadow-sm border-gray-200' : ''"
-                >
-                  <lucide-icon [name]="item.icon" class="w-[18px] h-[18px] mr-3" strokeWidth="2"></lucide-icon>
-                  <span class="text-[13px] font-medium tracking-wide">{{ item.label }}</span>
-                </button>
-              }
-            </div>
+                @if (item.badge && !isCollapsed()) {
+                  <span class="ml-auto bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+                    {{ item.badge }}
+                  </span>
+                }
+                @if (item.badge && isCollapsed()) {
+                  <span class="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full animate-pulse"></span>
+                }
+              </button>
+            }
           </div>
-
         </nav>
       </ng-scrollbar>
 
@@ -127,26 +128,16 @@ import { jwtDecode } from 'jwt-decode';
             </div>
           </div>
           
-          <div class="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center shrink-0 border border-gray-200 overflow-hidden">
-            <img [src]="currentUser().profileImage" alt="Administrator profile picture" class="w-full h-full object-cover">
-          </div>
-
-          <div class="ml-3 flex flex-col overflow-hidden">
-            <span class="text-[13px] font-bold text-gray-900 truncate">{{ currentUser().firstName }} {{ currentUser().lastName }}</span>
-            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate mt-0.5">{{ currentUser().role }}</span>
-          </div>
-
           <button 
             (click)="onLogout()" 
-            class="ml-auto p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200 active:scale-95"
-            title="Sign Out"
+            class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            [title]="isCollapsed() ? 'Sign Out' : ''"
+            [ngClass]="{'hidden': isCollapsed()}"
           >
-            <lucide-icon name="log-out" class="w-[18px] h-[18px]"></lucide-icon>
+            <lucide-icon name="log-out" class="w-4 h-4"></lucide-icon>
           </button>
-          
         </div>
       </div>
-
     </aside>
   `
 })
@@ -154,9 +145,11 @@ export class SidebarComponent implements OnInit {
 
   private router = inject(Router);
   private authService = inject(AuthService);
+  private hazardReportService = inject(HazardReportService);
 
-  // We start it blank. It will instantly update in ngOnInit based on the URL.
   readonly activeNav = signal<string>('');
+  readonly isCollapsed = signal<boolean>(false);
+  readonly isMobileOpen = signal<boolean>(false);
 
   readonly currentUser = signal({
     firstName: 'System',
@@ -166,21 +159,24 @@ export class SidebarComponent implements OnInit {
   });
 
   readonly mainLinks = signal([
-    { id: 'dashboard', label: 'Dashboard', icon: 'bar-chart-3', route: '/admin/dashboard' },
+    { id: 'dashboard', label: 'Dashboard', icon: 'layout-dashboard', route: '/admin/dashboard' },
     { id: 'map', label: 'Live Map', icon: 'map', route: '/admin/map' },
-    { id: 'hazards', label: 'Hazard Reports', icon: 'layout-dashboard', route: '/admin/hazards', badge: '12' }
+    { id: 'hazards', label: 'Hazard Reports', icon: 'alert-triangle', route: '/admin/hazards', badge: '' },
+    { id: 'historical-reports', label: 'Historical Reports', icon: 'history', route: '/admin/reports-generation' }
   ]);
 
-  readonly managementLinks = signal([
-    { id: 'citizens', label: 'Citizens', icon: 'users', route: '/admin/citizens' },
-    { id: 'settings', label: 'Settings', icon: 'settings', route: '/admin/settings' }
-  ]);
+  @HostListener('window:resize')
+  onResize() {
+    if (window.innerWidth >= 1024) {
+      this.isMobileOpen.set(false);
+    }
+  }
 
   ngOnInit() {
     this.loadUserData();
-    this.syncActiveNavWithUrl(this.router.url); // Run once immediately on load
+    this.syncActiveNavWithUrl(this.router.url);
+    this.loadPendingReportsCount();
 
-    // Listen to routing changes (like clicking Back/Forward in the browser)
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: any) => {
@@ -208,11 +204,8 @@ export class SidebarComponent implements OnInit {
     });
   }
 
-  // Checks the current URL against our link lists and highlights the correct button
   private syncActiveNavWithUrl(url: string) {
-    const allLinks = [...this.mainLinks(), ...this.managementLinks()];
-    const matchedLink = allLinks.find(link => url.includes(link.route));
-    
+    const matchedLink = this.mainLinks().find(link => url.includes(link.route));
     if (matchedLink) {
       this.activeNav.set(matchedLink.id);
     }

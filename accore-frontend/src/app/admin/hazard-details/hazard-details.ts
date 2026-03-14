@@ -1,7 +1,7 @@
 import { Component, OnInit, signal, effect, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import * as L from 'leaflet';
 
 import { HazardReportService } from '../../services/hazard-report';
@@ -30,6 +30,7 @@ import { toast } from 'ngx-sonner';
 export class HazardDetails implements OnInit {
   report = signal<any>(null);
   pendingStatus = signal<HazardReportStatus | ''>('');
+  isArchiving = signal<boolean>(false);
   private mapInstance: L.Map | undefined;
 
   readonly STATUS_PIPELINE: HazardReportStatus[] = ['Reported', 'Under Review', 'In Progress', 'Resolved'];
@@ -67,6 +68,7 @@ export class HazardDetails implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private location: Location,
     private hazardService: HazardReportService
   ) {

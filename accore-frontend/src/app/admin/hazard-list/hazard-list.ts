@@ -36,11 +36,8 @@ import { BrnSelectImports } from '@spartan-ng/brain/select';
 import { HlmSelectImports } from '@spartan-ng/helm/select';
 import { HlmTableImports } from '@spartan-ng/helm/table';
 import { HlmPaginationImports } from '@spartan-ng/helm/pagination';
+import { HlmScrollAreaImports } from '@spartan-ng/helm/scroll-area';
 import { toast } from 'ngx-sonner';
-
-// Custom sorting weights to ensure logical ordering rather than alphabetical
-const SEVERITY_WEIGHT: Record<string, number> = { 'Low': 1, 'Medium': 2, 'Critical': 3 };
-const STATUS_WEIGHT: Record<string, number> = { 'Reported': 1, 'Under Review': 2, 'In Progress': 3, 'Resolved': 4 };
 
 @Component({
   selector: 'app-hazard-list',
@@ -61,20 +58,25 @@ const STATUS_WEIGHT: Record<string, number> = { 'Reported': 1, 'Under Review': 2
   templateUrl: './hazard-list.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HazardList implements OnInit {
-  reports = signal<any[]>([]);
+export class HazardList implements OnInit, OnDestroy {
+  reports = signal<HazardReport[]>([]);
+  isLoading = signal<boolean>(false);
+  totalReports = signal<number>(0);
+  totalPages = signal<number>(1);
+  barangays = signal<string[]>([]);
+  categories = signal<string[]>([]);
+  archiveView = signal<'active' | 'archived'>('active');
+  searchDraft = signal<string>('');
+  searchTerm = signal<string>('');
 
-  // Filtering State
   filterBarangay = signal<string>('All');
   filterCategory = signal<string>('All');
   filterSeverity = signal<string>('All');
   filterStatus = signal<string>('All');
 
-  // Sorting State - Added 'createdAt'
-  sortColumn = signal<'severity' | 'status' | 'createdAt' | null>('createdAt');
-  sortDirection = signal<'asc' | 'desc'>('desc'); // Default to newest first
+  sortColumn = signal<'severity' | 'status' | 'createdAt'>('createdAt');
+  sortDirection = signal<'asc' | 'desc'>('desc');
 
-  // Pagination State
   currentPage = signal<number>(1);
   itemsPerPage = signal<number>(10);
 
@@ -102,64 +104,6 @@ export class HazardList implements OnInit {
     }
     return Math.min(this.currentPage() * this.itemsPerPage(), this.totalReports());
   });
-
-  // 1. First apply filters
-  filteredReports = computed(() => {
-    const brgy = this.filterBarangay();
-    const cat = this.filterCategory();
-    const sev = this.filterSeverity();
-    const stat = this.filterStatus();
-
-    return this.reports().filter(report => {
-      const matchBrgy = brgy === 'All' || report.barangay === brgy;
-      const matchCat = cat === 'All' || report.category === cat;
-      const matchSev = sev === 'All' || report.severity === sev;
-      const matchStat = stat === 'All' || report.status === stat;
-      return matchBrgy && matchCat && matchSev && matchStat;
-    });
-  });
-
-  // 2. Then apply sorting
-  sortedReports = computed(() => {
-    const baseReports = [...this.filteredReports()];
-    const col = this.sortColumn();
-    const dir = this.sortDirection();
-
-    if (!col) return baseReports;
-
-    return baseReports.sort((a, b) => {
-      if (col === 'createdAt') {
-        const dateA = new Date(a.createdAt).getTime();
-        const dateB = new Date(b.createdAt).getTime();
-        if (dateA < dateB) return dir === 'asc' ? -1 : 1;
-        if (dateA > dateB) return dir === 'asc' ? 1 : -1;
-        return 0;
-      }
-
-      let valA = a[col];
-      let valB = b[col];
-
-      if (col === 'severity') {
-        valA = SEVERITY_WEIGHT[valA] || 0;
-        valB = SEVERITY_WEIGHT[valB] || 0;
-      } else if (col === 'status') {
-        valA = STATUS_WEIGHT[valA] || 0;
-        valB = STATUS_WEIGHT[valB] || 0;
-      }
-
-      if (valA < valB) return dir === 'asc' ? -1 : 1;
-      if (valA > valB) return dir === 'asc' ? 1 : -1;
-      return 0;
-    });
-  });
-
-  // 3. Finally apply pagination
-  paginatedReports = computed(() => {
-    const start = (this.currentPage() - 1) * this.itemsPerPage();
-    return this.sortedReports().slice(start, start + this.itemsPerPage());
-  });
-
-  totalPages = computed(() => Math.ceil(this.sortedReports().length / this.itemsPerPage()) || 1);
 
   constructor(
     private hazardService: HazardReportService,
@@ -276,7 +220,8 @@ export class HazardList implements OnInit {
   }
 
   exportToCSV(): void {
-    this.exportService.exportToCSV(this.sortedReports(), 'hazard_reports.csv');
+    const prefix = this.isArchivedView() ? 'archived_hazard_reports' : 'hazard_reports';
+    this.exportService.exportToCSV(this.reports(), `${prefix}_page_${this.currentPage()}.csv`);
   }
 
   isGuestReport(report: HazardReport): boolean {
@@ -304,9 +249,14 @@ export class HazardList implements OnInit {
     if (type === 'category') this.filterCategory.set(value);
     if (type === 'severity') this.filterSeverity.set(value);
     if (type === 'status') this.filterStatus.set(value);
-    
-    // Reset pagination to page 1 whenever filters change
+
     this.currentPage.set(1);
+    this.requestReload();
+  }
+
+  onSearchDraftChange(value: string): void {
+    this.searchDraft.set(value);
+    this.searchInput$.next(value);
   }
 
   toggleSort(column: 'severity' | 'status' | 'createdAt'): void {
@@ -314,26 +264,31 @@ export class HazardList implements OnInit {
       this.sortDirection.set(this.sortDirection() === 'asc' ? 'desc' : 'asc');
     } else {
       this.sortColumn.set(column);
-      // Default to descending (newest first) for dates, ascending for text/status
       this.sortDirection.set(column === 'createdAt' ? 'desc' : 'asc');
     }
+
+    this.currentPage.set(1);
+    this.requestReload();
   }
 
   goToPage(page: number): void {
-    if (page >= 1 && page <= this.totalPages()) {
+    if (page >= 1 && page <= this.totalPages() && page !== this.currentPage()) {
       this.currentPage.set(page);
+      this.requestReload();
     }
   }
 
   nextPage(): void {
     if (this.currentPage() < this.totalPages()) {
       this.currentPage.set(this.currentPage() + 1);
+      this.requestReload();
     }
   }
 
   prevPage(): void {
     if (this.currentPage() > 1) {
       this.currentPage.set(this.currentPage() - 1);
+      this.requestReload();
     }
   }
 
@@ -341,21 +296,16 @@ export class HazardList implements OnInit {
     const total = this.totalPages();
     const current = this.currentPage();
     const pages: number[] = [];
-    
-    // Simple logic to show a maximum of 5 page numbers
+
     let start = Math.max(1, current - 2);
     let end = Math.min(total, current + 2);
-    
+
     if (current <= 2) end = Math.min(total, 5);
     if (current >= total - 1) start = Math.max(1, total - 4);
-    
+
     for (let i = start; i <= end; i++) {
       pages.push(i);
     }
     return pages;
-  }
-
-  min(a: number, b: number): number {
-    return Math.min(a, b);
   }
 }

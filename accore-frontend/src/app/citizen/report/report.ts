@@ -27,7 +27,7 @@ import { HlmSelectImports } from '@spartan-ng/helm/select';
 import { HlmTextareaImports } from '@spartan-ng/helm/textarea';
 import { HlmSpinnerImports } from '@spartan-ng/helm/spinner';
 import { CitizenHeaderComponent } from '../components/citizen-header/citizen-header';
-
+import { CitizenFooterComponent } from '../components/citizen-footer/citizen-footer';
 import { HazardReportService } from '../../services/hazard-report';
 import { BarangayService } from '../../services/barangay';
 import { APP_CONFIG } from '../../app.config';

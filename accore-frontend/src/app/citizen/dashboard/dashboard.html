@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-muted/30">
+<div class="min-h-screen bg-neutral-50 flex flex-col font-sans">
   <app-citizen-header></app-citizen-header>
 
   <main class="flex-1 mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 space-y-8">
@@ -165,16 +165,8 @@
             <div class="flex h-12 w-12 items-center justify-center rounded-full bg-neutral-100 mb-3">
               <svg class="h-6 w-6 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
             </div>
-            <span
-              class="shrink-0 rounded-full px-3 py-1 text-xs font-semibold"
-              [ngClass]="{
-                'bg-primary/10 text-primary': report.status === 'Reported',
-                'bg-secondary/20 text-foreground': report.status === 'Dispatched',
-                'bg-green-500/10 text-green-700': report.status === 'Resolved'
-              }"
-            >
-              {{ report.status }}
-            </span>
+            <p class="text-sm font-bold text-neutral-700">No Recent Activity</p>
+            <p class="text-xs mt-1">You have not submitted any hazard reports yet.</p>
           </div>
         </div>
       </section>

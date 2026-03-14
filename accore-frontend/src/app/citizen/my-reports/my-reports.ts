@@ -8,6 +8,7 @@ import { HlmSpinnerImports } from '@spartan-ng/helm/spinner';
 import { HazardReportService } from '../../services/hazard-report';
 import { HazardReport } from '../../shared/models/hazard-report';
 import { CitizenHeaderComponent } from '../components/citizen-header/citizen-header';
+import { CitizenFooterComponent } from '../components/citizen-footer/citizen-footer';
 import { PizzaTrackerComponent } from '../components/pizza-tracker/pizza-tracker';
 
 @Component({
@@ -21,6 +22,7 @@ import { PizzaTrackerComponent } from '../components/pizza-tracker/pizza-tracker
     HlmCardImports,
     HlmSpinnerImports,
     CitizenHeaderComponent,
+    CitizenFooterComponent,
     PizzaTrackerComponent,
   ],
   templateUrl: './my-reports.html',

@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { Types } from "mongoose";
 import HazardReport from "../models/hazard-report.model";
 import Admin from "../models/admin.model";
 import { v2 as cloudinary } from "cloudinary";
@@ -291,6 +292,11 @@ export const getReports = async (
 
       const reports = await HazardReport.aggregate([
         {
+          $match: {
+            isArchived: { $ne: true },
+          },
+        },
+        {
           $addFields: {
             priorityWeight: {
               $cond: {
@@ -341,6 +347,43 @@ export const getReports = async (
     }
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch hazard reports", error });
+  }
+};
+
+export const archiveReport = async (
+  req: AuthRequest,
+  res: Response,
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const adminId = req.user?.id;
+
+    if (!adminId) {
+      res.status(401).json({ message: "Unauthorized. Admin ID missing." });
+      return;
+    }
+
+    const admin = await Admin.findById(adminId);
+    if (!admin) {
+      res.status(404).json({ message: "Admin not found." });
+      return;
+    }
+
+    const report = await HazardReport.findById(id);
+    if (!report) {
+      res.status(404).json({ message: "Hazard report not found." });
+      return;
+    }
+
+    report.isArchived = !report.isArchived;
+
+    const updatedReport = await report.save();
+    res.status(200).json(updatedReport);
+  } catch (error: any) {
+    res.status(500).json({
+      message: "Failed to archive report",
+      error: error.message,
+    });
   }
 };
 
@@ -452,6 +495,11 @@ export const getAnalytics = async (
     }
 
     const analyticsData = await HazardReport.aggregate([
+      {
+        $match: {
+          isArchived: { $ne: true },
+        },
+      },
       {
         $facet: {
           byStatus: [{ $group: { _id: "$status", count: { $sum: 1 } } }],

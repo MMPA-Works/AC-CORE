@@ -20,7 +20,7 @@ import { toast } from 'ngx-sonner';
     HlmButtonImports,
     HlmInputImports,
     HlmLabelImports,
-    HlmToasterImports
+    HlmToasterImports,
   ],
   templateUrl: './signup.html',
 })
@@ -52,12 +52,17 @@ export class Signup implements OnInit {
       next: (response: any) => {
         localStorage.removeItem('adminToken');
         localStorage.setItem('token', response.token);
-        toast.success('Signup successful!', { description: 'Redirecting to dashboard...' });
+        toast.success('Signup successful!');
         this.router.navigate(['/dashboard']);
       },
-      error: () => {
+      error: (err) => {
         this.isLoading.set(false);
-        toast.error('Google signup failed', { description: 'Please try again.' });
+
+        if (err.status === 429) {
+          toast.error('Too many signup attempts. Please try again later.');
+        } else {
+          toast.error(err.error?.message || 'Google signup failed');
+        }
       },
     });
   }

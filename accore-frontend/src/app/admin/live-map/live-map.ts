@@ -15,6 +15,8 @@ import * as L from 'leaflet';
 import 'leaflet.markercluster';
 import { LucideAngularModule } from 'lucide-angular';
 import { HlmSkeletonImports } from '@spartan-ng/helm/skeleton';
+import { EMPTY, Subject, timer } from 'rxjs';
+import { catchError, switchMap, takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-live-map',
@@ -32,7 +34,6 @@ export class LiveMap implements OnInit, OnDestroy {
   private readonly refreshIntervalMs = 10000;
   private readonly activeStatuses = new Set(['Reported', 'Under Review', 'In Progress']);
 
-  allReports = signal<any[]>([]);
   reports = signal<any[]>([]);
   reportedOnly = computed(() => this.reports().filter((r) => r.status === 'Reported'));
 
@@ -45,7 +46,7 @@ export class LiveMap implements OnInit, OnDestroy {
 
   ngOnInit() {
     if (isPlatformBrowser(this.platformId)) {
-      this.fetchReports();
+      this.startAutoRefresh();
     }
   }
 
@@ -58,6 +59,7 @@ export class LiveMap implements OnInit, OnDestroy {
     }
     if (this.map) {
       this.map.remove();
+      this.map = undefined;
     }
   }
 
@@ -65,7 +67,7 @@ export class LiveMap implements OnInit, OnDestroy {
     this.isPanelOpen.update((state) => !state);
   }
 
-  fetchReports() {
+  private startAutoRefresh(): void {
     this.isLoading.set(true);
 
     timer(0, this.refreshIntervalMs)
@@ -95,22 +97,16 @@ export class LiveMap implements OnInit, OnDestroy {
       this.activeStatuses.has(report.status),
     );
 
-        const reportedOnly = actualData.filter(
-          (report: any) => report.status === 'Reported'
-        );
+    this.reports.set(activeReports);
+    this.errorMessage.set('');
+    this.isLoading.set(false);
 
-        this.reports.set(reportedOnly);
+    if (!this.map) {
+      setTimeout(() => this.initMap(), 0);
+      return;
+    }
 
-        this.isLoading.set(false);
-
-        setTimeout(() => this.initMap(), 0);
-      },
-      error: (error) => {
-        console.error('Failed to fetch reports', error);
-        this.errorMessage.set('Could not load reports.');
-        this.isLoading.set(false);
-      },
-    });
+    this.refreshMarkers();
   }
 
   private initMap(): void {

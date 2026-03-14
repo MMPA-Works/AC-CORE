@@ -1,7 +1,12 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { HazardReport, HazardReportStatus } from '../shared/models/hazard-report';
+import {
+  HazardReport,
+  HazardReportPageQuery,
+  HazardReportStatus,
+  PaginatedHazardReportResponse,
+} from '../shared/models/hazard-report';
 
 @Injectable({
   providedIn: 'root',

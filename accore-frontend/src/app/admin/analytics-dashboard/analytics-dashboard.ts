@@ -72,7 +72,7 @@ export class AnalyticsDashboard implements OnInit, OnDestroy {
     const data = this.analyticsData()?.recentActivity || [];
     return data.slice(0, 5);
   });
-  
+
   private map: L.Map | undefined;
   private markerClusterGroup: L.MarkerClusterGroup | undefined;
 
@@ -125,7 +125,7 @@ export class AnalyticsDashboard implements OnInit, OnDestroy {
         }
 
         this.analyticsData.set(data);
-        
+
         if (data?.byBarangay) {
           const counts = data.byBarangay.map((item: any) => item.count);
           this.maxReportCount.set(Math.max(...counts, 1));
@@ -155,7 +155,7 @@ export class AnalyticsDashboard implements OnInit, OnDestroy {
             ],
           };
         }
-        
+
         this.isLoading.set(false);
         if (isPlatformBrowser(this.platformId)) {
           setTimeout(() => this.initMiniMap(data?.activeHotspots || []), 100);

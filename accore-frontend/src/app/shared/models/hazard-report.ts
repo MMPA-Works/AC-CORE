@@ -38,3 +38,32 @@ export interface HazardReport {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface HazardReportPagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface PaginatedHazardReportResponse {
+  reports: HazardReport[];
+  pagination: HazardReportPagination;
+  filters?: {
+    barangays: string[];
+    categories: string[];
+  };
+}
+
+export interface HazardReportPageQuery {
+  page: number;
+  limit: number;
+  archived?: 'true' | 'false';
+  search?: string;
+  barangay?: string;
+  category?: string;
+  severity?: string;
+  status?: string;
+  sortColumn?: 'severity' | 'status' | 'createdAt';
+  sortDirection?: 'asc' | 'desc';
+}
