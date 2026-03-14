@@ -192,3 +192,49 @@ app-admin-layout {
 [data-sonner-toast][data-type='success'] [data-icon] {
   color: #16a34a !important;
 }
+
+/* Add to your global styles.css */
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background-color: #f3f4f6; /* Added a subtle background for contrast */
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-card {
+  display: flex;
+  width: 100%;
+  max-width: 850px; /* Slightly narrower */
+  min-height: 500px; /* Lowered the minimum height */
+  background: white;
+  border-radius: 1.5rem; /* Slightly tighter corners */
+  overflow: hidden;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  z-index: 10;
+}
+
+.auth-left-panel {
+  width: 40%; /* Reduced width of the red panel */
+  background: linear-gradient(160deg, #ac1001 0%, #d61402 100%);
+  padding: 2rem; /* Reduced padding */
+  display: none; 
+  flex-direction: column;
+  justify-content: center;
+  color: white;
+  position: relative;
+}
+
+@media (min-width: 768px) {
+  .auth-left-panel { display: flex; }
+}
+
+.sphere {
+  position: absolute;
+  border-radius: 50%;
+  background: white;
+  opacity: 0.1;
+}
