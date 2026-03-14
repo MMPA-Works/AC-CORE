@@ -268,7 +268,7 @@
                     {{ (currentPage() - 1) * itemsPerPage() + i + 1 }}
                   </td>
                   <td hlmTd class="py-4">
-                    <div class="font-semibold text-gray-900">{{ r.title || r.category }}</div>
+                    <div class="font-semibold text-gray-900">{{ r.title || r.category | titlecase}}</div>
                     <div class="text-xs text-gray-500">{{ r.category }}</div>
                   </td>
                   <td hlmTd class="py-4 text-gray-600 font-medium">{{ r.barangay }}</td>

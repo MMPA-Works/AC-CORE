@@ -5,11 +5,14 @@
     <div class="auth-left-panel">
       <div class="sphere w-64 h-64 -top-20 -left-20"></div>
       <div class="sphere w-32 h-32 bottom-10 right-10"></div>
-      
+
       <img src="/logo.svg" class="w-20 h-20 mb-6 brightness-0 invert" alt="AC-CORE" />
+
       <h2 class="text-4xl font-bold mb-4 uppercase tracking-tight">Welcome</h2>
+
       <p class="text-red-100 opacity-80 leading-relaxed">
-        Angeles City Municipal Maintenance Command Center. Secure access for authorized personnel only.
+        Angeles City Municipal Maintenance Command Center. Secure access for
+        authorized personnel only.
       </p>
     </div>
 
@@ -20,30 +23,60 @@
       </div>
 
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6">
+
+        <!-- EMAIL -->
         <div class="space-y-1">
-          <label hlmLabel class="text-xs font-bold text-gray-400 uppercase ml-2">Email Address</label>
-          <input hlmInput formControlName="email" placeholder="admin@angelescity.gov.ph" 
-                 class="w-full h-12 bg-gray-50 border-none rounded-full px-6 focus:ring-2 focus:ring-red-500" />
+          <label hlmLabel class="text-xs font-bold text-gray-400 uppercase ml-2">
+            Email Address
+          </label>
+
+          <input
+            hlmInput
+            type="email"
+            formControlName="email"
+            placeholder="admin@angelescity.gov.ph"
+            class="w-full h-12 bg-gray-50 border-none rounded-full px-6 focus:ring-2 focus:ring-red-500"
+          />
         </div>
 
+        <!-- PASSWORD -->
         <div class="space-y-1">
-          <label hlmLabel class="text-xs font-bold text-gray-400 uppercase ml-2">Password</label>
-          <input hlmInput type="password" formControlName="password" placeholder="••••••••" 
-                 class="w-full h-12 bg-gray-50 border-none rounded-full px-6 focus:ring-2 focus:ring-red-500" />
+          <label hlmLabel class="text-xs font-bold text-gray-400 uppercase ml-2">
+            Password
+          </label>
+
+          <input
+            hlmInput
+            type="password"
+            formControlName="password"
+            placeholder="••••••••"
+            class="w-full h-12 bg-gray-50 border-none rounded-full px-6 focus:ring-2 focus:ring-red-500"
+          />
         </div>
 
+        <!-- REMEMBER ME -->
         <div class="flex items-center justify-between px-2">
           <div class="flex items-center space-x-2">
-            <input type="checkbox" id="rem" class="rounded text-red-600 focus:ring-red-500" />
+            <input
+              type="checkbox"
+              id="rem"
+              formControlName="rememberMe"
+              class="rounded text-red-600 focus:ring-red-500"
+            />
             <label for="rem" class="text-sm text-gray-500">Remember me</label>
           </div>
         </div>
 
-        <button hlmBtn type="submit" 
-                class="w-full h-12 bg-[#ac1001] hover:bg-[#8e0d01] text-white rounded-full font-bold shadow-lg transition-transform active:scale-95"
-                [disabled]="isLoading()">
+        <!-- SUBMIT -->
+        <button
+          hlmBtn
+          type="submit"
+          class="w-full h-12 bg-[#ac1001] hover:bg-[#8e0d01] text-white rounded-full font-bold shadow-lg transition-transform active:scale-95"
+          [disabled]="isLoading()"
+        >
           {{ isLoading() ? 'Authenticating...' : 'Sign In' }}
         </button>
+
       </form>
     </div>
   </div>
