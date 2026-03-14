@@ -154,7 +154,7 @@ export class Report implements OnInit, OnDestroy {
       this.ngZone.run(() => this.handlePinMovement());
     });
 
-    this.locateUserManual();
+    // TASK #115 FIX: Removed the automatic call to locateUserManual() from here.
   }
 
   locateUserManual() {
