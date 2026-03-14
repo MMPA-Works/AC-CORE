@@ -1,53 +1,79 @@
-<main class="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
-  <!-- Sonner Toaster -->
-  <hlm-toaster class="z-50" [richColors]="true" [expand]="false"></hlm-toaster>
+<main class="auth-container">
+  <hlm-toaster class="z-50" [richColors]="true" [expand]="false" />
 
-  <div class="w-full max-w-md p-8 bg-white rounded-lg shadow-sm border border-gray-200">
-    <div class="text-center space-y-2 mb-8">
-      <h2 class="text-3xl font-bold tracking-tight">Create an Account</h2>
-      <p class="text-gray-500">Join AC-CORE to report incidents and stay updated.</p>
+  <div class="auth-card">
+    <div class="auth-left-panel">
+      <div class="sphere w-48 h-48 -top-16 -left-16"></div>
+      <div class="sphere w-32 h-32 bottom-10 right-5"></div>
+      
+      <div class="relative z-10">
+        <img src="/logo.svg" class="w-16 h-16 mb-4 brightness-0 invert" alt="AC-CORE Logo" />
+        <h2 class="text-3xl font-extrabold mb-2 uppercase tracking-tighter leading-tight">
+          Join the <br/> Community
+        </h2>
+        <p class="text-red-100 opacity-90 text-sm leading-relaxed max-w-xs">
+          Help improve Angeles City by reporting issues.
+        </p>
+      </div>
     </div>
 
-    <div class="flex justify-center w-full mb-6">
-      <asl-google-signin-button type="standard" size="large" [width]="300"></asl-google-signin-button>
-    </div>
+    <div class="flex-1 p-6 md:p-10 bg-white">
+      <div class="mb-4">
+        <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Create Account</h1>
+        <p class="text-gray-500 text-sm mt-0.5">Get started with your citizen dashboard</p>
+      </div>
 
-    <div class="relative flex items-center py-4 mb-2">
-      <div class="flex-grow border-t border-gray-200"></div>
-      <span class="flex-shrink-0 mx-4 text-sm text-gray-400">or register with email</span>
-      <div class="flex-grow border-t border-gray-200"></div>
-    </div>
+      <div class="flex justify-center w-full mb-4">
+        <asl-google-signin-button type="standard" size="medium" [width]="300"></asl-google-signin-button>
+      </div>
 
-    <form [formGroup]="signupForm" (ngSubmit)="onSubmit()" class="space-y-4">
-      <div class="grid grid-cols-2 gap-4">
-        <div class="space-y-1">
-          <label hlmLabel for="firstName">First Name</label>
-          <input hlmInput id="firstName" type="text" formControlName="firstName" placeholder="Juan" class="w-full" />
+      <div class="relative flex items-center mb-4">
+        <div class="flex-grow border-t border-gray-100"></div>
+        <span class="px-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Or Register With Email</span>
+        <div class="flex-grow border-t border-gray-100"></div>
+      </div>
+
+      <form [formGroup]="signupForm" (ngSubmit)="onSubmit()" class="space-y-2">
+        <div class="grid grid-cols-2 gap-3">
+          <div class="space-y-0.5">
+            <label hlmLabel class="text-[9px] font-bold text-gray-400 uppercase ml-4">First Name</label>
+            <input hlmInput formControlName="firstName" placeholder="Juan" 
+                   class="w-full h-10 bg-gray-50 border-none rounded-full px-5 text-sm focus:ring-2 focus:ring-red-500" />
+          </div>
+          <div class="space-y-0.5">
+            <label hlmLabel class="text-[9px] font-bold text-gray-400 uppercase ml-4">Last Name</label>
+            <input hlmInput formControlName="lastName" placeholder="Dela Cruz" 
+                   class="w-full h-10 bg-gray-50 border-none rounded-full px-5 text-sm focus:ring-2 focus:ring-red-500" />
+          </div>
         </div>
-        <div class="space-y-1">
-          <label hlmLabel for="lastName">Last Name</label>
-          <input hlmInput id="lastName" type="text" formControlName="lastName" placeholder="Dela Cruz" class="w-full" />
+
+        <div class="space-y-0.5">
+          <label hlmLabel class="text-[9px] font-bold text-gray-400 uppercase ml-4">Email Address</label>
+          <input hlmInput type="email" formControlName="email" placeholder="juan@example.com" 
+                 class="w-full h-10 bg-gray-50 border-none rounded-full px-5 text-sm focus:ring-2 focus:ring-red-500" />
         </div>
-      </div>
 
-      <div class="space-y-1">
-        <label hlmLabel for="email">Email Address</label>
-        <input hlmInput id="email" type="email" formControlName="email" placeholder="juan@example.com" class="w-full" />
-      </div>
+        <div class="space-y-0.5">
+          <div class="flex justify-between items-center px-4">
+            <label hlmLabel class="text-[9px] font-bold text-gray-400 uppercase">Password</label>
+            <button type="button" class="text-[9px] font-bold text-red-700 uppercase hover:underline">Show</button>
+          </div>
+          <input hlmInput type="password" formControlName="password" placeholder="••••••••" 
+                 class="w-full h-10 bg-gray-50 border-none rounded-full px-5 text-sm focus:ring-2 focus:ring-red-500" />
+        </div>
 
-      <div class="space-y-1">
-        <label hlmLabel for="password">Password</label>
-        <input hlmInput id="password" type="password" formControlName="password" placeholder="Create a password (min 6 chars)" class="w-full" />
-      </div>
+        <button hlmBtn type="submit" 
+                class="w-full h-11 bg-[#ac1001] hover:bg-[#8e0d01] text-white rounded-full font-bold shadow-md mt-4 transition-all active:scale-95 disabled:opacity-50"
+                [disabled]="isLoading() || signupForm.invalid">
+          <span *ngIf="!isLoading()">Sign Up</span>
+          <span *ngIf="isLoading()">Creating Account...</span>
+        </button>
+      </form>
 
-      <button hlmBtn type="submit" class="w-full mt-6" [disabled]="isLoading() || signupForm.invalid">
-        <span *ngIf="isLoading()">Creating account...</span>
-        <span *ngIf="!isLoading()">Sign Up</span>
-      </button>
-    </form>
-
-    <p class="text-center text-sm text-gray-500 mt-8">
-      Already have an account? <a href="/citizen/login" class="text-blue-600 hover:underline">Log in here</a>.
-    </p>
+      <p class="text-center text-xs text-gray-500 mt-6">
+        Already have an account? 
+        <a href="/citizen/login" class="text-[#ac1001] font-bold hover:underline">Log in</a>
+      </p>
+    </div>
   </div>
 </main>
