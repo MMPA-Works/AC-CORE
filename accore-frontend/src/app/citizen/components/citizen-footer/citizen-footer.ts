@@ -1,7 +1,8 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { LucideAngularModule, LUCIDE_ICONS, LucideIconProvider, Phone, Shield } from 'lucide-angular';
+import { AuthService } from '../../../shared/auth'; // Ensure this path is correct
 
 @Component({
   selector: 'app-citizen-footer',
@@ -17,7 +18,25 @@ import { LucideAngularModule, LUCIDE_ICONS, LucideIconProvider, Phone, Shield } 
   ]
 })
 export class CitizenFooterComponent {
+  private authService = inject(AuthService);
+  private router = inject(Router);
+
   readonly currentYear = new Date().getFullYear();
+
+  /**
+   * Logic: Show footer everywhere EXCEPT when:
+   * 1. Path is exactly '/report'
+   * 2. AND user is NOT logged in (Guest)
+   */
+  get isVisible(): boolean {
+    const isReportPage = this.router.url === '/report' || this.router.url === '/citizen/report';
+    const isLoggedIn = !!this.authService.getCitizenToken();
+
+    if (isReportPage && !isLoggedIn) {
+      return false;
+    }
+    return true;
+  }
 
   readonly platformLinks = [
     { label: 'Dashboard', route: '/citizen/dashboard' },
