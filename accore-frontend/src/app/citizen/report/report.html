@@ -1,7 +1,9 @@
 <div class="min-h-screen bg-slate-50">
-  <app-citizen-header class="sticky top-0 z-50 block w-full"></app-citizen-header>
+  @if (isLoggedIn) {
+    <app-citizen-header class="sticky top-0 z-50 block w-full"></app-citizen-header>
+  }
 
-  <div class="p-4 md:p-8">
+  <div class="p-4 md:p-8" [class.pt-12]="!isLoggedIn">
     <div
       class="max-w-3xl mx-auto bg-white shadow-2xl md:rounded-2xl overflow-hidden border border-slate-200"
     >
@@ -270,5 +272,8 @@
       </main>
     </div>
   </div>
-  <app-citizen-footer></app-citizen-footer>
+
+  @if (isLoggedIn) {
+    <app-citizen-footer></app-citizen-footer>
+  }
 </div>

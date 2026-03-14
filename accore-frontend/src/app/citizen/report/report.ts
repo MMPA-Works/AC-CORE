@@ -82,6 +82,11 @@ export class Report implements OnInit, OnDestroy {
   private map?: L.Map;
   private marker?: L.Marker;
 
+  // New getter for Feature #138
+  public get isLoggedIn(): boolean {
+    return !!this.authService.getCitizenToken();
+  }
+
   readonly isGuestMode = !this.authService.getCitizenToken();
   readonly closeRoute = this.isGuestMode ? '/' : '/dashboard';
 
@@ -153,8 +158,6 @@ export class Report implements OnInit, OnDestroy {
       this.marker?.setLatLng(e.latlng);
       this.ngZone.run(() => this.handlePinMovement());
     });
-
-    // TASK #115 FIX: Removed the automatic call to locateUserManual() from here.
   }
 
   locateUserManual() {
