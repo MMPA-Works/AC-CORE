@@ -5,9 +5,7 @@ import {
 } from '@angular/core';
 
 import { provideRouter } from '@angular/router';
-
 import { provideHttpClient, withFetch } from '@angular/common/http';
-
 import { routes } from './app.routes';
 
 import {
@@ -32,6 +30,9 @@ import {
   AlertTriangle,
   CalendarDays,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  AlignLeft,
   Check,
   CheckCircle2,
   History,
@@ -86,16 +87,12 @@ export const APP_CONFIG = {
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZonelessChangeDetection(),
-
     provideRouter(routes),
-
     provideHttpClient(withFetch()),
-
     provideCharts(withDefaultRegisterables()),
 
     importProvidersFrom(
       SocialLoginModule,
-
       LucideAngularModule.pick({
         LayoutDashboard,
         Map,
@@ -110,6 +107,9 @@ export const appConfig: ApplicationConfig = {
         AlertTriangle,
         CalendarDays,
         ChevronDown,
+        ChevronLeft,
+        ChevronRight,
+        AlignLeft,
         Check,
         CheckCircle2,
         History,
@@ -137,17 +137,13 @@ export const appConfig: ApplicationConfig = {
 
     {
       provide: SOCIAL_AUTH_CONFIG,
-
       useValue: {
         autoLogin: false,
-
         providers: [
           {
             id: GoogleLoginProvider.PROVIDER_ID,
-
             provider: new GoogleLoginProvider(
               '184337788465-d57oaputgh4s9vvc384sbe6olrvc8ffd.apps.googleusercontent.com',
-
               { prompt: 'select_account' },
             ),
           },

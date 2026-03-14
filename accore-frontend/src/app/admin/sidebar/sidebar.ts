@@ -22,107 +22,110 @@ import { HazardReportService } from '../../services/hazard-report';
   template: `
     @if (isMobileOpen()) {
       <div 
-        class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden transition-opacity"
+        class="fixed inset-0 z-40 bg-slate-900/60 backdrop-blur-sm lg:hidden transition-opacity duration-300"
         (click)="closeMobile()"
       ></div>
     }
 
     <aside 
-      class="fixed inset-y-0 left-0 z-50 flex flex-col bg-white border-r border-gray-200 transition-all duration-300 ease-in-out shadow-lg lg:shadow-none lg:static lg:h-screen lg:shrink-0"
+      class="absolute lg:static inset-y-0 left-0 z-50 flex flex-col bg-white border-r border-slate-200 transition-all duration-300 ease-in-out shadow-2xl lg:shadow-none h-full w-64 lg:w-auto"
       [ngClass]="{
-        'w-64': !isCollapsed(),
-        'w-20': isCollapsed(),
         'translate-x-0': isMobileOpen(),
         '-translate-x-full lg:translate-x-0': !isMobileOpen()
       }"
     >
-      <div class="h-20 flex items-center justify-between px-5 shrink-0 border-b border-gray-100 transition-all">
-        <a routerLink="/admin/dashboard" class="flex items-center overflow-hidden min-w-0">
-          <div class="w-10 h-10 flex items-center justify-center shrink-0 overflow-hidden">
-            <img
-              src="logo.svg"
-              alt="AC-CORE Angeles City Municipal Maintenance Official Logo"
-              class="h-10 w-10 object-contain"
-            />
+      <button 
+        (click)="toggleCollapse()" 
+        class="hidden lg:flex absolute -right-3.5 top-[26px] items-center justify-center w-7 h-7 bg-white border border-slate-200 text-slate-500 hover:text-slate-900 hover:border-slate-400 rounded-full shadow-sm transition-all z-50 hover:scale-110"
+        aria-label="Toggle Desktop Sidebar"
+      >
+        <lucide-icon [name]="isCollapsed() ? 'chevron-right' : 'chevron-left'" class="w-4 h-4"></lucide-icon>
+      </button>
+
+      <div 
+        class="h-16 lg:h-20 flex items-center shrink-0 border-b border-slate-100 transition-all"
+        [ngClass]="(isCollapsed() && !isMobileOpen()) ? 'px-0 justify-center' : 'px-6 justify-between'"
+      >
+        <a routerLink="/admin/dashboard" class="flex items-center overflow-hidden min-w-0 flex-1"
+           [ngClass]="{'justify-center': isCollapsed() && !isMobileOpen()}">
+          <div class="w-8 h-8 lg:w-10 lg:h-10 flex items-center justify-center shrink-0">
+            <img src="logo.svg" alt="AC-CORE Dashboard Official Logo" class="h-full w-full object-contain drop-shadow-sm" />
           </div>
           <div 
-            class="flex flex-col ml-3 transition-opacity duration-300 whitespace-nowrap"
-            [ngClass]="{'opacity-0 hidden': isCollapsed(), 'opacity-100': !isCollapsed()}"
+            class="flex flex-col transition-all duration-300 whitespace-nowrap overflow-hidden"
+            [ngClass]="{'opacity-0 w-0 ml-0': isCollapsed() && !isMobileOpen(), 'opacity-100 w-auto ml-3': !isCollapsed() || isMobileOpen()}"
           >
-            <span class="text-lg font-extrabold tracking-tight text-gray-900 leading-none">AC-CORE</span>
-            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-1">Command Center</span>
+            <span class="text-lg lg:text-xl font-black tracking-tight text-slate-800 leading-none">AC-CORE</span>
+            <span class="text-[9px] lg:text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Command Center</span>
           </div>
         </a>
         
-        <button class="lg:hidden p-2 text-gray-400 hover:text-gray-900" (click)="closeMobile()">
+        <button class="lg:hidden p-2 text-slate-400 hover:text-slate-800 bg-slate-50 rounded-lg active:scale-95 transition-all" (click)="closeMobile()">
           <lucide-icon name="x" class="w-5 h-5"></lucide-icon>
         </button>
       </div>
 
       <ng-scrollbar hlm class="flex-1" appearance="compact">
-        <nav class="px-3 py-6 space-y-6">
-          <div class="space-y-1.5">
-            @for (item of mainLinks(); track item.id) {
-              <button
-                (click)="navigate(item.route, item.id)"
-                class="w-full flex items-center px-3 py-3 rounded-xl transition-all duration-200 group relative"
-                [ngClass]="activeNav() === item.id 
-                  ? 'bg-primary/10 text-primary font-semibold' 
-                  : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900'"
-                [title]="isCollapsed() ? item.label : ''"
-              >
-                <lucide-icon 
-                  [name]="item.icon" 
-                  class="w-5 h-5 shrink-0 transition-transform group-hover:scale-110" 
-                  [ngClass]="activeNav() === item.id ? 'text-primary' : 'text-gray-400 group-hover:text-gray-600'"
-                  [strokeWidth]="activeNav() === item.id ? 2.5 : 2"
-                ></lucide-icon>
-                
-                <span 
-                  class="ml-3 text-sm tracking-wide whitespace-nowrap transition-all duration-300"
-                  [ngClass]="{'opacity-0 w-0 hidden': isCollapsed(), 'opacity-100 w-auto': !isCollapsed()}"
-                >
-                  {{ item.label }}
-                </span>
+        <nav class="px-4 py-6 space-y-1">
+          <p 
+            class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 px-2 transition-all duration-300 overflow-hidden whitespace-nowrap"
+            [ngClass]="{'opacity-0 w-0 h-0 mb-0 text-center': isCollapsed() && !isMobileOpen(), 'opacity-100 w-auto': !isCollapsed() || isMobileOpen()}"
+          >
+            Main Menu
+          </p>
 
-                @if (item.badge && !isCollapsed()) {
-                  <span class="ml-auto bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
-                    {{ item.badge }}
-                  </span>
-                }
-                @if (item.badge && isCollapsed()) {
-                  <span class="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full animate-pulse"></span>
-                }
-              </button>
-            }
-          </div>
+          @for (item of mainLinks(); track item.id) {
+            <button
+              (click)="navigate(item.route, item.id)"
+              class="w-full flex items-center py-3 mt-1 rounded-lg transition-all duration-200 group relative border border-transparent overflow-hidden"
+              [ngClass]="[
+                activeNav() === item.id ? 'bg-slate-100 text-slate-900 font-semibold shadow-sm' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900',
+                (isCollapsed() && !isMobileOpen()) ? 'justify-center px-0' : 'px-3'
+              ]"
+              [title]="isCollapsed() && !isMobileOpen() ? item.label : ''"
+            >
+              <lucide-icon 
+                [name]="item.icon" 
+                class="w-5 h-5 shrink-0 transition-transform group-hover:scale-110" 
+                [ngClass]="activeNav() === item.id ? 'text-slate-800' : 'text-slate-400 group-hover:text-slate-600'"
+                [strokeWidth]="activeNav() === item.id ? 2.5 : 2"
+              ></lucide-icon>
+              
+              <span 
+                class="text-sm tracking-wide whitespace-nowrap transition-all duration-300 overflow-hidden text-left"
+                [ngClass]="{'opacity-0 w-0 ml-0 flex-none': isCollapsed() && !isMobileOpen(), 'opacity-100 w-auto ml-3 flex-1': !isCollapsed() || isMobileOpen()}"
+              >
+                {{ item.label }}
+              </span>
+
+              @if (item.badge && (!isCollapsed() || isMobileOpen())) {
+                <span class="ml-2 bg-white text-slate-600 border border-slate-200 text-xs font-bold px-2 h-6 flex items-center justify-center rounded-md shadow-sm transition-all">
+                  {{ item.badge }}
+                </span>
+              }
+            </button>
+          }
         </nav>
       </ng-scrollbar>
 
-      <div class="p-4 shrink-0 border-t border-gray-100 flex flex-col gap-2">
-        <button 
-          (click)="toggleCollapse()" 
-          class="hidden lg:flex items-center justify-center w-full py-2 mb-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+      <div class="p-4 shrink-0 border-t border-slate-100 transition-all flex justify-center">
+        <div 
+          class="flex items-center w-full rounded-xl transition-colors overflow-hidden"
+          [ngClass]="(isCollapsed() && !isMobileOpen()) ? 'justify-center p-0' : 'p-2 hover:bg-slate-50 border border-transparent hover:border-slate-100 justify-between'"
         >
-          <lucide-icon [name]="isCollapsed() ? 'chevron-right' : 'chevron-left'" class="w-5 h-5"></lucide-icon>
-        </button>
-
-        <div class="flex items-center justify-between w-full p-2 rounded-xl bg-gray-50 border border-gray-100">
-          <div class="flex items-center overflow-hidden">
-            <div class="w-9 h-9 rounded-full bg-white flex items-center justify-center shrink-0 shadow-sm overflow-hidden">
-              <img [src]="currentUser().profileImage" alt="Administrator Profile Picture" class="w-full h-full object-cover">
+          <div class="flex items-center overflow-hidden" [ngClass]="{'justify-center': isCollapsed() && !isMobileOpen(), 'flex-1': !isCollapsed() || isMobileOpen()}">
+            <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center shrink-0 shadow-sm border border-slate-200 overflow-hidden">
+              <img [src]="currentUser().profileImage" alt="Current Administrator Profile Portrait" class="w-full h-full object-cover">
             </div>
 
             <div 
-              class="ml-3 flex flex-col transition-opacity duration-300 whitespace-nowrap"
-              [ngClass]="{'opacity-0 hidden': isCollapsed(), 'opacity-100': !isCollapsed()}"
+              class="flex flex-col transition-all duration-300 whitespace-nowrap overflow-hidden"
+              [ngClass]="{'opacity-0 w-0 ml-0 flex-none': isCollapsed() && !isMobileOpen(), 'opacity-100 w-auto ml-3 flex-1': !isCollapsed() || isMobileOpen()}"
             >
-              <!-- FULL NAME -->
-              <span class="text-sm font-bold text-gray-900 truncate">
+              <span class="text-sm font-bold text-slate-800 truncate">
                 {{ currentUser().firstName }} {{ currentUser().lastName }}
               </span>
-
-              <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider truncate">
+              <span class="text-xs font-medium text-slate-500 truncate">
                 {{ currentUser().role }}
               </span>
             </div>
@@ -130,9 +133,9 @@ import { HazardReportService } from '../../services/hazard-report';
           
           <button 
             (click)="onLogout()" 
-            class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-            [title]="isCollapsed() ? 'Sign Out' : ''"
-            [ngClass]="{'hidden': isCollapsed()}"
+            class="p-2 ml-1 text-slate-400 hover:text-slate-800 hover:bg-slate-200 rounded-lg transition-colors shrink-0"
+            [title]="(isCollapsed() && !isMobileOpen()) ? 'Sign Out' : 'Sign Out'"
+            [ngClass]="{'hidden': isCollapsed() && !isMobileOpen()}"
           >
             <lucide-icon name="log-out" class="w-4 h-4"></lucide-icon>
           </button>
