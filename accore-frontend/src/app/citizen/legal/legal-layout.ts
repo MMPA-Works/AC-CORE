@@ -10,7 +10,7 @@ import { CitizenFooterComponent } from '../components/citizen-footer/citizen-foo
   template: `
     <div class="flex min-h-screen flex-col bg-neutral-50">
       <app-citizen-header />
-      <main class="flex-grow pt-24 pb-16">
+      <main class="flex-grow pt-12 pb-16">
         <div class="mx-auto max-w-4xl px-4 md:px-6">
           <div class="rounded-2xl border border-neutral-200 bg-white p-8 shadow-sm md:p-12">
             <router-outlet />
