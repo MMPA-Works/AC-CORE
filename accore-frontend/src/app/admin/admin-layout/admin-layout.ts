@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { SidebarComponent } from '../sidebar/sidebar';
 import { LucideAngularModule } from 'lucide-angular';
 import { AdminFooter } from '../admin-footer/admin-footer';
@@ -11,4 +11,10 @@ import { AdminFooter } from '../admin-footer/admin-footer';
   imports: [CommonModule, RouterModule, SidebarComponent, LucideAngularModule, AdminFooter],
   templateUrl: './admin-layout.html'
 })
-export class AdminLayout {}
+export class AdminLayout {
+  private router = inject(Router);
+
+  get showFooter(): boolean {
+    return !this.router.url.includes('/map');
+  }
+}
