@@ -115,7 +115,7 @@ import { HazardReportService } from '../../services/hazard-report';
         >
           <div class="flex items-center overflow-hidden" [ngClass]="{'justify-center': isCollapsed() && !isMobileOpen(), 'flex-1': !isCollapsed() || isMobileOpen()}">
             <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center shrink-0 shadow-sm border border-slate-200 overflow-hidden">
-              <img [src]="currentUser().profileImage" alt="Current Administrator Profile Portrait" class="w-full h-full object-cover">
+              <img src="boss-tryke.png" alt="Current Administrator Profile Portrait" class="w-full h-full object-cover">
             </div>
 
             <div 
