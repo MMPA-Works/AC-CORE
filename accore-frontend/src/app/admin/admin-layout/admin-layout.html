@@ -28,8 +28,14 @@
       </button>
     </header>
 
-    <main class="flex-1 overflow-y-auto overflow-x-hidden relative bg-slate-50/50 z-0">
-      <router-outlet></router-outlet>
+    <main class="flex-1 flex flex-col overflow-y-auto overflow-x-hidden relative bg-slate-50/50 z-0">
+      
+      <div class="flex-1">
+        <router-outlet></router-outlet>
+      </div>
+
+      <app-admin-footer></app-admin-footer>
+
     </main>
     
   </div>
