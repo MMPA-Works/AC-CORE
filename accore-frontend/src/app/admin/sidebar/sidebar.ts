@@ -49,7 +49,7 @@ import { HazardReportService } from '../../services/hazard-report';
         <a routerLink="/admin/dashboard" class="flex items-center overflow-hidden min-w-0 flex-1"
            [ngClass]="{'justify-center': isCollapsed() && !isMobileOpen()}">
           <div class="w-8 h-8 lg:w-10 lg:h-10 flex items-center justify-center shrink-0">
-            <img src="logo.svg" alt="AC-CORE Dashboard Official Logo" class="h-full w-full object-contain drop-shadow-sm" />
+            <img src="/logo/logo.svg" alt="AC-CORE Dashboard Official Logo" class="h-full w-full object-contain drop-shadow-sm" />
           </div>
           <div 
             class="flex flex-col transition-all duration-300 whitespace-nowrap overflow-hidden"
@@ -115,7 +115,7 @@ import { HazardReportService } from '../../services/hazard-report';
         >
           <div class="flex items-center overflow-hidden" [ngClass]="{'justify-center': isCollapsed() && !isMobileOpen(), 'flex-1': !isCollapsed() || isMobileOpen()}">
             <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center shrink-0 shadow-sm border border-slate-200 overflow-hidden">
-              <img src="boss-tryke.png" alt="Current Administrator Profile Portrait" class="w-full h-full object-cover">
+              <img src="/assets/boss-tryke.png" alt="Current Administrator Profile Portrait" class="w-full h-full object-cover">
             </div>
 
             <div 
