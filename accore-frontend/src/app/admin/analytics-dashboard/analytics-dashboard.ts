@@ -16,7 +16,6 @@ import { ExportService } from '../../services/export';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartType } from 'chart.js';
 import * as L from 'leaflet';
-import 'leaflet.markercluster';
 
 L.Icon.Default.imagePath = 'https://unpkg.com/leaflet@1.9.4/dist/images/';
 
@@ -164,10 +163,17 @@ export class AnalyticsDashboard implements OnInit, OnDestroy {
         this.cdr.detectChanges(); // Sync data instantly
 
         if (isPlatformBrowser(this.platformId)) {
-          // Allow browser 50ms to paint the DOM element before Leaflet attaches
-          setTimeout(() => {
-            this.initMiniMap(data?.activeHotspots || []);
-          }, 50);
+          // Make Leaflet global and dynamically import the cluster plugin
+          (window as any).L = L;
+
+          import('leaflet.markercluster')
+            .then(() => {
+              // Allow browser 50ms to paint the DOM element before Leaflet attaches
+              setTimeout(() => {
+                this.initMiniMap(data?.activeHotspots || []);
+              }, 50);
+            })
+            .catch((err) => console.error('Map plugin failed to load', err));
         }
       },
       error: (err) => {
