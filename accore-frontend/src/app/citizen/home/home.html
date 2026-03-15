@@ -3,7 +3,7 @@
 
     <a routerLink="/"
       class="flex items-center gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-md">
-      <img src="logo.svg" alt="AC-CORE Logo" class="h-8 w-8 object-contain">
+      <img src="logo.svg" alt="Official AC-CORE Municipal Logo" class="h-8 w-8 object-contain">
       <div class="flex flex-col justify-center text-left">
         <span class="text-lg font-bold leading-none tracking-tight text-foreground">AC-CORE</span>
         <span class="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">Angeles City</span>
@@ -22,24 +22,177 @@
   </div>
 </header>
 
-<main class="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] p-6 text-center bg-gray-50">
-  <h1 class="text-4xl md:text-6xl font-extrabold text-gray-900 tracking-tight max-w-3xl">
-    Empowering Angeles City Through <span class="text-red-700">Smart Maintenance</span>
-  </h1>
-  <p class="mt-6 text-lg md:text-xl text-gray-600 max-w-2xl">
-    Report potholes, clogged drains, and other micro-infrastructure hazards instantly. Help us keep our barangays safe
-    and flood-free.
-  </p>
+<main class="flex flex-col min-h-[calc(100vh-64px)]">
+  <section class="relative w-full flex-grow flex items-center bg-gray-900">
+    <img 
+      src="assets/images/angeles-city-infrastructure.jpg" 
+      alt="Well-maintained streets and modern municipal infrastructure in Angeles City, Philippines" 
+      class="absolute inset-0 w-full h-full object-cover z-0" 
+    />
+    
+    <div class="absolute inset-0 bg-red-950/85 z-0"></div>
 
-  <div class="flex gap-4 mt-10">
-    <a routerLink="/citizen/report" hlmBtn size="lg" class="bg-red-700 hover:bg-red-800 text-white">
-      Report an Issue Now
-    </a>
-    <a routerLink="/citizen/my-reports" hlmBtn variant="outline" size="lg"
-      class="text-red-700 border-red-700 hover:bg-red-50">
-      Track My Reports
-    </a>
-  </div>
+    <div class="relative z-10 container mx-auto px-6 py-12 md:py-24 lg:py-32 flex flex-col lg:flex-row items-center gap-12">
+      
+      <div class="flex-1 text-left space-y-8 max-w-3xl">
+        
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
+          Report Local Issues. Build a Better Angeles City.
+        </h1>
+        
+        <p class="text-lg md:text-xl text-white max-w-2xl font-medium leading-relaxed">
+          Angeles Fix-It is the official platform for residents to easily report public maintenance needs. Submit issues directly to city departments, track the progress of repairs, and help keep our community safe and beautiful.
+        </p>
+        
+        <div class="flex flex-wrap gap-4 pt-4">
+          <a routerLink="/citizen/report" hlmBtn size="lg" class="bg-red-600 hover:bg-red-700 text-white font-bold text-lg px-8 border border-red-600">
+            Report an Issue Now
+          </a>
+          
+          <a routerLink="/citizen/my-reports" hlmBtn variant="outline" size="lg" class="bg-transparent border-2 border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black font-bold text-lg px-8">
+            Track a Report
+          </a>
+        </div>
+
+      </div>
+      
+      <div class="hidden lg:flex flex-1"></div>
+      
+    </div>
+  </section>
+
+  <section class="bg-white py-20 lg:py-32">
+    <div class="container mx-auto px-6 max-w-6xl">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight text-gray-900">
+          How It Works
+        </h2>
+        <p class="mt-4 text-lg text-gray-600 font-medium">
+          Improving our city takes three simple steps.
+        </p>
+      </div>
+
+      <div class="relative flex flex-col md:flex-row justify-between items-start md:items-center gap-16 md:gap-4">
+        
+        <div class="hidden md:block absolute top-12 left-[15%] right-[15%] h-1 bg-gradient-to-r from-red-600 to-yellow-400 z-0 rounded-full"></div>
+        <div class="md:hidden absolute top-0 bottom-0 left-12 w-1 bg-gradient-to-b from-red-600 to-yellow-400 z-0 rounded-full"></div>
+
+        <div class="relative z-10 flex flex-col items-center flex-1 w-full text-center">
+          <div class="flex items-center justify-center w-24 h-24 bg-white rounded-full border-4 border-red-600 shadow-md mb-6 text-red-600 transition-transform hover:scale-105">
+             <ng-icon hlm size="xl" name="lucideMapPin"></ng-icon>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-3">1. Locate the Hazard</h3>
+          <p class="text-gray-600 max-w-xs mx-auto leading-relaxed">
+            Pinpoint the exact location of the issue on the city map to help maintenance crews find it quickly.
+          </p>
+        </div>
+
+        <div class="relative z-10 flex flex-col items-center flex-1 w-full text-center">
+          <div class="flex items-center justify-center w-24 h-24 bg-white rounded-full border-4 border-orange-500 shadow-md mb-6 text-orange-500 transition-transform hover:scale-105">
+             <ng-icon hlm size="xl" name="lucideCamera"></ng-icon>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-3">2. Snap and Describe</h3>
+          <p class="text-gray-600 max-w-xs mx-auto leading-relaxed">
+            Take a clear photo and provide a brief description of the required maintenance.
+          </p>
+        </div>
+
+        <div class="relative z-10 flex flex-col items-center flex-1 w-full text-center">
+          <div class="flex items-center justify-center w-24 h-24 bg-white rounded-full border-4 border-yellow-400 shadow-md mb-6 text-yellow-500 transition-transform hover:scale-105">
+             <ng-icon hlm size="xl" name="lucideCheckCircle"></ng-icon>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-3">3. Track the Fix</h3>
+          <p class="text-gray-600 max-w-xs mx-auto leading-relaxed">
+            Get automated updates as city departments review, process, and resolve your reported issue.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+<section class="bg-gray-50 py-20 lg:py-32">
+    <div class="container mx-auto px-6 max-w-6xl">
+      
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight text-gray-900">
+          Official Reporting Categories
+        </h2>
+        <p class="mt-4 text-lg text-gray-600 font-medium max-w-2xl mx-auto">
+          Angeles Fix-It currently accepts reports for the following municipal maintenance issues. Please select the correct category when submitting to ensure a swift response from the city.
+        </p>
+      </div>
+
+      <div class="flex flex-wrap justify-center gap-6">
+        
+        <div hlmCard class="w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden group">
+          <div class="absolute top-0 left-0 w-full h-1 bg-red-600 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300 ease-out"></div>
+          <div hlmCardHeader class="pt-8 pb-4 flex flex-col items-center text-center">
+            <div class="flex items-center justify-center w-12 h-12 rounded-full bg-red-50 text-red-600 mb-4 transition-transform group-hover:scale-110 duration-300">
+              <ng-icon hlm size="lg" name="lucideConstruction"></ng-icon>
+            </div>
+            <h3 hlmCardTitle class="text-xl font-bold text-gray-900">Pothole</h3>
+          </div>
+          <div hlmCardContent class="text-center text-gray-600 pb-8 px-6 leading-relaxed">
+            Report deep craters and severe road surface damage that pose a risk to vehicles or pedestrians.
+          </div>
+        </div>
+
+        <div hlmCard class="w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden group">
+          <div class="absolute top-0 left-0 w-full h-1 bg-yellow-400 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300 ease-out"></div>
+          <div hlmCardHeader class="pt-8 pb-4 flex flex-col items-center text-center">
+            <div class="flex items-center justify-center w-12 h-12 rounded-full bg-yellow-50 text-yellow-600 mb-4 transition-transform group-hover:scale-110 duration-300">
+              <ng-icon hlm size="lg" name="lucideWaves"></ng-icon>
+            </div>
+            <h3 hlmCardTitle class="text-xl font-bold text-gray-900">Flooding</h3>
+          </div>
+          <div hlmCardContent class="text-center text-gray-600 pb-8 px-6 leading-relaxed">
+            Report overflowing streets, blocked waterways, and severely inundated public pathways.
+          </div>
+        </div>
+
+        <div hlmCard class="w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden group">
+          <div class="absolute top-0 left-0 w-full h-1 bg-red-600 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300 ease-out"></div>
+          <div hlmCardHeader class="pt-8 pb-4 flex flex-col items-center text-center">
+            <div class="flex items-center justify-center w-12 h-12 rounded-full bg-red-50 text-red-600 mb-4 transition-transform group-hover:scale-110 duration-300">
+              <ng-icon hlm size="lg" name="lucideTreePine"></ng-icon>
+            </div>
+            <h3 hlmCardTitle class="text-xl font-bold text-gray-900">Fallen Tree</h3>
+          </div>
+          <div hlmCardContent class="text-center text-gray-600 pb-8 px-6 leading-relaxed">
+            Report trees or large branches obstructing public roads, sidewalks, or utility power lines.
+          </div>
+        </div>
+
+        <div hlmCard class="w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden group">
+          <div class="absolute top-0 left-0 w-full h-1 bg-yellow-400 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300 ease-out"></div>
+          <div hlmCardHeader class="pt-8 pb-4 flex flex-col items-center text-center">
+            <div class="flex items-center justify-center w-12 h-12 rounded-full bg-yellow-50 text-yellow-600 mb-4 transition-transform group-hover:scale-110 duration-300">
+              <ng-icon hlm size="lg" name="lucideDroplets"></ng-icon>
+            </div>
+            <h3 hlmCardTitle class="text-xl font-bold text-gray-900">Clogged Drain</h3>
+          </div>
+          <div hlmCardContent class="text-center text-gray-600 pb-8 px-6 leading-relaxed">
+            Report blocked municipal sewers, obstructed street gutters, and non-draining water pooling.
+          </div>
+        </div>
+
+        <div hlmCard class="w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden group">
+          <div class="absolute top-0 left-0 w-full h-1 bg-red-600 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300 ease-out"></div>
+          <div hlmCardHeader class="pt-8 pb-4 flex flex-col items-center text-center">
+            <div class="flex items-center justify-center w-12 h-12 rounded-full bg-red-50 text-red-600 mb-4 transition-transform group-hover:scale-110 duration-300">
+              <ng-icon hlm size="lg" name="lucideLightbulbOff"></ng-icon>
+            </div>
+            <h3 hlmCardTitle class="text-xl font-bold text-gray-900">Streetlight Out</h3>
+          </div>
+          <div hlmCardContent class="text-center text-gray-600 pb-8 px-6 leading-relaxed">
+            Report broken, flickering, or completely unlit public streetlights creating neighborhood safety hazards.
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
 </main>
 
 <app-citizen-footer></app-citizen-footer>
