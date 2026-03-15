@@ -10,6 +10,7 @@ import { HlmLabelImports } from '@spartan-ng/helm/label';
 import { HlmToasterImports } from '@spartan-ng/helm/sonner';
 import { HlmCheckboxImports } from '@spartan-ng/helm/checkbox';
 import { toast } from 'ngx-sonner';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -59,7 +60,7 @@ export class Login implements OnInit {
   handleGoogleLogin(token: string) {
     this.isLoading.set(true);
 
-    this.http.post('http://localhost:5000/api/auth/citizen/google', { token }).subscribe({
+    this.http.post(`${environment.apiUrl}/auth/citizen/google`, { token }).subscribe({
       next: (response: any) => {
         this.isLoading.set(false);
         localStorage.removeItem('adminToken');
@@ -94,7 +95,8 @@ export class Login implements OnInit {
 
     this.isLoading.set(true);
 
-    this.http.post('http://localhost:5000/api/auth/citizen/login', this.loginForm.value).subscribe({
+    // Use environment.apiUrl instead of localhost
+    this.http.post(`${environment.apiUrl}/auth/citizen/login`, this.loginForm.value).subscribe({
       next: (response: any) => {
         this.isLoading.set(false);
         localStorage.removeItem('adminToken');
