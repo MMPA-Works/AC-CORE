@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
@@ -8,21 +8,23 @@ import {
   HazardReportStatus,
   PaginatedHazardReportResponse,
 } from '../shared/models/hazard-report';
+import { AuthService } from '../shared/auth';
 
 @Injectable({
   providedIn: 'root',
 })
 export class HazardReportService {
   private apiUrl = `${environment.apiUrl}/reports`;
+  private authService = inject(AuthService);
 
   constructor(private http: HttpClient) {}
 
   private getCitizenToken(): string | null {
-    return localStorage.getItem('token');
+    return this.authService.getCitizenToken();
   }
 
   private getStoredToken(): string | null {
-    return localStorage.getItem('adminToken') || localStorage.getItem('token');
+    return this.authService.getToken();
   }
 
   private getAuthHeaders(token = this.getStoredToken()): HttpHeaders {
