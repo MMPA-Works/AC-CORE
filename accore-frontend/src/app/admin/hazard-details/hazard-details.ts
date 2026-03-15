@@ -204,13 +204,6 @@ export class HazardDetails implements OnInit {
     return this.isGuestReport(report) ? 'Flag as Spam' : 'Archive Report';
   }
 
-  scrollToActions(): void {
-    document.getElementById('hazard-actions')?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start'
-    });
-  }
-
   saveStatus(): void {
     const currentReport = this.report();
     const newStatus = this.pendingStatus();
@@ -269,18 +262,17 @@ export class HazardDetails implements OnInit {
     });
   }
 
-  private getMarkerColor(status: HazardReportStatus): string {
-    switch (this.normalizeStatus(status)) {
-      case 'Reported':
-        return 'bg-red-700';
-      case 'Under Review':
-        return 'bg-amber-500';
-      case 'In Progress':
-        return 'bg-blue-500';
-      case 'Resolved':
-        return 'bg-emerald-600';
+  private getMarkerColor(severity: string | undefined): string {
+    switch (severity?.toLowerCase()) {
+      case 'critical':
+        return '#dc2626';
+      case 'medium':
+      case 'high':
+        return '#f97316';
+      case 'low':
+        return '#eab308';
       default:
-        return 'bg-slate-500';
+        return '#737373';
     }
   }
 
@@ -294,24 +286,22 @@ export class HazardDetails implements OnInit {
     this.mapInstance = L.map('details-minimap', { zoomControl: false }).setView([lat, lng], 16);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors'
+      attribution: '© OpenStreetMap contributors'
     }).addTo(this.mapInstance);
 
-    const markerColor = this.getMarkerColor(report.status);
-    const categoryInitial = report.category ? report.category.charAt(0) : '!';
+    const markerColor = this.getMarkerColor(report.severity);
 
     const customIcon = L.divIcon({
       className: 'bg-transparent border-0',
       html: `
-        <div class="relative flex flex-col items-center justify-center transition-transform hover:scale-110">
-          <div class="flex items-center justify-center w-8 h-8 ${markerColor} rounded-full shadow-lg border-2 border-white">
-            <span class="text-white text-xs font-bold">${categoryInitial}</span>
+        <div style="position: relative; display: flex; justify-content: center; align-items: center; width: 32px; height: 32px; transition: transform 0.2s ease-in-out;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+          <div style="width: 24px; height: 24px; background-color: ${markerColor}; border: 2px solid white; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); box-shadow: 0 3px 6px rgba(0,0,0,0.3); display: flex; justify-content: center; align-items: center; z-index: 10;">
+            <div style="width: 8px; height: 8px; background: white; border-radius: 50%; transform: rotate(45deg);"></div>
           </div>
-          <div class="w-2 h-2 ${markerColor} rotate-45 -mt-1 border-r-2 border-b-2 border-white shadow-sm"></div>
-        </div>
-      `,
-      iconSize: [32, 40],
-      iconAnchor: [16, 40],
+        </div>`,
+      iconSize: [32, 32],
+      iconAnchor: [16, 32],
+      popupAnchor: [0, -32],
     });
 
     L.marker([lat, lng], { icon: customIcon }).addTo(this.mapInstance);

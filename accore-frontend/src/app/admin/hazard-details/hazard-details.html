@@ -1,5 +1,5 @@
 <div class="min-h-screen bg-slate-50 text-slate-900">
-  <div class="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-5 sm:px-6 lg:px-8">
+  <div class="mx-auto flex w-full max-w-[1400px] flex-col gap-6 px-4 py-5 sm:px-6 lg:px-8">
     <button
       hlmBtn
       variant="ghost"
@@ -13,8 +13,9 @@
     </button>
 
     @if (report(); as reportData) {
+      
       <section class="overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm">
-        <div class="flex flex-col gap-8 p-5 sm:p-6 xl:flex-row xl:items-start xl:justify-between">
+        <div class="flex flex-col gap-8 p-5 sm:p-6">
           <div class="min-w-0 flex-1">
             <div class="flex flex-wrap items-center gap-3">
               <h1 class="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
@@ -31,9 +32,14 @@
                   Possible Duplicate
                 </span>
               }
+              @if (reportData.isHighPriority) {
+                <span class="rounded-full border border-red-200 bg-red-50 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-red-700">
+                  High Priority
+                </span>
+              }
             </div>
 
-            <div class="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-5">
+            <div class="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
               <div class="space-y-1.5">
                 <p class="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                   <svg class="h-4 w-4 text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -68,18 +74,6 @@
               <div class="space-y-1.5">
                 <p class="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                   <svg class="h-4 w-4 text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                  </svg>
-                  Verified
-                </p>
-                <p class="text-xl font-semibold text-slate-900">
-                  {{ reportData.verifications?.length || 0 }} {{ reportData.verifications?.length === 1 ? 'confirmation' : 'confirmations' }}
-                </p>
-              </div>
-
-              <div class="space-y-1.5">
-                <p class="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                  <svg class="h-4 w-4 text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z"></path>
                   </svg>
                   Source
@@ -109,159 +103,14 @@
               </div>
             </div>
           </div>
-
-          <div class="flex shrink-0 flex-col gap-3 xl:w-[220px] xl:items-end">
-            <button
-              hlmBtn
-              class="h-11 rounded-xl bg-red-700 px-6 font-semibold text-white hover:bg-red-800"
-              (click)="scrollToActions()"
-            >
-              Change Status
-            </button>
-
-            @if (reportData.isHighPriority) {
-              <span class="rounded-full border border-red-200 bg-red-50 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-red-700">
-                High Priority
-              </span>
-            }
-          </div>
         </div>
       </section>
 
-      <div class="grid gap-6 xl:grid-cols-[minmax(0,1.6fr)_360px]">
+      <div class="grid gap-6 xl:grid-cols-[minmax(0,1.6fr)_380px]">
+        
         <div class="flex flex-col gap-6">
-          <section class="overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm">
-            <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4 sm:px-6">
-              <div class="flex items-center gap-2">
-                <svg class="h-5 w-5 text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                </svg>
-                <h2 class="text-xl font-semibold text-slate-950">Visual Evidence</h2>
-              </div>
-              <span class="text-sm text-slate-500">1 image</span>
-            </div>
-
-            <div class="p-5 sm:p-6">
-              <hlm-dialog>
-                <button
-                  hlmDialogTrigger
-                  class="group relative flex h-[320px] w-full cursor-zoom-in items-center justify-center overflow-hidden rounded-[16px] border-none bg-slate-100 p-0 outline-none md:h-[460px]"
-                >
-                  <img
-                    [src]="reportData.imageURL || 'assets/placeholder.png'"
-                    [alt]="(reportData.title || reportData.category | titlecase) + ' evidence image'"
-                    class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-                  />
-                </button>
-                <hlm-dialog-content *hlmDialogPortal="let ctx" class="flex flex-row items-center justify-center gap-4 border-none bg-transparent p-0 shadow-none sm:max-h-[95vh] sm:max-w-[95vw]">
-                  <img
-                    [src]="reportData.imageURL || 'assets/placeholder.png'"
-                    [alt]="(reportData.title || reportData.category | titlecase) + ' evidence image'"
-                    class="max-h-[90vh] max-w-[calc(90vw-80px)] rounded-2xl object-contain shadow-2xl"
-                  />
-                </hlm-dialog-content>
-              </hlm-dialog>
-
-              <div class="mt-4 flex items-center gap-3">
-                <button class="h-14 w-20 overflow-hidden rounded-lg border-2 border-red-700 bg-slate-100">
-                  <img
-                    [src]="reportData.imageURL || 'assets/placeholder.png'"
-                    [alt]="(reportData.title || reportData.category | titlecase) + ' thumbnail'"
-                    class="h-full w-full object-cover"
-                  />
-                </button>
-              </div>
-
-              <p class="mt-3 text-sm text-slate-500">
-                Uploaded {{ reportData.createdAt | date: 'MMMM d, y' }} at {{ reportData.createdAt | date: 'h:mm a' }}
-              </p>
-            </div>
-          </section>
-
-          <section class="overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm">
-              <div class="flex items-center gap-2 border-b border-slate-200 px-5 py-4 sm:px-6">
-              <svg class="h-5 w-5 text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-              </svg>
-              <h2 class="text-xl font-semibold text-slate-950">Location Details</h2>
-            </div>
-
-            <div class="border-b border-slate-200 bg-slate-50/50 p-6">
-              @if (hasCoordinates(reportData)) {
-                <div class="overflow-hidden rounded-[16px] border border-slate-200 bg-slate-100">
-                  <div id="details-minimap" class="h-[320px] w-full"></div>
-                </div>
-              } @else {
-                <div class="flex h-[320px] flex-col items-center justify-center rounded-[16px] bg-slate-100 px-6 text-center text-sm text-slate-500">
-                  <svg class="h-8 w-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                  </svg>
-                  <p class="mt-3 font-medium text-slate-700">Map preview unavailable</p>
-                  <p>Coordinates were not attached to this report.</p>
-                </div>
-              }
-            </div>
-
-            <div class="space-y-5 p-5 sm:p-6">
-              <div class="grid gap-5 md:grid-cols-2">
-                <div class="flex items-start gap-3">
-                  <svg class="mt-0.5 h-5 w-5 text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                  </svg>
-                  <div>
-                    <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Barangay</p>
-                    <p class="mt-2 text-2xl font-semibold text-slate-900">{{ reportData.barangay }}</p>
-                  </div>
-                </div>
-
-                <div class="flex items-start gap-3">
-                  <svg class="mt-0.5 h-5 w-5 text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v8m-4-4h8"></path>
-                    <circle cx="12" cy="12" r="9" stroke-width="2"></circle>
-                    <circle cx="12" cy="12" r="2.5" stroke-width="2"></circle>
-                  </svg>
-                  <div>
-                    <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Coordinates</p>
-                    <p class="mt-2 text-xl font-semibold text-slate-900">{{ getCoordinatesLabel(reportData) }}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div class="flex flex-wrap gap-3">
-                <a
-                  hlmBtn
-                  class="rounded-xl border border-red-200 bg-white text-red-700 hover:bg-red-50"
-                  [href]="getMapUrl(reportData)"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 3h7m0 0v7m0-7L10 14"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5h5M5 5v14h14v-5"></path>
-                  </svg>
-                  Open in Map
-                </a>
-
-                <button
-                  hlmBtn
-                  variant="outline"
-                  class="rounded-xl border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                  (click)="copyCoordinates(reportData)"
-                >
-                  <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V5a2 2 0 012-2h9a2 2 0 012 2v9a2 2 0 01-2 2h-2"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 9h9a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2v-9a2 2 0 012-2z"></path>
-                  </svg>
-                  Copy Coordinates
-                </button>
-              </div>
-            </div>
-          </section>
-
-          <section class="rounded-[24px] border border-slate-200 bg-white shadow-sm">
+          
+          <section class="rounded-[24px] border border-slate-200 bg-white shadow-sm overflow-hidden">
             <div class="border-b border-slate-200 px-5 py-4 sm:px-6">
               <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Resolution Pipeline</p>
               <h2 class="mt-1 text-lg font-semibold text-slate-950">Status Progress</h2>
@@ -336,7 +185,7 @@
                   <div class="relative flex flex-1 flex-col items-center">
                     @if (!last) {
                       <div
-                        class="absolute left-1/2 top-4 -z-10 h-[4px] w-full rounded-full transition-colors duration-500"
+                        class="absolute left-1/2 top-4 z-0 h-[4px] w-full rounded-full transition-colors duration-500"
                         [class.bg-red-700]="step.isActive"
                         [class.bg-slate-200]="!step.isActive"
                       ></div>
@@ -378,9 +227,71 @@
               </div>
             </div>
           </section>
+
+          <section class="overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm">
+            <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4 sm:px-6">
+              <div class="flex items-center gap-2">
+                <svg class="h-5 w-5 text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                <h2 class="text-xl font-semibold text-slate-950">Visual Evidence</h2>
+              </div>
+              <span class="text-sm text-slate-500">1 image</span>
+            </div>
+
+            <div class="p-5 sm:p-6">
+              <hlm-dialog>
+                <button
+                  hlmDialogTrigger
+                  class="group relative flex h-[320px] w-full cursor-zoom-in items-center justify-center overflow-hidden rounded-[16px] border-none bg-slate-100 p-0 outline-none md:h-[460px]"
+                >
+                  <img
+                    [src]="reportData.imageURL || 'assets/placeholder.png'"
+                    [alt]="(reportData.title || reportData.category | titlecase) + ' evidence image'"
+                    class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                  />
+                </button>
+                <hlm-dialog-content *hlmDialogPortal="let ctx" class="flex flex-row items-center justify-center gap-4 border-none bg-transparent p-0 shadow-none sm:max-h-[95vh] sm:max-w-[95vw]">
+                  <img
+                    [src]="reportData.imageURL || 'assets/placeholder.png'"
+                    [alt]="(reportData.title || reportData.category | titlecase) + ' evidence image'"
+                    class="max-h-[90vh] max-w-[calc(90vw-80px)] rounded-2xl object-contain shadow-2xl"
+                  />
+                </hlm-dialog-content>
+              </hlm-dialog>
+
+              <div class="mt-4 flex items-center gap-3">
+                <button class="h-14 w-20 overflow-hidden rounded-lg border-2 border-red-700 bg-slate-100">
+                  <img
+                    [src]="reportData.imageURL || 'assets/placeholder.png'"
+                    [alt]="(reportData.title || reportData.category | titlecase) + ' thumbnail'"
+                    class="h-full w-full object-cover"
+                  />
+                </button>
+              </div>
+
+              <p class="mt-3 text-sm text-slate-500">
+                Uploaded {{ reportData.createdAt | date: 'MMMM d, y' }} at {{ reportData.createdAt | date: 'h:mm a' }}
+              </p>
+            </div>
+          </section>
+
+          <section class="rounded-[24px] border border-slate-200 bg-white shadow-sm">
+            <div class="border-b border-slate-200 px-5 py-4">
+              <h2 class="text-xl font-semibold text-slate-950">Report Description</h2>
+            </div>
+
+            <div class="p-5 sm:p-6">
+              <p class="text-base leading-8 text-slate-700">
+                {{ reportData.description || 'No detailed description was provided by the citizen.' }}
+              </p>
+            </div>
+          </section>
+
         </div>
 
         <aside class="flex flex-col gap-6">
+          
           <section id="hazard-actions" class="rounded-[24px] border border-slate-200 bg-white shadow-sm">
             <div class="border-b border-slate-200 px-5 py-4">
               <h2 class="text-xl font-semibold text-slate-950">Update Status</h2>
@@ -427,8 +338,75 @@
               >
                 {{ getArchiveButtonLabel(reportData) }}
               </button>
+            </div>
+          </section>
 
-              <p class="text-center text-sm text-slate-600">Advance this report to the next workflow stage</p>
+          <section class="overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm">
+            <div class="flex items-center gap-2 border-b border-slate-200 px-5 py-4">
+              <svg class="h-5 w-5 text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+              <h2 class="text-xl font-semibold text-slate-950">Location Map</h2>
+            </div>
+
+            <div class="border-b border-slate-200 bg-slate-50/50 p-4">
+              @if (hasCoordinates(reportData)) {
+                <div class="overflow-hidden rounded-[16px] border border-slate-200 bg-slate-100">
+                  <div id="details-minimap" class="h-[200px] w-full z-0"></div>
+                </div>
+              } @else {
+                <div class="flex h-[200px] flex-col items-center justify-center rounded-[16px] bg-slate-100 px-6 text-center text-sm text-slate-500">
+                  <svg class="h-8 w-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  </svg>
+                  <p class="mt-3 font-medium text-slate-700">Map preview unavailable</p>
+                </div>
+              }
+            </div>
+
+            <div class="p-5">
+              <div class="flex items-start gap-3">
+                <svg class="mt-0.5 h-5 w-5 text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v8m-4-4h8"></path>
+                  <circle cx="12" cy="12" r="9" stroke-width="2"></circle>
+                  <circle cx="12" cy="12" r="2.5" stroke-width="2"></circle>
+                </svg>
+                <div>
+                  <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Coordinates</p>
+                  <p class="mt-1 text-sm font-semibold text-slate-900">{{ getCoordinatesLabel(reportData) }}</p>
+                </div>
+              </div>
+
+              <div class="mt-5 flex flex-col gap-3">
+                <a
+                  hlmBtn
+                  class="w-full rounded-xl border border-red-200 bg-white text-red-700 hover:bg-red-50"
+                  [href]="getMapUrl(reportData)"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 3h7m0 0v7m0-7L10 14"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5h5M5 5v14h14v-5"></path>
+                  </svg>
+                  Open in Map
+                </a>
+
+                <button
+                  hlmBtn
+                  variant="outline"
+                  class="w-full rounded-xl border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                  (click)="copyCoordinates(reportData)"
+                >
+                  <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V5a2 2 0 012-2h9a2 2 0 012 2v9a2 2 0 01-2 2h-2"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 9h9a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2v-9a2 2 0 012-2z"></path>
+                  </svg>
+                  Copy Coordinates
+                </button>
+              </div>
             </div>
           </section>
 
@@ -452,15 +430,6 @@
 
               <div class="space-y-4 border-t border-slate-200 pt-4">
                 <div>
-                  <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Submission Type</p>
-                  <p class="mt-2">
-                    <span class="rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700">
-                      {{ isGuestReport(reportData) ? 'Guest User' : 'Citizen User' }}
-                    </span>
-                  </p>
-                </div>
-
-                <div>
                   <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Contact Info</p>
                   <p class="mt-2 text-sm font-semibold text-slate-900">{{ reportData.guestContact || 'Not provided' }}</p>
                 </div>
@@ -474,52 +443,7 @@
               </div>
             </div>
           </section>
-
-          <section class="rounded-[24px] border border-slate-200 bg-white shadow-sm">
-            <div class="border-b border-slate-200 px-5 py-4">
-              <h2 class="text-xl font-semibold text-slate-950">Report Description</h2>
-            </div>
-
-            <div class="space-y-6 p-5">
-              <p class="text-base leading-8 text-slate-700">
-                {{ reportData.description || 'No detailed description was provided by the citizen.' }}
-              </p>
-
-              <div class="grid gap-5 border-t border-slate-200 pt-5 sm:grid-cols-2">
-                <div>
-                  <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Severity</p>
-                  <p class="mt-2">
-                    <span class="rounded-full border border-orange-200 bg-orange-50 px-2.5 py-1 text-xs font-semibold text-orange-700">
-                      {{ reportData.severity }}
-                    </span>
-                  </p>
-                </div>
-                <div>
-                  <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Type</p>
-                  <p class="mt-2 text-sm font-semibold text-slate-900">{{ reportData.category }}</p>
-                </div>
-                <div>
-                  <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Status</p>
-                  <p class="mt-2 text-sm font-semibold text-slate-900">{{ getDisplayStatus(reportData.status) }}</p>
-                </div>
-                <div>
-                  <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Duplicate</p>
-                  <p class="mt-2">
-                    <span class="rounded-full border px-2.5 py-1 text-xs font-semibold"
-                      [class.border-amber-200]="reportData.isPossibleDuplicate"
-                      [class.bg-amber-50]="reportData.isPossibleDuplicate"
-                      [class.text-amber-700]="reportData.isPossibleDuplicate"
-                      [class.border-slate-200]="!reportData.isPossibleDuplicate"
-                      [class.bg-slate-50]="!reportData.isPossibleDuplicate"
-                      [class.text-slate-600]="!reportData.isPossibleDuplicate"
-                    >
-                      {{ reportData.isPossibleDuplicate ? 'Possible' : 'None' }}
-                    </span>
-                  </p>
-                </div>
-              </div>
-            </div>
-          </section>
+          
         </aside>
       </div>
     } @else {
