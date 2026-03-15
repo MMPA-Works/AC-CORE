@@ -1,83 +1,144 @@
-<main class="auth-container">
+<main class="relative flex min-h-screen overflow-hidden bg-gray-100">
   <hlm-toaster class="z-50" [richColors]="true" [expand]="false" />
 
-  <div class="auth-card">
-    <div class="auth-left-panel">
-      <div class="sphere w-64 h-64 -top-20 -left-20"></div>
-      <div class="sphere w-32 h-32 bottom-10 right-10"></div>
+  <div class="flex min-h-screen w-full bg-white">
+    <div class="relative hidden w-[44%] flex-col justify-center bg-[linear-gradient(160deg,#ac1001_0%,#d61402_100%)] p-14 text-white md:flex">
+      <div class="absolute -left-20 -top-20 h-64 w-64 rounded-full bg-white opacity-10"></div>
+      <div class="absolute bottom-10 right-10 h-32 w-32 rounded-full bg-white opacity-10"></div>
 
-      <img src="/logo.svg" class="w-20 h-20 mb-6 brightness-0 invert" alt="AC-CORE" />
+      <div class="relative z-10 max-w-xl">
+        <div class="mb-10 flex items-center gap-4">
+          <div class="flex h-20 w-20 items-center justify-center rounded-3xl border border-white/15 bg-white/10 shadow-lg shadow-black/10 backdrop-blur-sm">
+            <img src="/logo.svg" class="h-12 w-12 brightness-0 invert" alt="AC-CORE" />
+          </div>
 
-      <h2 class="text-4xl font-bold mb-4 uppercase tracking-tight">Welcome</h2>
-
-      <p class="text-red-100 opacity-80 leading-relaxed">
-        Angeles City Municipal Maintenance Command Center. Secure access for
-        authorized personnel only.
-      </p>
-    </div>
-
-    <div class="flex-1 p-8 md:p-12 bg-white">
-      <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900">Sign in</h1>
-        <p class="text-gray-500 mt-2">Admin Command Center</p>
-      </div>
-
-      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6">
-
-        <!-- EMAIL -->
-        <div class="space-y-1">
-          <label hlmLabel class="text-xs font-bold text-gray-400 uppercase ml-2">
-            Email Address
-          </label>
-
-          <input
-            hlmInput
-            type="email"
-            formControlName="email"
-            placeholder="admin@angelescity.gov.ph"
-            class="w-full h-12 bg-gray-50 border-none rounded-full px-6 focus:ring-2 focus:ring-red-500"
-          />
-        </div>
-
-        <!-- PASSWORD -->
-        <div class="space-y-1">
-          <label hlmLabel class="text-xs font-bold text-gray-400 uppercase ml-2">
-            Password
-          </label>
-
-          <input
-            hlmInput
-            type="password"
-            formControlName="password"
-            placeholder="••••••••"
-            class="w-full h-12 bg-gray-50 border-none rounded-full px-6 focus:ring-2 focus:ring-red-500"
-          />
-        </div>
-
-        <!-- REMEMBER ME -->
-        <div class="flex items-center justify-between px-2">
-          <div class="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id="rem"
-              formControlName="rememberMe"
-              class="rounded text-red-600 focus:ring-red-500"
-            />
-            <label for="rem" class="text-sm text-gray-500">Remember me</label>
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.34em] text-white/70">AC-CORE</p>
+            <p class="mt-2 text-xl font-semibold text-white/95">Command Center Portal</p>
           </div>
         </div>
 
-        <!-- SUBMIT -->
-        <button
-          hlmBtn
-          type="submit"
-          class="w-full h-12 bg-[#ac1001] hover:bg-[#8e0d01] text-white rounded-full font-bold shadow-lg transition-transform active:scale-95"
-          [disabled]="isLoading()"
-        >
-          {{ isLoading() ? 'Authenticating...' : 'Sign In' }}
-        </button>
+        <div class="max-w-lg">
+          <h2 class="text-5xl font-black leading-[0.96] tracking-tight text-white">
+            Municipal operations access for city officials.
+          </h2>
 
-      </form>
+          <p class="mt-6 max-w-md text-lg leading-relaxed text-white/82">
+            Secure entry point for Angeles City maintenance coordination, hazard
+            review, and command center oversight.
+          </p>
+        </div>
+
+        <div class="mt-12 grid gap-4 border-t border-white/15 pt-8 text-sm text-white/85">
+          <div class="flex items-start gap-3">
+            <span class="mt-1 inline-block h-2 w-2 rounded-full bg-white/90"></span>
+            <div>
+              <p class="font-semibold text-white">Review incoming hazard reports</p>
+              <p class="mt-1 text-white/70">Track submissions and maintain response visibility across the city.</p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-3">
+            <span class="mt-1 inline-block h-2 w-2 rounded-full bg-white/90"></span>
+            <div>
+              <p class="font-semibold text-white">Coordinate field operations</p>
+              <p class="mt-1 text-white/70">Support verification, prioritization, and municipal action planning.</p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-3">
+            <span class="mt-1 inline-block h-2 w-2 rounded-full bg-white/90"></span>
+            <div>
+              <p class="font-semibold text-white">Protected administrative environment</p>
+              <p class="mt-1 text-white/70">Restricted to AC-CORE personnel and authorized city administrators.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex flex-1 items-center justify-center bg-white px-6 py-12 sm:px-10 md:px-14 lg:px-20">
+      <div class="w-full max-w-xl">
+        <div class="mb-10">
+          <h1 class="text-3xl font-bold text-gray-900 md:text-4xl">Sign in</h1>
+          <p class="mt-2 text-gray-600">Admin Command Center</p>
+        </div>
+
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6" novalidate>
+          <div class="space-y-1">
+            <label hlmLabel for="admin-email" class="ml-2 text-xs font-bold uppercase text-gray-600">
+              Email Address
+            </label>
+
+            <input
+              hlmInput
+              id="admin-email"
+              type="email"
+              formControlName="email"
+              autocomplete="username"
+              placeholder="admin@accore.gov"
+              [attr.aria-invalid]="hasControlError('email')"
+              [attr.aria-describedby]="hasControlError('email') ? 'admin-email-error' : null"
+              (input)="clearAuthError()"
+              class="h-12 w-full rounded-full border bg-gray-50 px-6 text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-red-500"
+              [ngClass]="hasControlError('email') ? 'border-red-500 bg-red-50 focus:ring-red-200' : 'border-gray-200 focus:border-red-500'"
+            />
+
+            @if (getControlError('email'); as emailError) {
+              <p id="admin-email-error" class="ml-2 text-sm font-medium text-red-700" role="alert">
+                {{ emailError }}
+              </p>
+            }
+          </div>
+
+          <div class="space-y-1">
+            <label hlmLabel for="admin-password" class="ml-2 text-xs font-bold uppercase text-gray-600">
+              Password
+            </label>
+
+            <input
+              hlmInput
+              id="admin-password"
+              type="password"
+              formControlName="password"
+              autocomplete="current-password"
+              placeholder="Password"
+              [attr.aria-invalid]="hasControlError('password')"
+              [attr.aria-describedby]="hasControlError('password') ? 'admin-password-error' : null"
+              (input)="clearAuthError()"
+              class="h-12 w-full rounded-full border bg-gray-50 px-6 text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-red-500"
+              [ngClass]="hasControlError('password') ? 'border-red-500 bg-red-50 focus:ring-red-200' : 'border-gray-200 focus:border-red-500'"
+            />
+
+            @if (getControlError('password'); as passwordError) {
+              <p id="admin-password-error" class="ml-2 text-sm font-medium text-red-700" role="alert">
+                {{ passwordError }}
+              </p>
+            }
+          </div>
+
+          <div class="flex items-center justify-between px-2">
+            <div class="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="rem"
+                formControlName="rememberMe"
+                class="rounded text-red-600 focus:ring-red-500"
+              />
+              <label for="rem" class="text-sm text-gray-600">Remember me</label>
+            </div>
+          </div>
+
+          <button
+            hlmBtn
+            type="submit"
+            class="h-12 w-full rounded-full bg-[#ac1001] font-bold text-white shadow-lg transition-transform active:scale-95 hover:bg-[#8e0d01] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-300 focus-visible:ring-offset-2"
+            [disabled]="isLoading()"
+          >
+            {{ isLoading() ? 'Authenticating...' : 'Sign In' }}
+          </button>
+        </form>
+      </div>
     </div>
   </div>
 </main>
