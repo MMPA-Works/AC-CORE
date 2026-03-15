@@ -20,25 +20,26 @@ import { AuthService } from '../../shared/auth';
     HlmInputImports,
     HlmLabelImports,
     HlmButtonImports,
-    HlmToasterImports
+    HlmToasterImports,
   ],
   templateUrl: './login.html',
 })
 export class Login {
-
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
 
   isLoading = signal(false);
+  authError = signal('');
 
   loginForm = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', Validators.required],
-    rememberMe: [false]
+    rememberMe: [false],
   });
 
   onSubmit() {
+    this.authError.set('');
 
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
@@ -51,9 +52,7 @@ export class Login {
     const { email, password, rememberMe } = this.loginForm.value;
 
     this.authService.login({ email, password }).subscribe({
-
       next: (res: any) => {
-
         this.isLoading.set(false);
 
         if (!res?.token) {
@@ -61,7 +60,6 @@ export class Login {
           return;
         }
 
-        // Store token
         if (rememberMe) {
           localStorage.setItem('authToken', res.token);
         } else {
@@ -69,29 +67,55 @@ export class Login {
         }
 
         toast.success('Welcome back!');
-
-        // Navigate to Admin Dashboard
         this.router.navigate(['/admin/dashboard']);
       },
 
       error: (err) => {
-
         this.isLoading.set(false);
 
         if (err.status === 429) {
+          this.authError.set('Too many login attempts. Please try again later.');
           toast.error('Too many login attempts. Please try again later.');
-        }
-        else if (err.status === 401) {
+        } else if (err.status === 401) {
+          this.authError.set('Invalid email or password.');
           toast.error('Invalid email or password.');
+        } else {
+          const errorMessage = err.error?.message || 'Login failed.';
+          this.authError.set(errorMessage);
+          toast.error(errorMessage);
         }
-        else {
-          toast.error(err.error?.message || 'Login failed.');
-        }
-
-      }
-
+      },
     });
-
   }
 
+  clearAuthError(): void {
+    if (this.authError()) {
+      this.authError.set('');
+    }
+  }
+
+  hasControlError(controlName: 'email' | 'password'): boolean {
+    const control = this.loginForm.controls[controlName];
+    return !!control.errors && control.touched;
+  }
+
+  getControlError(controlName: 'email' | 'password'): string | null {
+    const control = this.loginForm.controls[controlName];
+
+    if (!control.touched || !control.errors) {
+      return null;
+    }
+
+    if (control.errors['required']) {
+      return controlName === 'email'
+        ? 'Email address is required.'
+        : 'Password is required.';
+    }
+
+    if (controlName === 'email' && control.errors['email']) {
+      return 'Enter a valid email address.';
+    }
+
+    return null;
+  }
 }
