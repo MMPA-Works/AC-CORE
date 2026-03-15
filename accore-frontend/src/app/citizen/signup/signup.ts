@@ -9,6 +9,7 @@ import { HlmInputImports } from '@spartan-ng/helm/input';
 import { HlmLabelImports } from '@spartan-ng/helm/label';
 import { HlmToasterImports } from '@spartan-ng/helm/sonner';
 import { toast } from 'ngx-sonner';
+import { environment } from '../../../environments/environment'; // Added environment import
 
 @Component({
   selector: 'app-signup',
@@ -53,12 +54,13 @@ export class Signup implements OnInit {
   handleGoogleSignup(token: string) {
     this.isLoading.set(true);
 
-    this.http.post('http://localhost:5000/api/auth/citizen/google', { token }).subscribe({
+    // Replaced localhost with environment.apiUrl
+    this.http.post(`${environment.apiUrl}/auth/citizen/google`, { token }).subscribe({
       next: (response: any) => {
         localStorage.removeItem('adminToken');
         localStorage.setItem('token', response.token);
         toast.success('Signup successful!');
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/citizen/dashboard']);
       },
       error: (err) => {
         this.isLoading.set(false);
@@ -79,14 +81,15 @@ export class Signup implements OnInit {
 
     this.isLoading.set(true);
 
+    // Replaced localhost with environment.apiUrl
     this.http
-      .post('http://localhost:5000/api/auth/citizen/register', this.signupForm.value)
+      .post(`${environment.apiUrl}/auth/citizen/register`, this.signupForm.value)
       .subscribe({
         next: (response: any) => {
           localStorage.removeItem('adminToken');
           localStorage.setItem('token', response.token);
           toast.success('Account created!');
-          this.router.navigate(['/dashboard']);
+          this.router.navigate(['/citizen/dashboard']);
         },
         error: (err) => {
           this.isLoading.set(false);
