@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 import {
   HazardReport,
   HazardReportPageQuery,
@@ -12,7 +13,7 @@ import {
   providedIn: 'root',
 })
 export class HazardReportService {
-  private apiUrl = 'http://localhost:5000/api/reports';
+  private apiUrl = `${environment.apiUrl}/reports`;
 
   constructor(private http: HttpClient) {}
 
