@@ -322,7 +322,57 @@
 
         <div class="flex justify-center order-1 lg:order-2">
           <nav hlmPagination>
-            <ul hlmPaginationContent class="gap-1.5 flex flex-wrap justify-center">
+            <div class="flex sm:hidden flex-col items-center gap-2">
+              <ul hlmPaginationContent class="flex max-w-full flex-nowrap items-center justify-center gap-0.5">
+                @for (page of getMobilePageArray(); track $index) {
+                  <li hlmPaginationItem>
+                    @if (page === '...') {
+                      <span class="flex h-8 min-w-4 shrink-0 items-center justify-center px-0.5 text-xs text-gray-400">
+                        ...
+                      </span>
+                    } @else {
+                      <button
+                        hlmPaginationLink
+                        (click)="goToPage(page)"
+                        [class.bg-primary]="page === currentPage()"
+                        [class.text-white]="page === currentPage()"
+                        [class.border-primary]="page === currentPage()"
+                        class="h-8 w-8 shrink-0 cursor-pointer rounded-lg border border-gray-200 bg-white text-xs text-gray-600 shadow-sm transition-colors hover:bg-gray-50"
+                      >
+                        {{ page }}
+                      </button>
+                    }
+                  </li>
+                }
+              </ul>
+
+              <ul hlmPaginationContent class="flex items-center justify-center gap-2">
+                <li hlmPaginationItem>
+                  <button
+                    hlmPaginationPrevious
+                    (click)="prevPage()"
+                    [disabled]="currentPage() === 1"
+                    class="flex h-8 min-w-16 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-gray-200 bg-white px-2 text-xs text-gray-600 shadow-sm transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    aria-label="Previous page"
+                  >
+                    Prev
+                  </button>
+                </li>
+                <li hlmPaginationItem>
+                  <button
+                    hlmPaginationNext
+                    (click)="nextPage()"
+                    [disabled]="currentPage() === totalPages()"
+                    class="flex h-8 min-w-16 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-gray-200 bg-white px-2 text-xs text-gray-600 shadow-sm transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    aria-label="Next page"
+                  >
+                    Next
+                  </button>
+                </li>
+              </ul>
+            </div>
+
+            <ul hlmPaginationContent class="hidden sm:flex gap-1.5 flex-wrap justify-center">
               <li hlmPaginationItem>
                 <button
                   hlmPaginationPrevious

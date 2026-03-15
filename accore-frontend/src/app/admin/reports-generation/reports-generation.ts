@@ -14,6 +14,7 @@ import { HlmBadgeImports } from '@spartan-ng/helm/badge';
 import { HlmDatePicker } from '@spartan-ng/helm/date-picker';
 import { HlmLabel } from '@spartan-ng/helm/label';
 import { HlmPaginationImports } from '@spartan-ng/helm/pagination';
+import { buildMobilePagination, type MobilePaginationItem } from '../../shared/mobile-pagination';
 
 @Component({
   selector: 'app-reports-generation',
@@ -178,6 +179,10 @@ export class ReportsGeneration implements OnInit {
       pages.push(i);
     }
     return pages;
+  }
+
+  getMobilePageArray(): MobilePaginationItem[] {
+    return buildMobilePagination(this.currentPage(), this.totalPages(), 3);
   }
 
   min(a: number, b: number): number {
