@@ -23,7 +23,7 @@ import {
 
 const router = Router();
 
-router.get("/analytics", verifyToken, verifyAdmin, getAnalytics);
+router.get("/summary", verifyToken, verifyAdmin, getAnalytics);
 router.get(
   "/downstream-risks",
   verifyToken,
