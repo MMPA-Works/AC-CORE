@@ -74,7 +74,7 @@ export class Login implements OnInit {
         }
 
         toast.success('Login successful!');
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/citizen/dashboard']);
       },
       error: (err) => {
         this.isLoading.set(false);
@@ -110,7 +110,7 @@ export class Login implements OnInit {
         }
 
         toast.success('Login successful!');
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/citizen/dashboard']);
       },
       error: (err) => {
         this.isLoading.set(false);
