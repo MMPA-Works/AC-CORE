@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
 import { SocialAuthService } from '@abacritt/angularx-social-login';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +11,7 @@ import { SocialAuthService } from '@abacritt/angularx-social-login';
 export class AuthService {
   private http = inject(HttpClient);
   private socialAuthService = inject(SocialAuthService, { optional: true });
-  private adminLoginUrl = 'http://localhost:5000/api/auth/admin/login';
+  private adminLoginUrl = `${environment.apiUrl}/auth/admin/login`;
   private readonly ADMIN_TOKEN_KEY = 'adminToken';
   private readonly CITIZEN_TOKEN_KEY = 'token';
 
