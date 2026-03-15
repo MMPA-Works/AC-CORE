@@ -1,7 +1,9 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { LucideAngularModule, LUCIDE_ICONS, LucideIconProvider, Phone, Shield } from 'lucide-angular';
+import { AuthService } from '../../../shared/auth';
+import { filter, Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-citizen-footer',
@@ -16,8 +18,13 @@ import { LucideAngularModule, LUCIDE_ICONS, LucideIconProvider, Phone, Shield } 
     }
   ]
 })
-export class CitizenFooterComponent {
+export class CitizenFooterComponent implements OnInit, OnDestroy {
+  private authService = inject(AuthService);
+  private router = inject(Router);
+  private destroy$ = new Subject<void>();
+
   readonly currentYear = new Date().getFullYear();
+  isVisible = true;
 
   readonly platformLinks = [
     { label: 'Dashboard', route: '/citizen/dashboard' },
@@ -29,6 +36,33 @@ export class CitizenFooterComponent {
   readonly legalLinks = [
     { label: 'Privacy Policy', route: '/citizen/privacy' },
     { label: 'Terms of Service', route: '/citizen/terms' },
-    { label: 'Cookie Policy', route: '/citizen/cookies' },
+    { label: 'Tracking & Local Storage', route: '/citizen/tracking' },
   ] as const;
+
+  ngOnInit(): void {
+    this.evaluateVisibility(this.router.url);
+
+    this.router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      takeUntil(this.destroy$)
+    ).subscribe((event: NavigationEnd) => {
+      this.evaluateVisibility(event.urlAfterRedirects);
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private evaluateVisibility(url: string): void {
+    const isReportPage = url.includes('/report');
+    const isLoggedIn = !!this.authService.getCitizenToken();
+    
+    this.isVisible = !(isReportPage && !isLoggedIn);
+  }
+
+  trackByRoute(index: number, item: any): string {
+    return item.route;
+  }
 }

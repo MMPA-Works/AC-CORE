@@ -8,6 +8,7 @@ import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmInputImports } from '@spartan-ng/helm/input';
 import { HlmLabelImports } from '@spartan-ng/helm/label';
 import { HlmToasterImports } from '@spartan-ng/helm/sonner';
+import { HlmCheckboxImports } from '@spartan-ng/helm/checkbox';
 import { toast } from 'ngx-sonner';
 
 @Component({
@@ -21,6 +22,7 @@ import { toast } from 'ngx-sonner';
     HlmInputImports,
     HlmLabelImports,
     HlmToasterImports,
+    HlmCheckboxImports,
   ],
   templateUrl: './login.html',
 })
@@ -31,14 +33,17 @@ export class Login implements OnInit {
   private fb = inject(FormBuilder);
 
   isLoading = signal(false);
+  showPassword = signal(false);
 
   loginForm = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', Validators.required],
+    rememberMe: [false],
   });
 
   ngOnInit() {
-    if (!localStorage.getItem('token')) {
+    const hasToken = localStorage.getItem('token') || sessionStorage.getItem('token');
+    if (!hasToken) {
       this.authService.signOut().catch(() => {});
     }
 
@@ -47,19 +52,31 @@ export class Login implements OnInit {
     });
   }
 
+  togglePassword() {
+    this.showPassword.update((val) => !val);
+  }
+
   handleGoogleLogin(token: string) {
     this.isLoading.set(true);
 
     this.http.post('http://localhost:5000/api/auth/citizen/google', { token }).subscribe({
       next: (response: any) => {
+        this.isLoading.set(false);
         localStorage.removeItem('adminToken');
-        localStorage.setItem('token', response.token);
+        sessionStorage.removeItem('adminToken');
+
+        const rememberMe = this.loginForm.value.rememberMe;
+        if (rememberMe) {
+          localStorage.setItem('token', response.token);
+        } else {
+          sessionStorage.setItem('token', response.token);
+        }
+
         toast.success('Login successful!');
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
         this.isLoading.set(false);
-
         if (err.status === 429) {
           toast.error('Too many login attempts. Please try again later.');
         } else {
@@ -79,14 +96,22 @@ export class Login implements OnInit {
 
     this.http.post('http://localhost:5000/api/auth/citizen/login', this.loginForm.value).subscribe({
       next: (response: any) => {
+        this.isLoading.set(false);
         localStorage.removeItem('adminToken');
-        localStorage.setItem('token', response.token);
+        sessionStorage.removeItem('adminToken');
+
+        const rememberMe = this.loginForm.value.rememberMe;
+        if (rememberMe) {
+          localStorage.setItem('token', response.token);
+        } else {
+          sessionStorage.setItem('token', response.token);
+        }
+
         toast.success('Login successful!');
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
         this.isLoading.set(false);
-
         if (err.status === 429) {
           toast.error('Too many login attempts. Please try again later.');
         } else {

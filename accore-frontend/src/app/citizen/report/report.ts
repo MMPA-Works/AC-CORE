@@ -30,7 +30,7 @@ import { CitizenHeaderComponent } from '../components/citizen-header/citizen-hea
 import { CitizenFooterComponent } from '../components/citizen-footer/citizen-footer';
 import { HazardReportService } from '../../services/hazard-report';
 import { BarangayService } from '../../services/barangay';
-import { APP_CONFIG } from '../../app.config';
+import { APP_CONFIG, HazardCategory } from '../../app.config';
 import { AuthService } from '../../shared/auth';
 import * as L from 'leaflet';
 
@@ -81,6 +81,11 @@ export class Report implements OnInit, OnDestroy {
 
   private map?: L.Map;
   private marker?: L.Marker;
+
+  // New getter for Feature #138
+  public get isLoggedIn(): boolean {
+    return !!this.authService.getCitizenToken();
+  }
 
   readonly isGuestMode = !this.authService.getCitizenToken();
   readonly closeRoute = this.isGuestMode ? '/' : '/dashboard';
@@ -153,8 +158,6 @@ export class Report implements OnInit, OnDestroy {
       this.marker?.setLatLng(e.latlng);
       this.ngZone.run(() => this.handlePinMovement());
     });
-
-    // TASK #115 FIX: Removed the automatic call to locateUserManual() from here.
   }
 
   locateUserManual() {
@@ -232,8 +235,9 @@ export class Report implements OnInit, OnDestroy {
 
   private setupAutoSuggest() {
     this.reportForm.get('category')?.valueChanges.subscribe((cat) => {
-      if (cat && APP_CONFIG.severityMapping[cat]) {
-        this.reportForm.patchValue({ severity: APP_CONFIG.severityMapping[cat] });
+      const category = cat as HazardCategory;
+      if (category && APP_CONFIG.severityMapping[category]) {
+        this.reportForm.patchValue({ severity: APP_CONFIG.severityMapping[category] });
       }
     });
   }

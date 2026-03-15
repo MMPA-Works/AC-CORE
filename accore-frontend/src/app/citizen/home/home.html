@@ -1,28 +1,438 @@
-<nav class="flex items-center justify-between w-full p-4 bg-white border-b border-gray-200">
-  <a routerLink="/" class="flex items-center gap-2">
-    <span class="text-xl font-bold text-red-800">AC-CORE</span>
-  </a>
+<app-citizen-header></app-citizen-header>
 
-  <div class="flex items-center gap-4">
-    <a routerLink="/login" class="text-sm font-medium text-gray-600 hover:text-red-700 transition-colors">Login</a>
-    <a routerLink="/signup" hlmBtn class="bg-red-700 hover:bg-red-800 text-white">Sign Up</a>
-  </div>
-</nav>
+<main class="flex flex-col min-h-[calc(100vh-64px)] overflow-hidden">
+  <section
+    class="relative bg-white pt-20 pb-12 sm:pt-24 sm:pb-16 overflow-hidden flex flex-col items-center justify-center min-h-[70vh]"
+  >
+    <div
+      class="absolute inset-0 z-0 pointer-events-none [mask-image:linear-gradient(to_bottom,white_60%,transparent_100%)]"
+    >
+      <div
+        class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:32px_32px]"
+      ></div>
+    </div>
 
-<main class="flex flex-col items-center justify-center min-h-[calc(100vh-73px)] p-6 text-center bg-gray-50">
-  <h1 class="text-4xl md:text-6xl font-extrabold text-gray-900 tracking-tight max-w-3xl">
-    Empowering Angeles City Through <span class="text-red-700">Smart Maintenance</span>
-  </h1>
-  <p class="mt-6 text-lg md:text-xl text-gray-600 max-w-2xl">
-    Report potholes, clogged drains, and other micro-infrastructure hazards instantly. Help us keep our barangays safe and flood-free.
-  </p>
-  
-  <div class="flex gap-4 mt-10">
-    <a routerLink="/report" hlmBtn size="lg" class="bg-red-700 hover:bg-red-800 text-white">
-      Report an Issue Now
-    </a>
-    <a routerLink="/citizen/my-reports" hlmBtn variant="outline" size="lg" class="text-red-700 border-red-700 hover:bg-red-50">
-      Track My Reports
-    </a>
-  </div>
+    <div
+      class="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 text-center flex flex-col items-center w-full mt-8"
+    >
+      <h1
+        class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-gray-900 leading-[1.1] mb-6 max-w-4xl w-full"
+      >
+        Report Maintenance Issues <br class="hidden sm:block" />
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#ac1001] to-[#f99b36]"
+          >Directly to the Angeles City Government.</span
+        >
+      </h1>
+
+      <p
+        class="mx-auto max-w-2xl text-base sm:text-lg md:text-xl text-gray-600 font-medium leading-relaxed mb-8 sm:mb-10 px-2"
+      >
+        Report municipal issues directly to city departments. Whether it is a deep pothole,
+        uncollected waste, or a broken streetlight, your voice builds a better Angeles City.
+      </p>
+
+      <div
+        class="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto px-4 sm:px-0"
+      >
+        <a
+          routerLink="/citizen/signup"
+          hlmBtn
+          size="lg"
+          class="w-full sm:w-auto bg-gradient-to-r from-[#ac1001] to-[#f99b36] text-white hover:opacity-90 shadow-lg shadow-red-900/20 font-extrabold text-base sm:text-lg px-8 sm:px-10 h-12 sm:h-14 rounded-full transition-opacity border-0"
+        >
+          Join the Community
+        </a>
+
+        <a
+          routerLink="/citizen/report"
+          hlmBtn
+          variant="outline"
+          size="lg"
+          class="w-full sm:w-auto bg-white border-2 border-gray-200 text-gray-800 hover:border-[#ac1001] hover:text-[#ac1001] shadow-sm font-bold text-base sm:text-lg px-8 sm:px-10 h-12 sm:h-14 rounded-full transition-colors"
+        >
+          Quick Report (Guest)
+        </a>
+      </div>
+
+      <div
+        class="mt-12 sm:mt-16 grid grid-cols-2 sm:grid-cols-3 gap-6 sm:gap-8 text-center border-t border-gray-100 pt-8 sm:pt-10 w-full max-w-4xl"
+      >
+        <div class="flex flex-col items-center">
+          <span
+            class="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#ac1001] to-[#f99b36]"
+            >SGLG</span
+          >
+          <span class="text-[10px] sm:text-xs font-bold text-gray-600 uppercase tracking-wider mt-1"
+            >Back-to-Back Awardee</span
+          >
+          <span class="text-[10px] text-gray-500 mt-0.5">Recognized by DILG</span>
+        </div>
+        <div class="flex flex-col items-center">
+          <span
+            class="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#ac1001] to-[#f99b36]"
+            >100%</span
+          >
+          <span class="text-[10px] sm:text-xs font-bold text-gray-600 uppercase tracking-wider mt-1"
+            >Direct Routing</span
+          >
+          <span class="text-[10px] text-gray-500 mt-0.5">No Bureaucratic Red Tape</span>
+        </div>
+        <div class="flex flex-col items-center col-span-2 sm:col-span-1">
+          <span
+            class="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#ac1001] to-[#f99b36]"
+            >Real-Time</span
+          >
+          <span class="text-[10px] sm:text-xs font-bold text-gray-600 uppercase tracking-wider mt-1"
+            >Live Tracking</span
+          >
+          <span class="text-[10px] text-gray-500 mt-0.5">Open311 Integrated</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-gray-50 py-16 sm:py-20 lg:py-24 border-y border-gray-200">
+    <div class="mx-auto max-w-6xl px-4 sm:px-6">
+      <div class="text-center mb-12 sm:mb-16 max-w-3xl mx-auto">
+        <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight text-gray-900">
+          How It Works
+        </h2>
+        <p class="mt-3 sm:mt-4 text-base sm:text-lg text-gray-600 font-medium">
+          Improving our city takes three simple steps.
+        </p>
+      </div>
+
+      <div class="relative flex flex-col md:flex-row justify-between items-center gap-12 md:gap-4">
+        <div
+          class="hidden md:block absolute top-12 left-[15%] right-[15%] h-1.5 bg-gradient-to-r from-[#ac1001] via-[#da531e] to-[#f99b36] z-0 rounded-full"
+        ></div>
+        <div
+          class="md:hidden absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-1.5 bg-gradient-to-b from-[#ac1001] via-[#da531e] to-[#f99b36] z-0 rounded-full"
+        ></div>
+
+        <div
+          class="relative z-10 flex flex-col items-center flex-1 w-full text-center py-4 md:py-0 px-4 md:px-0 bg-gray-50 md:bg-transparent"
+        >
+          <div
+            class="flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-full shadow-md border-4 border-[#ac1001] mb-4 sm:mb-6 text-[#ac1001] transition-transform hover:scale-105 duration-300"
+          >
+            <ng-icon hlm size="xl" name="lucideMapPin"></ng-icon>
+          </div>
+          <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">
+            1. Locate the Hazard
+          </h3>
+          <p
+            class="text-gray-600 max-w-xs mx-auto leading-relaxed text-sm sm:text-base font-medium"
+          >
+            Pinpoint the exact location using our interactive map or type in the street address.
+          </p>
+        </div>
+
+        <div
+          class="relative z-10 flex flex-col items-center flex-1 w-full text-center py-4 md:py-0 px-4 md:px-0 bg-gray-50 md:bg-transparent"
+        >
+          <div
+            class="flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-full shadow-md border-4 border-[#da531e] mb-4 sm:mb-6 text-[#da531e] transition-transform hover:scale-105 duration-300"
+          >
+            <ng-icon hlm size="xl" name="lucideCamera"></ng-icon>
+          </div>
+          <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">
+            2. Snap and Describe
+          </h3>
+          <p
+            class="text-gray-600 max-w-xs mx-auto leading-relaxed text-sm sm:text-base font-medium"
+          >
+            Upload a clear photo and select the category of the issue. Add a brief description to
+            help our field teams.
+          </p>
+        </div>
+
+        <div
+          class="relative z-10 flex flex-col items-center flex-1 w-full text-center py-4 md:py-0 px-4 md:px-0 bg-gray-50 md:bg-transparent"
+        >
+          <div
+            class="flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-full shadow-md border-4 border-[#f99b36] mb-4 sm:mb-6 text-[#f99b36] transition-transform hover:scale-105 duration-300"
+          >
+            <ng-icon hlm size="xl" name="lucideCheckCircle"></ng-icon>
+          </div>
+          <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">3. Track the Fix</h3>
+          <p
+            class="text-gray-600 max-w-xs mx-auto leading-relaxed text-sm sm:text-base font-medium"
+          >
+            Submit your report and receive real-time updates as the Angeles City Public Works team
+            resolves the problem.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-white py-16 sm:py-20 lg:py-24 border-t border-gray-200">
+    <div class="mx-auto max-w-6xl px-4 sm:px-6">
+      <div class="text-center mb-12 sm:mb-16 max-w-3xl mx-auto">
+        <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight text-gray-900">
+          Official Reporting Categories
+        </h2>
+        <p class="mt-3 sm:mt-4 text-base sm:text-lg text-gray-600 font-medium">
+          AC-CORE currently accepts reports for the following municipal maintenance issues. Please
+          select the correct category when submitting to ensure a swift response from the city.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+        <div
+          hlmCard
+          class="bg-white border-2 border-gray-100 shadow-sm hover:shadow-lg hover:border-red-100 transition-shadow duration-300 rounded-2xl overflow-hidden flex flex-col h-full"
+        >
+          <div
+            hlmCardHeader
+            class="flex flex-row items-center gap-4 sm:gap-5 pb-2 bg-gray-50/50 border-b border-gray-100 p-5 sm:p-6"
+          >
+            <div
+              class="flex items-center justify-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-red-50 text-[#ac1001] shadow-inner"
+            >
+              <ng-icon hlm size="xl" name="lucideConstruction"></ng-icon>
+            </div>
+            <div class="flex flex-col text-left">
+              <h3 hlmCardTitle class="text-xl sm:text-2xl font-extrabold text-gray-900">
+                Streets & Infrastructure
+              </h3>
+              <p
+                class="text-[10px] sm:text-xs font-bold text-[#ac1001] uppercase tracking-wider mt-1"
+              >
+                Potholes, Uneven Sidewalks
+              </p>
+            </div>
+          </div>
+          <div
+            hlmCardContent
+            class="flex-grow text-gray-600 p-5 sm:p-6 leading-relaxed text-sm sm:text-base font-medium"
+          >
+            Report structural damages to public roadways and pedestrian paths that disrupt traffic
+            or pose tripping hazards in public areas.
+          </div>
+        </div>
+
+        <div
+          hlmCard
+          class="bg-white border-2 border-gray-100 shadow-sm hover:shadow-lg hover:border-orange-100 transition-shadow duration-300 rounded-2xl overflow-hidden flex flex-col h-full"
+        >
+          <div
+            hlmCardHeader
+            class="flex flex-row items-center gap-4 sm:gap-5 pb-2 bg-gray-50/50 border-b border-gray-100 p-5 sm:p-6"
+          >
+            <div
+              class="flex items-center justify-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-orange-50 text-[#f99b36] shadow-inner"
+            >
+              <ng-icon hlm size="xl" name="lucideTrash2"></ng-icon>
+            </div>
+            <div class="flex flex-col text-left">
+              <h3 hlmCardTitle class="text-xl sm:text-2xl font-extrabold text-gray-900">
+                Sanitation & Waste
+              </h3>
+              <p
+                class="text-[10px] sm:text-xs font-bold text-[#f99b36] uppercase tracking-wider mt-1"
+              >
+                Uncollected Garbage, Illegal Dumping
+              </p>
+            </div>
+          </div>
+          <div
+            hlmCardContent
+            class="flex-grow text-gray-600 p-5 sm:p-6 leading-relaxed text-sm sm:text-base font-medium"
+          >
+            Notify sanitation teams of missed collections, illegal dumping sites, or debris blocking
+            local waterways. Essential for maintaining public health.
+          </div>
+        </div>
+
+        <div
+          hlmCard
+          class="bg-white border-2 border-gray-100 shadow-sm hover:shadow-lg hover:border-red-100 transition-shadow duration-300 rounded-2xl overflow-hidden flex flex-col h-full"
+        >
+          <div
+            hlmCardHeader
+            class="flex flex-row items-center gap-4 sm:gap-5 pb-2 bg-gray-50/50 border-b border-gray-100 p-5 sm:p-6"
+          >
+            <div
+              class="flex items-center justify-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-red-50 text-[#ac1001] shadow-inner"
+            >
+              <ng-icon hlm size="xl" name="lucideLightbulbOff"></ng-icon>
+            </div>
+            <div class="flex flex-col text-left">
+              <h3 hlmCardTitle class="text-xl sm:text-2xl font-extrabold text-gray-900">
+                Public Utilities
+              </h3>
+              <p
+                class="text-[10px] sm:text-xs font-bold text-[#ac1001] uppercase tracking-wider mt-1"
+              >
+                Broken Streetlights, Leaking Pipes
+              </p>
+            </div>
+          </div>
+          <div
+            hlmCardContent
+            class="flex-grow text-gray-600 p-5 sm:p-6 leading-relaxed text-sm sm:text-base font-medium"
+          >
+            Report malfunctioning municipal lighting and public utility failures to ensure
+            neighborhood visibility and prevent localized flooding.
+          </div>
+        </div>
+
+        <div
+          hlmCard
+          class="bg-white border-2 border-gray-100 shadow-sm hover:shadow-lg hover:border-orange-100 transition-shadow duration-300 rounded-2xl overflow-hidden flex flex-col h-full"
+        >
+          <div
+            hlmCardHeader
+            class="flex flex-row items-center gap-4 sm:gap-5 pb-2 bg-gray-50/50 border-b border-gray-100 p-5 sm:p-6"
+          >
+            <div
+              class="flex items-center justify-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-orange-50 text-[#f99b36] shadow-inner"
+            >
+              <ng-icon hlm size="xl" name="lucideTreePine"></ng-icon>
+            </div>
+            <div class="flex flex-col text-left">
+              <h3 hlmCardTitle class="text-xl sm:text-2xl font-extrabold text-gray-900">
+                Public Spaces
+              </h3>
+              <p
+                class="text-[10px] sm:text-xs font-bold text-[#f99b36] uppercase tracking-wider mt-1"
+              >
+                Overgrown Vegetation, Fallen Trees
+              </p>
+            </div>
+          </div>
+          <div
+            hlmCardContent
+            class="flex-grow text-gray-600 p-5 sm:p-6 leading-relaxed text-sm sm:text-base font-medium"
+          >
+            Help maintain the aesthetic and physical safety of Angeles City parks, plazas, and
+            public rights-of-way.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="relative bg-white py-20 sm:py-32 border-t border-gray-200 overflow-hidden">
+    <div
+      class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-64 bg-gradient-to-b from-red-50 to-transparent opacity-60 pointer-events-none"
+    ></div>
+
+    <div class="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
+      <div class="text-center max-w-3xl mx-auto mb-16 sm:mb-24">
+        <div
+          class="inline-flex items-center justify-center p-3.5 rounded-2xl bg-gradient-to-br from-red-50 to-orange-50 border border-red-100 text-[#ac1001] shadow-sm mb-6"
+        >
+          <ng-icon hlm size="xl" name="lucideLandmark"></ng-icon>
+        </div>
+        <h2 class="text-4xl md:text-5xl font-black text-gray-900 tracking-tight mb-6">
+          Engineered for
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#ac1001] to-[#f99b36]"
+            >Public Trust</span
+          >
+        </h2>
+        <p class="text-lg md:text-xl text-gray-600 font-medium leading-relaxed">
+          The City Government of Angeles is a back-to-back recipient of the DILG Seal of Good Local
+          Governance. AC-CORE reflects this standard by offering a secure, transparent, and highly
+          efficient platform for all citizens.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+        <div
+          class="bg-white rounded-2xl p-8 border border-gray-200 shadow-sm hover:shadow-lg transition-shadow duration-300 relative overflow-hidden group"
+        >
+          <div
+            class="absolute top-0 left-0 w-full h-1.5 bg-[#ac1001] opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          ></div>
+          <div
+            class="w-14 h-14 rounded-xl bg-red-50 text-[#ac1001] flex items-center justify-center mb-6"
+          >
+            <ng-icon hlm size="lg" name="lucideShieldCheck"></ng-icon>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-3">Privacy First</h3>
+          <p class="text-gray-600 font-medium leading-relaxed">
+            Fully compliant with the Data Privacy Act. Your personal details remain strictly
+            confidential and protected.
+          </p>
+        </div>
+
+        <div
+          class="bg-white rounded-2xl p-8 border border-gray-200 shadow-sm hover:shadow-lg transition-shadow duration-300 relative overflow-hidden group"
+        >
+          <div
+            class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-[#ac1001] to-[#f99b36] opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          ></div>
+          <div
+            class="w-14 h-14 rounded-xl bg-orange-50 text-[#da531e] flex items-center justify-center mb-6"
+          >
+            <ng-icon hlm size="lg" name="lucideRadar"></ng-icon>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-3">Live Tracking</h3>
+          <p class="text-gray-600 font-medium leading-relaxed">
+            Follow your report from submission to resolution with full transparency at every step of
+            the way.
+          </p>
+        </div>
+
+        <div
+          class="bg-white rounded-2xl p-8 border border-gray-200 shadow-sm hover:shadow-lg transition-shadow duration-300 relative overflow-hidden group"
+        >
+          <div
+            class="absolute top-0 left-0 w-full h-1.5 bg-[#f99b36] opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          ></div>
+          <div
+            class="w-14 h-14 rounded-xl bg-orange-50 text-[#f99b36] flex items-center justify-center mb-6"
+          >
+            <ng-icon hlm size="lg" name="lucideZap"></ng-icon>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-3">Instant Routing</h3>
+          <p class="text-gray-600 font-medium leading-relaxed">
+            Skip the paperwork. Reports are instantly sent to the exact department equipped to fix
+            the issue.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-gray-50 py-16 sm:py-24 border-t border-gray-200">
+    <div class="mx-auto max-w-3xl px-4 sm:px-6">
+      <div class="text-center mb-12 sm:mb-16">
+        <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight text-gray-900">
+          Frequently Asked Questions
+        </h2>
+        <p class="mt-4 text-lg text-gray-600 font-medium">
+          Everything you need to know about reporting municipal issues.
+        </p>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        <hlm-accordion type="single">
+          @for (faq of faqs(); track faq.question) {
+            <hlm-accordion-item class="border-b border-gray-100 last:border-0 px-6 sm:px-8">
+              <h3 class="contents">
+                <button
+                  hlmAccordionTrigger
+                  class="text-left py-6 text-lg font-bold text-gray-900 hover:text-[#ac1001] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ac1001] rounded-sm"
+                >
+                  {{ faq.question }}
+                  <ng-icon name="lucideChevronDown" hlm hlmAccIcon class="text-gray-500" />
+                </button>
+              </h3>
+              <hlm-accordion-content>
+                <div class="pb-6 text-gray-600 font-medium leading-relaxed">
+                  {{ faq.answer }}
+                </div>
+              </hlm-accordion-content>
+            </hlm-accordion-item>
+          }
+        </hlm-accordion>
+      </div>
+    </div>
+  </section>
 </main>
+
+<app-citizen-footer></app-citizen-footer>

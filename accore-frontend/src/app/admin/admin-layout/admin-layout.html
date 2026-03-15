@@ -1,27 +1,41 @@
-<div class="fixed inset-0 flex w-full overflow-hidden bg-gray-50/50">
-  <app-sidebar #sidebar class="shrink-0 h-full"></app-sidebar>
+<div class="fixed inset-0 flex w-full overflow-hidden bg-slate-50/50">
+  
+  <app-sidebar 
+    #sidebar 
+    class="block relative z-50 h-full shrink-0 transition-[width] duration-300 ease-in-out w-0"
+    [class.lg:w-64]="!sidebar.isCollapsed()"
+    [class.lg:w-20]="sidebar.isCollapsed()"
+  ></app-sidebar>
 
-  <div class="flex-1 flex flex-col min-w-0 h-full">
+  <div class="flex-1 flex flex-col min-w-0 h-full relative z-10">
     
-    <header class="flex lg:hidden items-center justify-between bg-white border-b border-gray-200 h-16 px-5 shrink-0 shadow-sm z-20">
+    <header class="flex lg:hidden items-center justify-between bg-white border-b border-slate-200 h-16 px-5 shrink-0 shadow-sm z-20">
       <div class="flex items-center gap-3">
-        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-sm">
-          <lucide-icon name="shield-alert" class="text-white w-4 h-4"></lucide-icon>
-        </div>
-        <span class="text-lg font-extrabold tracking-tight text-gray-900 leading-none">AC-CORE</span>
+        <img 
+          src="logo.svg" 
+          alt="AC-CORE Command Center Official Mobile Logo" 
+          class="w-8 h-8 object-contain"
+        />
+        <span class="text-lg font-black tracking-tight text-slate-800 leading-none">AC-CORE</span>
       </div>
       
       <button 
         (click)="sidebar.toggleMobile()" 
-        class="p-2 -mr-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-        aria-label="Open Menu"
+        class="p-2 -mr-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all duration-200 active:scale-95"
+        aria-label="Open Mobile Navigation Menu"
       >
-        <lucide-icon name="menu" class="w-6 h-6"></lucide-icon>
+        <lucide-icon name="grip" class="w-6 h-6"></lucide-icon>
       </button>
     </header>
 
-    <main class="flex-1 overflow-y-auto overflow-x-hidden relative bg-slate-50/50">
-      <router-outlet></router-outlet>
+    <main class="flex-1 flex flex-col overflow-y-auto overflow-x-hidden relative bg-slate-50/50 z-0">
+      
+      <div class="flex-1">
+        <router-outlet></router-outlet>
+      </div>
+
+      <app-admin-footer *ngIf="showFooter"></app-admin-footer>
+
     </main>
     
   </div>

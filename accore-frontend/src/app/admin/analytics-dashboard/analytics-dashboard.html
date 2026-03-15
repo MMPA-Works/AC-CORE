@@ -1,232 +1,417 @@
 <div class="p-4 sm:p-6 lg:p-8 mx-auto space-y-6 lg:space-y-8 max-w-[1400px]">
-
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-    <div>
-      <h2 class="text-2xl sm:text-3xl font-black tracking-tight text-[var(--foreground)]">Analytics Dashboard</h2>
-      <p class="text-xs sm:text-sm text-[var(--muted-foreground)] mt-1 font-medium">Real-time municipal hazard intelligence.</p>
+    <div class="flex items-center gap-4">
+      <div
+        class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shrink-0 shadow-sm"
+      >
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+          ></path>
+        </svg>
+      </div>
+      <div>
+        <h2 class="text-2xl sm:text-3xl font-black tracking-tight text-[var(--foreground)]">
+          Analytics Dashboard
+        </h2>
+        <p class="text-xs sm:text-sm text-[var(--muted-foreground)] mt-1 font-medium">
+          Real-time municipal hazard intelligence.
+        </p>
+      </div>
     </div>
-    <button hlmBtn variant="outline" (click)="exportData()" class="gap-2 border-[var(--border)] text-[var(--foreground)] hover:bg-[var(--muted)] w-full sm:w-auto">
+
+    <button
+      hlmBtn
+      variant="outline"
+      (click)="exportData()"
+      class="gap-2 border-[var(--border)] text-[var(--foreground)] hover:bg-[var(--muted)] w-full sm:w-auto"
+    >
       <lucide-icon name="upload-cloud" size="16"></lucide-icon>
       Export CSV Report
     </button>
   </div>
 
   @if (isLoading()) {
-  <div class="flex flex-col justify-center items-center h-96 space-y-4">
-    <lucide-icon name="loader-2" class="w-10 h-10 text-[var(--primary)] animate-spin"></lucide-icon>
-    <p class="text-[var(--muted-foreground)] font-bold animate-pulse uppercase tracking-widest text-xs">Aggregating Data...</p>
-  </div>
+    <div class="flex flex-col justify-center items-center h-96 space-y-4">
+      <lucide-icon
+        name="loader-2"
+        class="w-10 h-10 text-[var(--primary)] animate-spin"
+      ></lucide-icon>
+      <p
+        class="text-[var(--muted-foreground)] font-bold animate-pulse uppercase tracking-widest text-xs"
+      >
+        Aggregating Data...
+      </p>
+    </div>
   } @else {
-  
-  <div class="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-    
-    <div hlmCard class="shadow-sm border border-[var(--border)] bg-white p-5 lg:p-6 rounded-2xl hover:shadow-md transition-all duration-300 group">
-      <div class="flex items-start justify-between">
-        <div>
-          <p class="text-sm font-bold text-[var(--muted-foreground)]">Active Hazards</p>
-          <div class="text-3xl lg:text-4xl font-black text-[var(--foreground)] mt-2 leading-none tracking-tight">{{ activeHazardsCount() }}</div>
-        </div>
-        <div class="p-3 bg-red-50 text-red-600 rounded-xl shrink-0 group-hover:scale-110 transition-transform">
-          <lucide-icon name="alert-circle" size="24" strokeWidth="2.5"></lucide-icon>
-        </div>
-      </div>
-      <div class="mt-4">
-        <p class="text-[10px] font-bold text-red-600 uppercase tracking-widest">Requires Action</p>
-      </div>
-    </div>
-
-    <div hlmCard class="shadow-sm border border-[var(--border)] bg-white p-5 lg:p-6 rounded-2xl hover:shadow-md transition-all duration-300 group">
-      <div class="flex items-start justify-between">
-        <div>
-          <p class="text-sm font-bold text-[var(--muted-foreground)]">Critical Alerts</p>
-          <div class="text-3xl lg:text-4xl font-black text-[var(--foreground)] mt-2 leading-none tracking-tight">{{ criticalAlertsCount() }}</div>
-        </div>
-        <div class="p-3 bg-rose-50 text-rose-600 rounded-xl shrink-0 group-hover:scale-110 transition-transform">
-          <lucide-icon name="flame" size="24" strokeWidth="2.5"></lucide-icon>
-        </div>
-      </div>
-      <div class="mt-4">
-        <p class="text-[10px] font-bold text-rose-600 uppercase tracking-widest">Highest Priority</p>
-      </div>
-    </div>
-
-    <div hlmCard class="shadow-sm border border-[var(--border)] bg-white p-5 lg:p-6 rounded-2xl hover:shadow-md transition-all duration-300 group">
-      <div class="flex items-start justify-between">
-        <div>
-          <p class="text-sm font-bold text-[var(--muted-foreground)]">Under Review</p>
-          <div class="text-3xl lg:text-4xl font-black text-[var(--foreground)] mt-2 leading-none tracking-tight">{{ underReviewCount() }}</div>
-        </div>
-        <div class="p-3 bg-amber-50 text-amber-600 rounded-xl shrink-0 group-hover:scale-110 transition-transform">
-          <lucide-icon name="search" size="24" strokeWidth="2.5"></lucide-icon>
-        </div>
-      </div>
-      <div class="mt-4">
-        <p class="text-[10px] font-bold text-amber-600 uppercase tracking-widest">Pending Assessment</p>
-      </div>
-    </div>
-
-    <div hlmCard class="shadow-sm border border-[var(--border)] bg-white p-5 lg:p-6 rounded-2xl hover:shadow-md transition-all duration-300 group">
-      <div class="flex items-start justify-between">
-        <div>
-          <p class="text-sm font-bold text-[var(--muted-foreground)]">In Progress</p>
-          <div class="text-3xl lg:text-4xl font-black text-[var(--foreground)] mt-2 leading-none tracking-tight">{{ inProgressCount() }}</div>
-        </div>
-        <div class="p-3 bg-blue-50 text-blue-600 rounded-xl shrink-0 group-hover:scale-110 transition-transform">
-          <lucide-icon name="hammer" size="24" strokeWidth="2.5"></lucide-icon>
-        </div>
-      </div>
-      <div class="mt-4">
-        <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Currently Handled</p>
-      </div>
-    </div>
-
-    <div hlmCard class="shadow-sm border border-[var(--border)] bg-white p-5 lg:p-6 rounded-2xl hover:shadow-md transition-all duration-300 group">
-      <div class="flex items-start justify-between">
-        <div>
-          <p class="text-sm font-bold text-[var(--muted-foreground)]">Resolved</p>
-          <div class="text-3xl lg:text-4xl font-black text-[var(--foreground)] mt-2 leading-none tracking-tight">{{ resolvedCount() }}</div>
-        </div>
-        <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl shrink-0 group-hover:scale-110 transition-transform">
-          <lucide-icon name="check-circle-2" size="24" strokeWidth="2.5"></lucide-icon>
-        </div>
-      </div>
-      <div class="mt-4">
-        <p class="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">Successfully Fixed</p>
-      </div>
-    </div>
-
-    <div hlmCard class="shadow-sm border border-[var(--border)] bg-white p-5 lg:p-6 rounded-2xl hover:shadow-md transition-all duration-300 group">
-      <div class="flex items-start justify-between">
-        <div>
-          <p class="text-sm font-bold text-[var(--muted-foreground)]">Resolution Rate</p>
-          <div class="text-3xl lg:text-4xl font-black text-[var(--foreground)] mt-2 leading-none tracking-tight">{{ resolutionRate() }}%</div>
-        </div>
-        <div class="p-3 bg-teal-50 text-teal-600 rounded-xl shrink-0 group-hover:scale-110 transition-transform">
-          <lucide-icon name="trending-up" size="24" strokeWidth="2.5"></lucide-icon>
-        </div>
-      </div>
-      <div class="mt-4">
-        <p class="text-[10px] font-bold text-teal-600 uppercase tracking-widest">Overall Efficiency</p>
-      </div>
-    </div>
-
-  </div>
-
-  <div class="grid gap-4 sm:gap-6 lg:grid-cols-3">
-    <div hlmCard class="shadow-lg border border-[var(--border)] bg-white lg:col-span-2 overflow-hidden flex flex-col h-full rounded-2xl">
-      <div hlmCardHeader class="flex flex-row items-center justify-between pb-6">
-        <div>
-          <h3 hlmCardTitle class="text-xl font-bold text-[var(--foreground)]">Barangay Hotspots</h3>
-          <p class="text-sm text-[var(--muted-foreground)] font-medium">Top active municipal zones</p>
-        </div>
-        <hlm-badge class="bg-[var(--secondary)] text-[var(--secondary-foreground)] border-none px-3 font-bold">LIVE</hlm-badge>
-      </div>
-      <div hlmCardContent class="pt-6 flex-1 flex flex-col justify-between">
-        <div class="space-y-6">
-          @for (item of topBarangays(); track item._id) {
-          <div class="group">
-            <div class="flex justify-between items-center mb-2">
-              <span class="text-sm font-bold text-[var(--foreground)] group-hover:text-[var(--primary)] transition-colors">{{ item._id }}</span>
-              <span class="text-sm font-black text-[var(--foreground)]">{{ item.count }} <span class="text-[10px] text-[var(--muted-foreground)] font-normal ml-1">REPORTS</span></span>
+    <div class="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      <div
+        hlmCard
+        class="shadow-sm border border-[var(--border)] bg-white p-5 lg:p-6 rounded-2xl hover:shadow-md transition-all duration-300 group"
+      >
+        <div class="flex items-start justify-between">
+          <div>
+            <p class="text-sm font-bold text-[var(--muted-foreground)]">Active Hazards</p>
+            <div
+              class="text-3xl lg:text-4xl font-black text-[var(--foreground)] mt-2 leading-none tracking-tight"
+            >
+              {{ activeHazardsCount() }}
             </div>
-            <div class="h-2.5 w-full bg-[var(--muted)] rounded-full overflow-hidden">
-              <div class="h-full rounded-full bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] transition-all duration-1000 ease-out"
-                [style.width.%]="(item.count / maxReportCount()) * 100">
+          </div>
+          <div
+            class="p-3 bg-red-50 text-red-600 rounded-xl shrink-0 group-hover:scale-110 transition-transform"
+          >
+            <lucide-icon name="alert-circle" size="24" strokeWidth="2.5"></lucide-icon>
+          </div>
+        </div>
+        <div class="mt-4">
+          <p class="text-[10px] font-bold text-red-600 uppercase tracking-widest">
+            Requires Action
+          </p>
+        </div>
+      </div>
+
+      <div
+        hlmCard
+        class="shadow-sm border border-[var(--border)] bg-white p-5 lg:p-6 rounded-2xl hover:shadow-md transition-all duration-300 group"
+      >
+        <div class="flex items-start justify-between">
+          <div>
+            <p class="text-sm font-bold text-[var(--muted-foreground)]">Critical Alerts</p>
+            <div
+              class="text-3xl lg:text-4xl font-black text-[var(--foreground)] mt-2 leading-none tracking-tight"
+            >
+              {{ criticalAlertsCount() }}
+            </div>
+          </div>
+          <div
+            class="p-3 bg-rose-50 text-rose-600 rounded-xl shrink-0 group-hover:scale-110 transition-transform"
+          >
+            <lucide-icon name="flame" size="24" strokeWidth="2.5"></lucide-icon>
+          </div>
+        </div>
+        <div class="mt-4">
+          <p class="text-[10px] font-bold text-rose-600 uppercase tracking-widest">
+            Highest Priority
+          </p>
+        </div>
+      </div>
+
+      <div
+        hlmCard
+        class="shadow-sm border border-[var(--border)] bg-white p-5 lg:p-6 rounded-2xl hover:shadow-md transition-all duration-300 group"
+      >
+        <div class="flex items-start justify-between">
+          <div>
+            <p class="text-sm font-bold text-[var(--muted-foreground)]">Under Review</p>
+            <div
+              class="text-3xl lg:text-4xl font-black text-[var(--foreground)] mt-2 leading-none tracking-tight"
+            >
+              {{ underReviewCount() }}
+            </div>
+          </div>
+          <div
+            class="p-3 bg-amber-50 text-amber-600 rounded-xl shrink-0 group-hover:scale-110 transition-transform"
+          >
+            <lucide-icon name="search" size="24" strokeWidth="2.5"></lucide-icon>
+          </div>
+        </div>
+        <div class="mt-4">
+          <p class="text-[10px] font-bold text-amber-600 uppercase tracking-widest">
+            Pending Assessment
+          </p>
+        </div>
+      </div>
+
+      <div
+        hlmCard
+        class="shadow-sm border border-[var(--border)] bg-white p-5 lg:p-6 rounded-2xl hover:shadow-md transition-all duration-300 group"
+      >
+        <div class="flex items-start justify-between">
+          <div>
+            <p class="text-sm font-bold text-[var(--muted-foreground)]">In Progress</p>
+            <div
+              class="text-3xl lg:text-4xl font-black text-[var(--foreground)] mt-2 leading-none tracking-tight"
+            >
+              {{ inProgressCount() }}
+            </div>
+          </div>
+          <div
+            class="p-3 bg-blue-50 text-blue-600 rounded-xl shrink-0 group-hover:scale-110 transition-transform"
+          >
+            <lucide-icon name="hammer" size="24" strokeWidth="2.5"></lucide-icon>
+          </div>
+        </div>
+        <div class="mt-4">
+          <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">
+            Currently Handled
+          </p>
+        </div>
+      </div>
+
+      <div
+        hlmCard
+        class="shadow-sm border border-[var(--border)] bg-white p-5 lg:p-6 rounded-2xl hover:shadow-md transition-all duration-300 group"
+      >
+        <div class="flex items-start justify-between">
+          <div>
+            <p class="text-sm font-bold text-[var(--muted-foreground)]">Resolved</p>
+            <div
+              class="text-3xl lg:text-4xl font-black text-[var(--foreground)] mt-2 leading-none tracking-tight"
+            >
+              {{ resolvedCount() }}
+            </div>
+          </div>
+          <div
+            class="p-3 bg-emerald-50 text-emerald-600 rounded-xl shrink-0 group-hover:scale-110 transition-transform"
+          >
+            <lucide-icon name="check-circle-2" size="24" strokeWidth="2.5"></lucide-icon>
+          </div>
+        </div>
+        <div class="mt-4">
+          <p class="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">
+            Successfully Fixed
+          </p>
+        </div>
+      </div>
+
+      <div
+        hlmCard
+        class="shadow-sm border border-[var(--border)] bg-white p-5 lg:p-6 rounded-2xl hover:shadow-md transition-all duration-300 group"
+      >
+        <div class="flex items-start justify-between">
+          <div>
+            <p class="text-sm font-bold text-[var(--muted-foreground)]">Resolution Rate</p>
+            <div
+              class="text-3xl lg:text-4xl font-black text-[var(--foreground)] mt-2 leading-none tracking-tight"
+            >
+              {{ resolutionRate() }}%
+            </div>
+          </div>
+          <div
+            class="p-3 bg-teal-50 text-teal-600 rounded-xl shrink-0 group-hover:scale-110 transition-transform"
+          >
+            <lucide-icon name="trending-up" size="24" strokeWidth="2.5"></lucide-icon>
+          </div>
+        </div>
+        <div class="mt-4">
+          <p class="text-[10px] font-bold text-teal-600 uppercase tracking-widest">
+            Overall Efficiency
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid gap-4 sm:gap-6 lg:grid-cols-3">
+      <div
+        hlmCard
+        class="shadow-lg border border-[var(--border)] bg-white lg:col-span-2 overflow-hidden flex flex-col h-full rounded-2xl"
+      >
+        <div hlmCardHeader class="flex flex-row items-center justify-between pb-6">
+          <div>
+            <h3 hlmCardTitle class="text-xl font-bold text-[var(--foreground)]">
+              Barangay Hotspots
+            </h3>
+            <p class="text-sm text-[var(--muted-foreground)] font-medium">
+              Top active municipal zones
+            </p>
+          </div>
+          <hlm-badge
+            class="bg-[var(--secondary)] text-[var(--secondary-foreground)] border-none px-3 font-bold"
+            >LIVE</hlm-badge
+          >
+        </div>
+        <div hlmCardContent class="pt-6 flex-1 flex flex-col justify-between">
+          <div class="space-y-6">
+            @for (item of topBarangays(); track item._id) {
+              <div class="group">
+                <div class="flex justify-between items-center mb-2">
+                  <span
+                    class="text-sm font-bold text-[var(--foreground)] group-hover:text-[var(--primary)] transition-colors"
+                    >{{ item._id }}</span
+                  >
+                  <span class="text-sm font-black text-[var(--foreground)]"
+                    >{{ item.count }}
+                    <span class="text-[10px] text-[var(--muted-foreground)] font-normal ml-1"
+                      >REPORTS</span
+                    ></span
+                  >
+                </div>
+                <div class="h-2.5 w-full bg-[var(--muted)] rounded-full overflow-hidden">
+                  <div
+                    class="h-full rounded-full bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] transition-all duration-1000 ease-out"
+                    [style.width.%]="(item.count / maxReportCount()) * 100"
+                  ></div>
+                </div>
+              </div>
+            }
+          </div>
+          <div class="mt-6 pt-4 border-t border-[var(--border)] flex justify-between items-center">
+            <p class="text-[10px] font-bold text-[var(--muted-foreground)] uppercase">
+              Showing top 5 regions
+            </p>
+            <span class="text-[10px] text-[var(--muted-foreground)] italic font-medium"
+              >Use Export for full data</span
+            >
+          </div>
+        </div>
+      </div>
+
+      <div
+        hlmCard
+        class="shadow-sm border border-[var(--border)] bg-white lg:col-span-1 flex flex-col h-full rounded-2xl"
+      >
+        <div hlmCardHeader class="border-b border-[var(--border)] pb-4">
+          <h3 hlmCardTitle class="text-lg font-bold text-[var(--foreground)]">Severity Profile</h3>
+        </div>
+        <div hlmCardContent class="pt-6 flex-1 flex flex-col justify-between">
+          <div class="relative h-[220px] w-full flex justify-center items-center">
+            <div
+              class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0"
+            >
+              <span class="text-3xl font-black text-[var(--foreground)]">{{ totalReports() }}</span>
+              <span
+                class="text-[10px] font-bold text-[var(--muted-foreground)] uppercase tracking-tighter"
+                >Total</span
+              >
+            </div>
+            <canvas
+              baseChart
+              [data]="doughnutChartData"
+              [options]="doughnutChartOptions"
+              [type]="doughnutChartType"
+              class="relative z-10"
+            ></canvas>
+          </div>
+
+          <div class="mt-6 space-y-3 border-t border-[var(--border)] pt-6">
+            @for (item of analyticsData()?.bySeverity; track item._id) {
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span
+                    class="w-2.5 h-2.5 rounded-full"
+                    [style.backgroundColor]="
+                      item._id === 'Critical'
+                        ? '#d93829'
+                        : item._id === 'Medium'
+                          ? '#f07c2b'
+                          : '#f9a842'
+                    "
+                  ></span>
+                  <span class="text-xs font-bold text-[var(--muted-foreground)]">{{
+                    item._id
+                  }}</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="text-xs font-black text-[var(--foreground)]">{{ item.count }}</span>
+                  <span
+                    class="text-[10px] font-medium bg-[var(--muted)] px-2 py-0.5 rounded text-[var(--muted-foreground)]"
+                    >{{ (item.count / (totalReports() || 1)) * 100 | number: '1.0-0' }}%</span
+                  >
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid gap-4 sm:gap-6 lg:grid-cols-3 lg:h-[500px]">
+      <div
+        hlmCard
+        class="shadow-lg border border-[var(--border)] bg-white lg:col-span-2 flex flex-col overflow-hidden !p-0 rounded-2xl h-[400px] lg:h-full relative"
+      >
+        <!-- Map Container fills entire card -->
+        <div id="mini-map" class="absolute inset-0 w-full h-full z-0"></div>
+
+        <!-- Card Header on top of map -->
+        <div
+          class="absolute top-0 left-0 right-0 px-5 sm:px-6 py-4 sm:py-5 flex flex-row items-center justify-between bg-white/90 backdrop-blur-sm z-10 border-b border-[var(--border)]"
+        >
+          <div class="flex items-center gap-3">
+            <div class="bg-[var(--primary)]/10 p-2 rounded-xl text-[var(--primary)]">
+              <lucide-icon name="navigation" size="20"></lucide-icon>
+            </div>
+            <div>
+              <h3 class="text-base sm:text-lg font-bold text-[var(--foreground)] leading-tight">
+                Geospatial Intelligence
+              </h3>
+              <p
+                class="text-[9px] sm:text-[10px] text-[var(--muted-foreground)] font-black uppercase tracking-widest mt-0.5"
+              >
+                Live Incident Mapping
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        hlmCard
+        class="shadow-sm border border-[var(--border)] bg-white lg:col-span-1 flex flex-col overflow-hidden !p-0 rounded-2xl h-[400px] lg:h-full"
+      >
+        <div
+          class="flex-none px-5 sm:px-6 py-4 sm:py-5 border-b border-[var(--border)] flex flex-row items-center bg-white z-10"
+        >
+          <h3 class="text-base sm:text-lg font-bold text-[var(--foreground)]">Recent Activity</h3>
+        </div>
+
+        <div class="flex-1 flex flex-col bg-white min-h-0">
+          @for (activity of recentActivityList(); track activity._id) {
+            <div
+              class="flex-1 flex flex-col justify-center px-5 sm:px-6 border-b border-[var(--border)] last:border-0 group overflow-hidden"
+            >
+              <div class="flex justify-between items-start mb-1 sm:mb-1.5 gap-4">
+                <h4
+                  class="text-xs sm:text-sm font-bold text-[var(--foreground)] group-hover:text-[var(--primary)] transition-colors leading-tight line-clamp-1 capitalize"
+                >
+                  {{ activity.title }}
+                </h4>
+                <span
+                  hlmBadge
+                  class="text-[9px] px-1.5 py-0 border-none font-black uppercase shrink-0"
+                  [style.backgroundColor]="
+                    activity.severity === 'Critical'
+                      ? '#d93829'
+                      : activity.severity === 'Medium'
+                        ? '#f07c2b'
+                        : '#f9a842'
+                  "
+                  [style.color]="
+                    activity.severity === 'Critical' || activity.severity === 'Medium'
+                      ? 'white'
+                      : 'var(--foreground)'
+                  "
+                >
+                  {{ activity.severity }}
+                </span>
+              </div>
+              <div
+                class="flex items-center text-[9px] sm:text-[10px] text-[var(--muted-foreground)] font-bold gap-2 sm:gap-3 uppercase line-clamp-1"
+              >
+                <span class="flex items-center gap-1 shrink-0"
+                  ><lucide-icon name="map-pin" size="10"></lucide-icon>
+                  {{ activity.barangay }}</span
+                >
+                <span class="flex items-center gap-1 shrink-0"
+                  ><lucide-icon name="clock" size="10"></lucide-icon>
+                  {{ activity.createdAt | date: 'shortTime' }}</span
+                >
               </div>
             </div>
-          </div>
-          }
-        </div>
-        <div class="mt-6 pt-4 border-t border-[var(--border)] flex justify-between items-center">
-          <p class="text-[10px] font-bold text-[var(--muted-foreground)] uppercase">Showing top 5 regions</p>
-          <span class="text-[10px] text-[var(--muted-foreground)] italic font-medium">Use Export for full data</span>
-        </div>
-      </div>
-    </div>
-
-    <div hlmCard class="shadow-sm border border-[var(--border)] bg-white lg:col-span-1 flex flex-col h-full rounded-2xl">
-      <div hlmCardHeader class="border-b border-[var(--border)] pb-4">
-        <h3 hlmCardTitle class="text-lg font-bold text-[var(--foreground)]">Severity Profile</h3>
-      </div>
-      <div hlmCardContent class="pt-6 flex-1 flex flex-col justify-between">
-        <div class="relative h-[220px] w-full flex justify-center items-center">
-          <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0">
-            <span class="text-3xl font-black text-[var(--foreground)]">{{ totalReports() }}</span>
-            <span class="text-[10px] font-bold text-[var(--muted-foreground)] uppercase tracking-tighter">Total</span>
-          </div>
-          <canvas baseChart [data]="doughnutChartData" [options]="doughnutChartOptions" [type]="doughnutChartType" class="relative z-10"></canvas>
-        </div>
-
-        <div class="mt-6 space-y-3 border-t border-[var(--border)] pt-6">
-          @for (item of analyticsData()?.bySeverity; track item._id) {
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full" 
-                [style.backgroundColor]="item._id === 'Critical' ? '#d93829' : item._id === 'Medium' ? '#f07c2b' : '#f9a842'"></span>
-              <span class="text-xs font-bold text-[var(--muted-foreground)]">{{ item._id }}</span>
+          } @empty {
+            <div
+              class="flex-1 flex flex-col items-center justify-center text-[var(--muted-foreground)] opacity-40"
+            >
+              <lucide-icon name="history" size="32" class="mb-2"></lucide-icon>
+              <p class="text-xs font-bold uppercase tracking-tighter">No recent activity</p>
             </div>
-            <div class="flex items-center gap-3">
-               <span class="text-xs font-black text-[var(--foreground)]">{{ item.count }}</span>
-               <span class="text-[10px] font-medium bg-[var(--muted)] px-2 py-0.5 rounded text-[var(--muted-foreground)]">{{ (item.count / (totalReports() || 1) * 100) | number:'1.0-0' }}%</span>
-            </div>
-          </div>
           }
         </div>
       </div>
     </div>
-  </div>
-
-  <div class="grid gap-4 sm:gap-6 lg:grid-cols-3 lg:h-[500px]">
-    
-    <div hlmCard class="shadow-lg border border-[var(--border)] bg-white lg:col-span-2 flex flex-col overflow-hidden !p-0 rounded-2xl h-[400px] lg:h-full">
-      <div class="flex-none px-5 sm:px-6 py-4 sm:py-5 border-b border-[var(--border)] flex flex-row items-center justify-between bg-white z-10">
-        <div class="flex items-center gap-3">
-          <div class="bg-[var(--primary)]/10 p-2 rounded-xl text-[var(--primary)]">
-            <lucide-icon name="navigation" size="20"></lucide-icon>
-          </div>
-          <div>
-            <h3 class="text-base sm:text-lg font-bold text-[var(--foreground)] leading-tight">Geospatial Intelligence</h3>
-            <p class="text-[9px] sm:text-[10px] text-[var(--muted-foreground)] font-black uppercase tracking-widest mt-0.5">Live Incident Mapping</p>
-          </div>
-        </div>
-      </div>
-      <div class="flex-1 relative bg-gray-50 min-h-0 w-full">
-        <div id="mini-map" class="absolute inset-0 w-full h-full outline-none z-0"></div>
-      </div>
-    </div>
-
-    <div hlmCard class="shadow-sm border border-[var(--border)] bg-white lg:col-span-1 flex flex-col overflow-hidden !p-0 rounded-2xl h-[400px] lg:h-full">
-      <div class="flex-none px-5 sm:px-6 py-4 sm:py-5 border-b border-[var(--border)] flex flex-row items-center bg-white z-10">
-        <h3 class="text-base sm:text-lg font-bold text-[var(--foreground)]">Recent Activity</h3>
-      </div>
-      
-      <div class="flex-1 flex flex-col bg-white min-h-0">
-        @for (activity of recentActivityList(); track activity._id) {
-        
-        <div class="flex-1 flex flex-col justify-center px-5 sm:px-6 border-b border-[var(--border)] last:border-0 group overflow-hidden">
-          <div class="flex justify-between items-start mb-1 sm:mb-1.5 gap-4">
-            <h4 class="text-xs sm:text-sm font-bold text-[var(--foreground)] group-hover:text-[var(--primary)] transition-colors leading-tight line-clamp-1 capitalize">{{ activity.title }}</h4>
-            <span hlmBadge 
-              class="text-[9px] px-1.5 py-0 border-none font-black uppercase shrink-0"
-              [style.backgroundColor]="activity.severity === 'Critical' ? '#d93829' : activity.severity === 'Medium' ? '#f07c2b' : '#f9a842'"
-              [style.color]="activity.severity === 'Critical' || activity.severity === 'Medium' ? 'white' : 'var(--foreground)'">
-              {{ activity.severity }}
-            </span>
-          </div>
-          <div class="flex items-center text-[9px] sm:text-[10px] text-[var(--muted-foreground)] font-bold gap-2 sm:gap-3 uppercase line-clamp-1">
-            <span class="flex items-center gap-1 shrink-0"><lucide-icon name="map-pin" size="10"></lucide-icon> {{ activity.barangay }}</span>
-            <span class="flex items-center gap-1 shrink-0"><lucide-icon name="clock" size="10"></lucide-icon> {{ activity.createdAt | date:'shortTime' }}</span>
-          </div>
-        </div>
-        
-        } @empty {
-        <div class="flex-1 flex flex-col items-center justify-center text-[var(--muted-foreground)] opacity-40">
-          <lucide-icon name="history" size="32" class="mb-2"></lucide-icon>
-          <p class="text-xs font-bold uppercase tracking-tighter">No recent activity</p>
-        </div>
-        }
-      </div>
-    </div>
-  </div>
   }
 </div>

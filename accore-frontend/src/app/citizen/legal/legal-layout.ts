@@ -8,13 +8,11 @@ import { CitizenFooterComponent } from '../components/citizen-footer/citizen-foo
   standalone: true,
   imports: [RouterOutlet, CitizenHeaderComponent, CitizenFooterComponent],
   template: `
-    <div class="flex min-h-screen flex-col bg-neutral-50">
+    <div class="flex min-h-screen flex-col bg-white selection:bg-neutral-200 selection:text-neutral-900">
       <app-citizen-header />
-      <main class="flex-grow pt-24 pb-16">
-        <div class="mx-auto max-w-4xl px-4 md:px-6">
-          <div class="rounded-2xl border border-neutral-200 bg-white p-8 shadow-sm md:p-12">
-            <router-outlet />
-          </div>
+      <main class="flex-grow pt-20 pb-32">
+        <div class="mx-auto max-w-3xl px-6 md:px-8">
+          <router-outlet />
         </div>
       </main>
       <app-citizen-footer />

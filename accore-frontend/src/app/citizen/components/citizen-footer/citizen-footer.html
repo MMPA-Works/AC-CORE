@@ -1,10 +1,10 @@
-<footer class="mt-auto border-t border-neutral-200 bg-white/95 backdrop-blur-md transform-gpu will-change-transform">
+<footer *ngIf="isVisible" class="mt-auto border-t border-neutral-200 bg-white">
   <div class="mx-auto max-w-6xl px-4 py-16 md:px-6">
     <div class="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-5">
       
       <div class="space-y-6 lg:col-span-2 lg:pr-8">
         <div class="flex items-center gap-4">
-          <img src="logo.svg" alt="AC-CORE Angeles City Center for Operational Reporting and Engineering Official Logo" class="h-14 w-14 object-contain opacity-90">
+          <img src="/logo/logo.svg" alt="AC-CORE Angeles City Hazard Reporting and Infrastructure Monitoring System Logo" class="h-14 w-14 object-contain opacity-90">
           <div>
             <p class="text-xl font-bold tracking-tight text-neutral-900">AC-CORE</p>
             <p class="mt-0.5 text-[10px] font-medium uppercase leading-tight tracking-wider text-neutral-500">
@@ -20,7 +20,7 @@
       <div class="flex flex-col gap-4 lg:pl-4">
         <h4 class="text-xs font-bold uppercase tracking-widest text-neutral-900">Platform</h4>
         <nav class="flex flex-col gap-3">
-          <a *ngFor="let link of platformLinks" 
+          <a *ngFor="let link of platformLinks; trackBy: trackByRoute" 
              [routerLink]="link.route" 
              class="text-sm text-neutral-500 transition-colors hover:text-red-700">
             {{ link.label }}
@@ -31,7 +31,7 @@
       <div class="flex flex-col gap-4">
         <h4 class="text-xs font-bold uppercase tracking-widest text-neutral-900">Legal</h4>
         <nav class="flex flex-col gap-3">
-          <a *ngFor="let link of legalLinks" 
+          <a *ngFor="let link of legalLinks; trackBy: trackByRoute" 
              [routerLink]="link.route" 
              class="text-sm text-neutral-500 transition-colors hover:text-red-700">
             {{ link.label }}

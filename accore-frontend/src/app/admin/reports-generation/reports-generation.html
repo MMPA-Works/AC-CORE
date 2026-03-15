@@ -1,197 +1,419 @@
-<div class="min-h-screen bg-slate-50/50 text-foreground font-sans p-4 sm:p-6 lg:p-8 pb-24 flex flex-col">
-  <div class="w-full max-w-[1400px] mx-auto flex flex-col gap-6">
-    
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 px-1">
-      <div class="flex items-center gap-4">
-        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shrink-0 shadow-sm">
-          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+<div class="p-4 sm:p-6 lg:p-8 mx-auto max-w-[1400px] w-full flex flex-col gap-6 pb-24">
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 px-1">
+    <div class="flex items-center gap-4">
+      <div
+        class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shrink-0 shadow-sm"
+      >
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+          ></path>
+        </svg>
+      </div>
+      <div>
+        <h2 class="text-3xl font-extrabold tracking-tight text-gray-900">Historical Reports</h2>
+        <p class="text-base text-gray-500 mt-0.5">Filter and export municipal hazard records.</p>
+      </div>
+    </div>
+  </div>
+
+  <form
+    [formGroup]="reportForm"
+    (ngSubmit)="onFilterReports()"
+    class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5"
+  >
+    <div class="flex flex-col xl:flex-row gap-5 items-start xl:items-end w-full">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full flex-grow">
+        <div class="flex flex-col gap-1.5">
+          <label
+            hlmLabel
+            for="startDate"
+            class="text-xs font-bold text-gray-500 uppercase tracking-wider pl-1"
+            >Start Date</label
+          >
+          <hlm-date-picker
+            id="startDate"
+            [(date)]="startDate"
+            [min]="minDate"
+            [max]="maxDate"
+            class="w-full"
+          >
+            <span class="text-sm">Select date</span>
+          </hlm-date-picker>
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label
+            hlmLabel
+            for="endDate"
+            class="text-xs font-bold text-gray-500 uppercase tracking-wider pl-1"
+            >End Date</label
+          >
+          <hlm-date-picker
+            id="endDate"
+            [(date)]="endDate"
+            [min]="minDate"
+            [max]="maxDate"
+            class="w-full"
+          >
+            <span class="text-sm">Select date</span>
+          </hlm-date-picker>
+        </div>
+
+        <div class="flex flex-col gap-1.5 w-full">
+          <label hlmLabel class="text-xs font-bold text-gray-500 uppercase tracking-wider pl-1"
+            >Barangay</label
+          >
+          <hlm-select scrollable="true" formControlName="barangay" class="w-full">
+            <hlm-select-trigger
+              class="w-full bg-gray-50 border-gray-200 shadow-none hover:border-primary/50 transition-colors"
+            >
+              <hlm-select-value placeholder="All Barangays" />
+            </hlm-select-trigger>
+            <hlm-select-content
+              class="max-h-64 min-w-[240px] bg-white border-gray-200 shadow-lg rounded-xl"
+            >
+              <hlm-select-scroll-up />
+              <hlm-option value="All" class="cursor-pointer hover:bg-gray-100 rounded-md"
+                >All Barangays</hlm-option
+              >
+              @for (b of filteredBarangays; track b) {
+                <hlm-option [value]="b" class="cursor-pointer hover:bg-gray-100 rounded-md">{{
+                  b
+                }}</hlm-option>
+              }
+              <hlm-select-scroll-down />
+            </hlm-select-content>
+          </hlm-select>
+        </div>
+
+        <div class="flex flex-col gap-1.5 w-full">
+          <label hlmLabel class="text-xs font-bold text-gray-500 uppercase tracking-wider pl-1"
+            >Category</label
+          >
+          <hlm-select scrollable="true" formControlName="category" class="w-full">
+            <hlm-select-trigger
+              class="w-full bg-gray-50 border-gray-200 shadow-none hover:border-primary/50 transition-colors"
+            >
+              <hlm-select-value placeholder="All Categories" />
+            </hlm-select-trigger>
+            <hlm-select-content
+              class="max-h-64 min-w-[240px] bg-white border-gray-200 shadow-lg rounded-xl"
+            >
+              <hlm-select-scroll-up />
+              @for (c of categories; track c) {
+                <hlm-option [value]="c" class="cursor-pointer hover:bg-gray-100 rounded-md">{{
+                  c === 'All' ? 'All Categories' : c
+                }}</hlm-option>
+              }
+              <hlm-select-scroll-down />
+            </hlm-select-content>
+          </hlm-select>
+        </div>
+      </div>
+
+      <div
+        class="flex flex-col sm:flex-row gap-3 shrink-0 w-full xl:w-auto mt-2 xl:mt-0 pt-2 xl:pt-0"
+      >
+        <button
+          hlmBtn
+          variant="outline"
+          type="button"
+          (click)="exportToCSV()"
+          [disabled]="!displayReports().length"
+          class="flex-1 sm:flex-none gap-2 rounded-xl transition-all h-10 w-full sm:w-auto"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+            ></path>
           </svg>
-        </div>
-        <div>
-          <h2 class="text-3xl font-extrabold tracking-tight text-gray-900">Historical Reports</h2>
-          <p class="text-base text-gray-500 mt-0.5">Filter and export municipal hazard records.</p>
-        </div>
+          Export CSV
+        </button>
+        <button
+          hlmBtn
+          type="submit"
+          [disabled]="isLoading"
+          class="flex-1 sm:flex-none rounded-xl shadow-sm px-6 h-10 w-full sm:w-auto"
+        >
+          {{ isLoading ? 'Loading...' : 'Filter Reports' }}
+        </button>
+      </div>
+    </div>
+  </form>
+
+  <div class="bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col overflow-hidden">
+    <div
+      class="px-5 py-4 border-b border-gray-100 flex flex-col sm:flex-row sm:justify-between sm:items-center bg-gray-50/50 gap-4"
+    >
+      <div class="flex items-center gap-3">
+        <span class="font-semibold text-gray-900">Filtered Results</span>
+        <span
+          class="text-xs font-medium text-gray-600 bg-white border border-gray-200 px-3 py-1.5 rounded-full shadow-sm"
+        >
+          {{ displayReports().length }} reports
+        </span>
+      </div>
+
+      <div class="relative w-full sm:w-72">
+        <svg
+          class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+          ></path>
+        </svg>
+        <input
+          type="text"
+          [ngModel]="searchQuery()"
+          (ngModelChange)="onSearch($event)"
+          placeholder="Search results..."
+          class="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors bg-white shadow-sm"
+        />
       </div>
     </div>
 
-    <form [formGroup]="reportForm" (ngSubmit)="onFilterReports()" class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
-      <div class="flex flex-col xl:flex-row gap-5 items-start xl:items-end w-full">
-        
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full flex-grow">
-          <div class="flex flex-col gap-1.5">
-            <label hlmLabel for="startDate" class="text-xs font-bold text-gray-500 uppercase tracking-wider pl-1">Start Date</label>
-            <hlm-date-picker id="startDate" [(date)]="startDate" [min]="minDate" [max]="maxDate" class="w-full">
-              <span class="text-sm">Select date</span>
-            </hlm-date-picker>
+    <div class="overflow-x-auto">
+      @if (reports().length === 0) {
+        <div class="flex flex-col items-center justify-center min-h-[500px] bg-slate-50/30 p-8">
+          <div
+            class="w-24 h-24 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center mb-6"
+          >
+            <svg
+              class="w-12 h-12 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1.5"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              ></path>
+              <circle
+                cx="15.5"
+                cy="15.5"
+                r="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1.5"
+              ></circle>
+              <path
+                d="M17.5 17.5L19 19"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1.5"
+              ></path>
+            </svg>
           </div>
-
-          <div class="flex flex-col gap-1.5">
-            <label hlmLabel for="endDate" class="text-xs font-bold text-gray-500 uppercase tracking-wider pl-1">End Date</label>
-            <hlm-date-picker id="endDate" [(date)]="endDate" [min]="minDate" [max]="maxDate" class="w-full">
-              <span class="text-sm">Select date</span>
-            </hlm-date-picker>
-          </div>
-
-          <div class="flex flex-col gap-1.5 w-full">
-            <label hlmLabel class="text-xs font-bold text-gray-500 uppercase tracking-wider pl-1">Barangay</label>
-            <hlm-select scrollable="true" formControlName="barangay" class="w-full">
-              <hlm-select-trigger class="w-full bg-gray-50 border-gray-200 shadow-none hover:border-primary/50 transition-colors">
-                <hlm-select-value placeholder="All Barangays" />
-              </hlm-select-trigger>
-              <hlm-select-content class="max-h-64 min-w-[240px] bg-white border-gray-200 shadow-lg rounded-xl">
-                <hlm-select-scroll-up />
-                <hlm-option value="All" class="cursor-pointer hover:bg-gray-100 rounded-md">All Barangays</hlm-option>
-                @for (b of filteredBarangays; track b) {
-                  <hlm-option [value]="b" class="cursor-pointer hover:bg-gray-100 rounded-md">{{ b }}</hlm-option>
-                }
-                <hlm-select-scroll-down />
-              </hlm-select-content>
-            </hlm-select>
-          </div>
-
-          <div class="flex flex-col gap-1.5 w-full">
-            <label hlmLabel class="text-xs font-bold text-gray-500 uppercase tracking-wider pl-1">Category</label>
-            <hlm-select scrollable="true" formControlName="category" class="w-full">
-              <hlm-select-trigger class="w-full bg-gray-50 border-gray-200 shadow-none hover:border-primary/50 transition-colors">
-                <hlm-select-value placeholder="All Categories" />
-              </hlm-select-trigger>
-              <hlm-select-content class="max-h-64 min-w-[240px] bg-white border-gray-200 shadow-lg rounded-xl">
-                <hlm-select-scroll-up />
-                @for (c of categories; track c) {
-                  <hlm-option [value]="c" class="cursor-pointer hover:bg-gray-100 rounded-md">{{ c === 'All' ? 'All Categories' : c }}</hlm-option>
-                }
-                <hlm-select-scroll-down />
-              </hlm-select-content>
-            </hlm-select>
-          </div>
+          <h3 class="text-xl font-bold text-gray-800 mb-2">No Reports Generated</h3>
+          <p class="text-base font-medium text-gray-500 text-center max-w-[350px]">
+            Select your date range and apply filters from the panel above to generate and view
+            hazard reports.
+          </p>
         </div>
+      }
 
-        <div class="flex flex-col sm:flex-row gap-3 shrink-0 w-full xl:w-auto mt-2 xl:mt-0 pt-2 xl:pt-0">
-          <button hlmBtn variant="outline" type="button" (click)="exportToCSV()" [disabled]="!displayReports().length" class="flex-1 sm:flex-none gap-2 rounded-xl transition-all h-10 w-full sm:w-auto">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-            Export CSV
-          </button>
-          <button hlmBtn type="submit" [disabled]="isLoading" class="flex-1 sm:flex-none rounded-xl shadow-sm px-6 h-10 w-full sm:w-auto">
-            {{ isLoading ? 'Loading...' : 'Filter Reports' }}
-          </button>
-        </div>
-
-      </div>
-    </form>
-
-    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col overflow-hidden">
-      
-      <div class="px-5 py-4 border-b border-gray-100 flex flex-col sm:flex-row sm:justify-between sm:items-center bg-gray-50/50 gap-4">
-        <div class="flex items-center gap-3">
-          <span class="font-semibold text-gray-900">Filtered Results</span>
-          <span class="text-xs font-medium text-gray-600 bg-white border border-gray-200 px-3 py-1.5 rounded-full shadow-sm">
-            {{ displayReports().length }} reports
-          </span>
-        </div>
-        
-        <div class="relative w-full sm:w-72">
-          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-          </svg>
-          <input type="text" [ngModel]="searchQuery()" (ngModelChange)="onSearch($event)" placeholder="Search results..." class="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors bg-white shadow-sm">
-        </div>
-      </div>
-
-      <div class="overflow-x-auto">
-        
-        @if (reports().length === 0) {
-          <div class="flex flex-col items-center justify-center min-h-[500px] bg-slate-50/30 p-8">
-            <div class="w-24 h-24 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center mb-6">
-              <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                <circle cx="15.5" cy="15.5" r="2.5" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></circle>
-                <path d="M17.5 17.5L19 19" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path>
-              </svg>
-            </div>
-            <h3 class="text-xl font-bold text-gray-800 mb-2">No Reports Generated</h3>
-            <p class="text-base font-medium text-gray-500 text-center max-w-[350px]">
-              Select your date range and apply filters from the panel above to generate and view hazard reports.
-            </p>
-          </div>
-        }
-
-        @if (reports().length > 0) {
-          <div hlmTableContainer class="min-w-[1000px] w-full min-h-[400px] max-h-[60vh] overflow-y-auto">
-            <table hlmTable class="w-full border-separate border-spacing-0">
-              <thead hlmTHead class="sticky top-0 z-10 bg-white shadow-sm">
-                <tr hlmTr class="bg-white border-b border-gray-200">
-                  <th hlmTh class="py-4 pl-5 w-16 text-xs font-semibold text-gray-500 uppercase tracking-wider">#</th>
-                  <th hlmTh class="py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Incident</th>
-                  <th hlmTh class="py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Barangay</th>
-                  <th hlmTh class="py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                  <th hlmTh class="py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
-                  <th hlmTh class="py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider pr-6">Resolved By</th>
+      @if (reports().length > 0) {
+        <div
+          hlmTableContainer
+          class="min-w-[1000px] w-full min-h-[400px] max-h-[60vh] overflow-y-auto"
+        >
+          <table hlmTable class="w-full border-separate border-spacing-0">
+            <thead hlmTHead class="sticky top-0 z-10 bg-white shadow-sm">
+              <tr hlmTr class="bg-white border-b border-gray-200">
+                <th
+                  hlmTh
+                  class="py-4 pl-5 w-16 text-xs font-semibold text-gray-500 uppercase tracking-wider"
+                >
+                  #
+                </th>
+                <th hlmTh class="py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  Incident
+                </th>
+                <th hlmTh class="py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  Barangay
+                </th>
+                <th hlmTh class="py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  Status
+                </th>
+                <th hlmTh class="py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  Date
+                </th>
+                <th
+                  hlmTh
+                  class="py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider pr-6"
+                >
+                  Resolved By
+                </th>
+              </tr>
+            </thead>
+            <tbody hlmTBody>
+              @for (r of paginatedReports(); track r._id; let i = $index) {
+                <tr hlmTr class="hover:bg-gray-50/80 border-b border-gray-100 transition-colors">
+                  <td hlmTd class="py-4 pl-5 text-gray-500 text-sm">
+                    {{ (currentPage() - 1) * itemsPerPage() + i + 1 }}
+                  </td>
+                  <td hlmTd class="py-4">
+                    <div class="font-semibold text-gray-900">{{ r.title || r.category | titlecase}}</div>
+                    <div class="text-xs text-gray-500">{{ r.category }}</div>
+                  </td>
+                  <td hlmTd class="py-4 text-gray-600 font-medium">{{ r.barangay }}</td>
+                  <td hlmTd class="py-4">
+                    <span
+                      hlmBadge
+                      variant="outline"
+                      class="font-medium text-xs px-2.5 py-0.5"
+                      [ngClass]="{
+                        'text-primary bg-primary/5': r.status === 'Reported',
+                        'text-blue-600 bg-blue-50': r.status === 'In Progress',
+                        'text-emerald-600 bg-emerald-50': r.status === 'Resolved',
+                      }"
+                    >
+                      {{ r.status }}
+                    </span>
+                  </td>
+                  <td hlmTd class="py-4 text-gray-500 text-sm">
+                    {{ r.createdAt | date: 'MMM d, y, h:mm a' }}
+                  </td>
+                  <td hlmTd class="py-4 pr-6 text-gray-700 font-medium text-sm">
+                    {{ getResolvedBy(r) }}
+                  </td>
                 </tr>
-              </thead>
-              <tbody hlmTBody>
-                @for (r of paginatedReports(); track r._id; let i = $index) {
-                  <tr hlmTr class="hover:bg-gray-50/80 border-b border-gray-100 transition-colors">
-                    <td hlmTd class="py-4 pl-5 text-gray-500 text-sm">{{ ((currentPage() - 1) * itemsPerPage()) + i + 1 }}</td>
-                    <td hlmTd class="py-4">
-                      <div class="font-semibold text-gray-900">{{ r.title || r.category }}</div>
-                      <div class="text-xs text-gray-500">{{ r.category }}</div>
-                    </td>
-                    <td hlmTd class="py-4 text-gray-600 font-medium">{{ r.barangay }}</td>
-                    <td hlmTd class="py-4">
-                      <span hlmBadge variant="outline" class="font-medium text-xs px-2.5 py-0.5"
-                        [ngClass]="{'text-primary bg-primary/5': r.status === 'Reported', 'text-blue-600 bg-blue-50': r.status === 'In Progress', 'text-emerald-600 bg-emerald-50': r.status === 'Resolved'}">
-                        {{ r.status }}
-                      </span>
-                    </td>
-                    <td hlmTd class="py-4 text-gray-500 text-sm">{{ r.createdAt | date:'MMM d, y, h:mm a' }}</td>
-                    <td hlmTd class="py-4 pr-6 text-gray-700 font-medium text-sm">{{ getResolvedBy(r) }}</td>
-                  </tr>
-                } @empty {
-                  <tr>
-                    <td colspan="6" class="py-16 text-center">
-                      <div class="text-gray-400 font-medium mb-1">No matches found</div>
-                      <div class="text-sm text-gray-500">Try adjusting your search terms.</div>
-                    </td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </div>
-        }
-      </div>
-
-      @if (totalPages() > 1 && displayReports().length > 0) {
-        <div class="p-4 sm:px-6 border-t border-gray-200 bg-white grid grid-cols-1 lg:grid-cols-3 gap-4 items-center mt-auto">
-          
-          <div class="text-sm font-medium text-gray-500 text-center lg:text-left order-2 lg:order-1">
-            Showing <span class="text-gray-900">{{ ((currentPage() - 1) * itemsPerPage()) + 1 }}</span> to <span class="text-gray-900">{{ min((currentPage() * itemsPerPage()), displayReports().length) }}</span> of <span class="text-gray-900">{{ displayReports().length }}</span> entries
-          </div>
-          
-          <div class="flex justify-center order-1 lg:order-2">
-            <nav hlmPagination>
-              <ul hlmPaginationContent class="gap-1.5 flex flex-wrap justify-center">
-                <li hlmPaginationItem>
-                  <button hlmPaginationPrevious (click)="prevPage()" [disabled]="currentPage() === 1" class="cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed bg-white border border-gray-200 hover:bg-gray-50 text-gray-600 rounded-lg shadow-sm text-sm h-9 px-3 transition-colors">Prev</button>
-                </li>
-                
-                @for (page of getPageArray(); track page) {
-                  <li hlmPaginationItem>
-                    <button hlmPaginationLink (click)="goToPage(page)" [class.bg-primary]="page === currentPage()" [class.text-white]="page === currentPage()" [class.border-primary]="page === currentPage()" class="cursor-pointer bg-white border border-gray-200 hover:bg-gray-50 text-gray-600 rounded-lg shadow-sm text-sm w-9 h-9 transition-colors">
-                      {{ page }}
-                    </button>
-                  </li>
-                }
-
-                <li hlmPaginationItem>
-                  <button hlmPaginationNext (click)="nextPage()" [disabled]="currentPage() === totalPages()" class="cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed bg-white border border-gray-200 hover:bg-gray-50 text-gray-600 rounded-lg shadow-sm text-sm h-9 px-3 transition-colors">Next</button>
-                </li>
-              </ul>
-            </nav>
-          </div>
-          <div class="hidden lg:block order-3"></div>
+              } @empty {
+                <tr>
+                  <td colspan="6" class="py-16 text-center">
+                    <div class="text-gray-400 font-medium mb-1">No matches found</div>
+                    <div class="text-sm text-gray-500">Try adjusting your search terms.</div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
         </div>
       }
     </div>
+
+    @if (totalPages() > 1 && displayReports().length > 0) {
+      <div
+        class="p-4 sm:px-6 border-t border-gray-200 bg-white grid grid-cols-1 lg:grid-cols-3 gap-4 items-center mt-auto"
+      >
+        <div class="text-sm font-medium text-gray-500 text-center lg:text-left order-2 lg:order-1">
+          Showing
+          <span class="text-gray-900">{{ (currentPage() - 1) * itemsPerPage() + 1 }}</span> to
+          <span class="text-gray-900">{{
+            min(currentPage() * itemsPerPage(), displayReports().length)
+          }}</span>
+          of <span class="text-gray-900">{{ displayReports().length }}</span> entries
+        </div>
+
+        <div class="flex justify-center order-1 lg:order-2">
+          <nav hlmPagination>
+            <div class="flex sm:hidden flex-col items-center gap-2">
+              <ul hlmPaginationContent class="flex max-w-full flex-nowrap items-center justify-center gap-0.5">
+                @for (page of getMobilePageArray(); track $index) {
+                  <li hlmPaginationItem>
+                    @if (page === '...') {
+                      <span class="flex h-8 min-w-4 shrink-0 items-center justify-center px-0.5 text-xs text-gray-400">
+                        ...
+                      </span>
+                    } @else {
+                      <button
+                        hlmPaginationLink
+                        (click)="goToPage(page)"
+                        [class.bg-primary]="page === currentPage()"
+                        [class.text-white]="page === currentPage()"
+                        [class.border-primary]="page === currentPage()"
+                        class="h-8 w-8 shrink-0 cursor-pointer rounded-lg border border-gray-200 bg-white text-xs text-gray-600 shadow-sm transition-colors hover:bg-gray-50"
+                      >
+                        {{ page }}
+                      </button>
+                    }
+                  </li>
+                }
+              </ul>
+
+              <ul hlmPaginationContent class="flex items-center justify-center gap-2">
+                <li hlmPaginationItem>
+                  <button
+                    hlmPaginationPrevious
+                    (click)="prevPage()"
+                    [disabled]="currentPage() === 1"
+                    class="flex h-8 min-w-16 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-gray-200 bg-white px-2 text-xs text-gray-600 shadow-sm transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    aria-label="Previous page"
+                  >
+                    Prev
+                  </button>
+                </li>
+                <li hlmPaginationItem>
+                  <button
+                    hlmPaginationNext
+                    (click)="nextPage()"
+                    [disabled]="currentPage() === totalPages()"
+                    class="flex h-8 min-w-16 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-gray-200 bg-white px-2 text-xs text-gray-600 shadow-sm transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    aria-label="Next page"
+                  >
+                    Next
+                  </button>
+                </li>
+              </ul>
+            </div>
+
+            <ul hlmPaginationContent class="hidden sm:flex gap-1.5 flex-wrap justify-center">
+              <li hlmPaginationItem>
+                <button
+                  hlmPaginationPrevious
+                  (click)="prevPage()"
+                  [disabled]="currentPage() === 1"
+                  class="cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed bg-white border border-gray-200 hover:bg-gray-50 text-gray-600 rounded-lg shadow-sm text-sm h-9 px-3 transition-colors"
+                >
+                  Prev
+                </button>
+              </li>
+
+              @for (page of getPageArray(); track page) {
+                <li hlmPaginationItem>
+                  <button
+                    hlmPaginationLink
+                    (click)="goToPage(page)"
+                    [class.bg-primary]="page === currentPage()"
+                    [class.text-white]="page === currentPage()"
+                    [class.border-primary]="page === currentPage()"
+                    class="cursor-pointer bg-white border border-gray-200 hover:bg-gray-50 text-gray-600 rounded-lg shadow-sm text-sm w-9 h-9 transition-colors"
+                  >
+                    {{ page }}
+                  </button>
+                </li>
+              }
+
+              <li hlmPaginationItem>
+                <button
+                  hlmPaginationNext
+                  (click)="nextPage()"
+                  [disabled]="currentPage() === totalPages()"
+                  class="cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed bg-white border border-gray-200 hover:bg-gray-50 text-gray-600 rounded-lg shadow-sm text-sm h-9 px-3 transition-colors"
+                >
+                  Next
+                </button>
+              </li>
+            </ul>
+          </nav>
+        </div>
+        <div class="hidden lg:block order-3"></div>
+      </div>
+    }
   </div>
 </div>

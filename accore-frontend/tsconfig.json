@@ -79,6 +79,9 @@
       ],
       "@spartan-ng/helm/popover": [
         "./libs/ui/popover/src/index.ts"
+      ],
+      "@spartan-ng/helm/checkbox": [
+        "./libs/ui/checkbox/src/index.ts"
       ]
     }
   },

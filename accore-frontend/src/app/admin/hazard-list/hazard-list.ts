@@ -30,6 +30,7 @@ import {
   HazardReportPageQuery,
   PaginatedHazardReportResponse,
 } from '../../shared/models/hazard-report';
+import { HAZARD_CATEGORIES } from '../../app.config';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';
 import { BrnSelectImports } from '@spartan-ng/brain/select';
@@ -38,6 +39,7 @@ import { HlmTableImports } from '@spartan-ng/helm/table';
 import { HlmPaginationImports } from '@spartan-ng/helm/pagination';
 import { HlmScrollAreaImports } from '@spartan-ng/helm/scroll-area';
 import { toast } from 'ngx-sonner';
+import { buildMobilePagination, type MobilePaginationItem } from '../../shared/mobile-pagination';
 
 @Component({
   selector: 'app-hazard-list',
@@ -64,7 +66,7 @@ export class HazardList implements OnInit, OnDestroy {
   totalReports = signal<number>(0);
   totalPages = signal<number>(1);
   barangays = signal<string[]>([]);
-  categories = signal<string[]>([]);
+  categories = signal<string[]>([...HAZARD_CATEGORIES]);
   archiveView = signal<'active' | 'archived'>('active');
   searchDraft = signal<string>('');
   searchTerm = signal<string>('');
@@ -191,12 +193,11 @@ export class HazardList implements OnInit, OnDestroy {
     };
   }
 
-  private applyResponse(response: PaginatedHazardReportResponse): void {
+private applyResponse(response: PaginatedHazardReportResponse): void {
     this.reports.set(response.reports || []);
     this.totalReports.set(response.pagination?.total || 0);
     this.totalPages.set(response.pagination?.totalPages || 1);
     this.barangays.set(response.filters?.barangays || []);
-    this.categories.set(response.filters?.categories || []);
     this.isLoading.set(false);
   }
 
@@ -307,5 +308,9 @@ export class HazardList implements OnInit, OnDestroy {
       pages.push(i);
     }
     return pages;
+  }
+
+  getMobilePageArray(): MobilePaginationItem[] {
+    return buildMobilePagination(this.currentPage(), this.totalPages(), 3);
   }
 }

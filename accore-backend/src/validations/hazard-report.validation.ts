@@ -30,7 +30,19 @@ const reportBodySchema = z.object({
     .min(10, "Please provide more details")
     .max(1000, "Description exceeds the 1000 character limit"),
   category: z.enum(
-    ["Pothole", "Clogged Drain", "Fallen Tree", "Streetlight Out", "Flooding"],
+    [
+      "Pothole",
+      "Uneven Sidewalk",
+      "Clogged Drain",
+      "Flooding",
+      "Uncollected Garbage",
+      "Illegal Dumping",
+      "Streetlight Out",
+      "Leaking Pipe",
+      "Fallen Tree",
+      "Overgrown Vegetation",
+      "Other",
+    ],
     {
       message: "Invalid category",
     },

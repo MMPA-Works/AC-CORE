@@ -147,23 +147,4 @@ export class Directory {
       ]
     }
   ]);
-
-  readonly faqs = signal<FaqItem[]>([
-    { 
-      question: 'How do I report a hazard using this portal?', 
-      answer: 'Navigate to the Report tab, select the hazard category, provide a brief description, and attach an image. The system automatically tags your location so responders can find the issue quickly.' 
-    },
-    { 
-      question: 'How is this portal different from the Angeleño Alerto! POGI App?', 
-      answer: 'The Angeleño Alerto! app is designed for immediate life-threatening emergencies requiring real-time tracking. This portal is best for reporting infrastructural hazards like broken pipes, potholes, or fallen trees to the proper maintenance departments.' 
-    },
-    { 
-      question: 'What happens after I submit a hazard report?', 
-      answer: 'Your report goes directly to the city administration dashboard. It will be reviewed and assigned to the proper department (such as the engineering office or DRRMO) for resolution.' 
-    },
-    { 
-      question: 'Will I be updated on my report?', 
-      answer: 'Yes. You can view the status of your reports in the My Reports section on your dashboard. The status will update from Reported to In Progress, and finally to Resolved.' 
-    }
-  ]);
 }

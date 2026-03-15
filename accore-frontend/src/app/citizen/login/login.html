@@ -1,42 +1,106 @@
-<main class="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
-  <!-- Sonner Toaster -->
+<main class="min-h-screen flex w-full bg-background relative">
   <hlm-toaster class="z-50" [richColors]="true" [expand]="false"></hlm-toaster>
 
-  <div class="w-full max-w-md p-8 bg-white rounded-lg shadow-sm border border-gray-200">
-    <div class="text-center space-y-2 mb-8">
-      <h2 class="text-3xl font-bold tracking-tight">Citizen Login</h2>
-      <p class="text-gray-500">Welcome to AC-CORE. Please sign in to continue.</p>
+  <div class="hidden lg:flex lg:w-1/2 relative bg-zinc-900 flex-col justify-between p-12 text-white overflow-hidden">
+    
+    <img src="/assets/angeles-church-main.webp" alt="Angeles City placeholder" class="absolute inset-0 w-full h-full object-cover z-0" />
+    
+    <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/20 to-transparent z-0"></div>
+    <div class="absolute inset-0 bg-primary opacity-20 mix-blend-multiply z-0"></div>
+    
+    <div class="relative z-10 flex items-center gap-4">
+      <img src="/logo/logo.svg" alt="AC-CORE Logo" class="h-16 w-auto brightness-0 invert shrink-0" />
+      <div class="flex flex-col justify-center">
+        <h2 class="text-3xl font-extrabold text-white tracking-tight leading-none mb-1 drop-shadow-md">AC-CORE</h2>
+        <p class="text-sm font-medium text-white/90 leading-tight drop-shadow-md">
+          Angeles City Center for <br/> Operational Reporting and Engineering
+        </p>
+      </div>
     </div>
 
-    <div class="flex justify-center w-full mb-6">
-      <asl-google-signin-button type="standard" size="large" [width]="300"></asl-google-signin-button>
+    <div class="relative z-10 mt-auto max-w-lg">
+      <blockquote class="space-y-3">
+        <p class="text-lg font-semibold leading-relaxed text-white drop-shadow-xl">
+          "Reporting local issues has never been easier. This platform helps us keep Angeles City safe and clean for everyone."
+        </p>
+        <footer class="text-sm text-zinc-200 font-bold tracking-wide drop-shadow-md">Citizen of Angeles City</footer>
+      </blockquote>
     </div>
+  </div>
 
-    <div class="relative flex items-center py-4 mb-2">
-      <div class="flex-grow border-t border-gray-200"></div>
-      <span class="flex-shrink-0 mx-4 text-sm text-gray-400">or continue with email</span>
-      <div class="flex-grow border-t border-gray-200"></div>
-    </div>
+  <div class="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 relative overflow-y-auto bg-card">
+    
+    <a href="/" class="absolute top-8 right-8 sm:top-10 sm:right-10 text-sm font-medium text-muted-foreground hover:text-foreground flex items-center gap-1.5 transition-colors">
+      Back to Home
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+    </a>
 
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-4">
-      <div class="space-y-1">
-        <label hlmLabel for="email">Email Address</label>
-        <input hlmInput id="email" type="email" formControlName="email" placeholder="juan@example.com" class="w-full" />
+    <div class="w-full max-w-[360px] space-y-6">
+      
+      <div class="flex flex-col space-y-2 text-center">
+        <h1 class="text-2xl font-bold tracking-tight text-foreground">Log in to your Account</h1>
+        <p class="text-sm text-muted-foreground">Welcome back. Please enter your details.</p>
       </div>
 
-      <div class="space-y-1">
-        <label hlmLabel for="password">Password</label>
-        <input hlmInput id="password" type="password" formControlName="password" placeholder="Enter your password" class="w-full" />
+      <div class="flex justify-center w-full pt-2">
+        <asl-google-signin-button type="standard" size="large" [width]="360"></asl-google-signin-button>
       </div>
 
-      <button hlmBtn type="submit" class="w-full mt-6" [disabled]="isLoading()">
-        <span *ngIf="isLoading()">Signing in...</span>
-        <span *ngIf="!isLoading()">Sign In</span>
-      </button>
-    </form>
+      <div class="relative py-2">
+        <div class="absolute inset-0 flex items-center">
+          <span class="w-full border-t border-border"></span>
+        </div>
+        <div class="relative flex justify-center text-xs uppercase font-medium">
+          <span class="bg-card px-3 text-muted-foreground tracking-wider">Or continue with email</span>
+        </div>
+      </div>
 
-    <p class="text-center text-sm text-gray-500 mt-8">
-      Do not have an account? <a href="/citizen/signup" class="text-blue-600 hover:underline">Sign up here</a>.
-    </p>
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-4">
+        
+        <div>
+          <label hlmLabel class="block text-sm font-medium text-foreground mb-1.5">Email</label>
+          <input hlmInput type="email" formControlName="email" placeholder="name@example.com" 
+                 class="w-full h-11 px-4 rounded-md border border-input bg-background focus:ring-2 focus:ring-primary focus:border-primary transition-colors" />
+        </div>
+
+        <div>
+          <label hlmLabel class="block text-sm font-medium text-foreground mb-1.5">Password</label>
+          <div class="relative">
+            <input hlmInput [type]="showPassword() ? 'text' : 'password'" formControlName="password" placeholder="••••••••" 
+                   class="w-full h-11 px-4 rounded-md border border-input bg-background focus:ring-2 focus:ring-primary focus:border-primary transition-colors pr-10" />
+            
+            <button type="button" (click)="togglePassword()" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none">
+              <svg *ngIf="!showPassword()" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <svg *ngIf="showPassword()" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex items-center pt-2">
+          <div class="flex items-center gap-3">
+            <hlm-checkbox id="rememberMe" formControlName="rememberMe" class="text-primary"></hlm-checkbox>
+            <label for="rememberMe" class="text-sm text-muted-foreground font-medium cursor-pointer">Remember me</label>
+          </div>
+        </div>
+
+        <button hlmBtn type="submit" 
+                class="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground rounded-md font-semibold shadow-sm mt-4 transition-all active:scale-[0.98] disabled:opacity-70 flex justify-center items-center"
+                [disabled]="isLoading() || loginForm.invalid">
+          <span *ngIf="!isLoading()">Sign In with Email</span>
+          <span *ngIf="isLoading()">Authenticating...</span>
+        </button>
+      </form>
+
+      <p class="text-center text-sm text-muted-foreground mt-6">
+        Don't have an account? 
+        <a href="/citizen/signup" class="text-primary font-semibold hover:underline ml-1">Sign up</a>
+      </p>
+
+    </div>
   </div>
 </main>

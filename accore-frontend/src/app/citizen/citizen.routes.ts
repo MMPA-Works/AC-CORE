@@ -1,72 +1,71 @@
 import { Routes } from '@angular/router';
-import { Home } from './home/home';
-import { Login } from './login/login';
-import { Signup } from './signup/signup';
-import { Dashboard } from './dashboard/dashboard';
-import { Report } from './report/report';
-import { MyReports } from './my-reports/my-reports';
-import { ReportDetails } from './report-details/report-details';
-import { Directory } from './directory/directory';
 import { AuthGuard } from '../shared/auth.guard';
 import { LegalLayout } from './legal/legal-layout';
 
 export const CITIZEN_ROUTES: Routes = [
-  // Public Landing & Auth
   {
     path: '',
-    component: Home,
+    loadComponent: () => import('./home/home').then(m => m.Home),
+    data: { title: 'Home' },
   },
   {
     path: 'login',
-    component: Login,
+    loadComponent: () => import('./login/login').then(m => m.Login),
+    data: { title: 'Login' },
   },
   {
     path: 'signup',
-    component: Signup,
+    loadComponent: () => import('./signup/signup').then(m => m.Signup),
+    data: { title: 'Sign Up' },
   },
   {
     path: 'report',
-    component: Report,
+    loadComponent: () => import('./report/report').then(m => m.Report),
+    data: { title: 'Report a Hazard' },
   },
   { 
     path: 'directory', 
-    component: Directory 
+    loadComponent: () => import('./directory/directory').then(m => m.Directory),
+    data: { title: 'Emergency Directory' },
   },
-
-  // Legal Pages (Wrapped in LegalLayout for Header/Footer)
   {
     path: '',
     component: LegalLayout,
     children: [
       { 
         path: 'privacy', 
-        loadComponent: () => import('./legal/privacy').then(m => m.PrivacyComponent) 
+        loadComponent: () => import('./legal/privacy').then(m => m.PrivacyComponent),
+        data: { title: 'Privacy Policy' },
       },
       { 
         path: 'terms', 
-        loadComponent: () => import('./legal/terms').then(m => m.TermsComponent) 
+        loadComponent: () => import('./legal/terms').then(m => m.TermsComponent),
+        data: { title: 'Terms of Service' },
       },
       { 
-        path: 'cookies', 
-        loadComponent: () => import('./legal/cookies').then(m => m.CookiesComponent) 
+        // Updated path and component name
+        path: 'tracking', 
+        loadComponent: () => import('./legal/tracking').then(m => m.TrackingComponent),
+        data: { title: 'Tracking & Local Storage Policy' },
       }
     ]
   },
-
-  // Protected Routes (Require Login)
   {
     path: 'dashboard',
-    component: Dashboard,
+    loadComponent: () => import('./dashboard/dashboard').then(m => m.Dashboard),
     canActivate: [AuthGuard],
+    data: { title: 'Dashboard' },
   },
   {
     path: 'my-reports',
-    component: MyReports,
+    loadComponent: () => import('./my-reports/my-reports').then(m => m.MyReports),
     canActivate: [AuthGuard],
+    data: { title: 'My Reports' },
   },
   {
     path: 'my-reports/:id',
-    component: ReportDetails,
+    loadComponent: () => import('./report-details/report-details').then(m => m.ReportDetails),
     canActivate: [AuthGuard],
+    data: { title: 'Report Details' },
   },
 ];

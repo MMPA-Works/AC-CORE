@@ -1,7 +1,9 @@
 <div class="min-h-screen bg-slate-50">
-  <app-citizen-header class="sticky top-0 z-50 block w-full"></app-citizen-header>
+  @if (isLoggedIn) {
+    <app-citizen-header class="sticky top-0 z-50 block w-full"></app-citizen-header>
+  }
 
-  <div class="p-4 md:p-8">
+  <div class="p-4 md:p-8" [class.pt-12]="!isLoggedIn">
     <div
       class="max-w-3xl mx-auto bg-white shadow-2xl md:rounded-2xl overflow-hidden border border-slate-200"
     >
@@ -84,14 +86,20 @@
                 <label hlmLabel>Hazard Category</label>
                 <brn-select formControlName="category">
                   <hlm-select-trigger class="w-full h-12">
-                    <hlm-select-value />
+                    <hlm-select-value placeholder="Select specific hazard" />
                   </hlm-select-trigger>
                   <hlm-select-content>
                     <hlm-option value="Pothole">Pothole</hlm-option>
+                    <hlm-option value="Uneven Sidewalk">Uneven Sidewalk</hlm-option>
                     <hlm-option value="Clogged Drain">Clogged Drain</hlm-option>
-                    <hlm-option value="Fallen Tree">Fallen Tree</hlm-option>
-                    <hlm-option value="Streetlight Out">Streetlight Out</hlm-option>
                     <hlm-option value="Flooding">Flooding</hlm-option>
+                    <hlm-option value="Uncollected Garbage">Uncollected Garbage</hlm-option>
+                    <hlm-option value="Illegal Dumping">Illegal Dumping</hlm-option>
+                    <hlm-option value="Streetlight Out">Streetlight Out</hlm-option>
+                    <hlm-option value="Leaking Pipe">Leaking Pipe</hlm-option>
+                    <hlm-option value="Fallen Tree">Fallen Tree</hlm-option>
+                    <hlm-option value="Overgrown Vegetation">Overgrown Vegetation</hlm-option>
+                    <hlm-option value="Other">Other</hlm-option>
                   </hlm-select-content>
                 </brn-select>
               </div>
@@ -144,8 +152,7 @@
                   This helps city staff reach you if they need clarification about the report.
                 </p>
                 @if (
-                  reportForm.get('guestContact')?.invalid &&
-                  reportForm.get('guestContact')?.touched
+                  reportForm.get('guestContact')?.invalid && reportForm.get('guestContact')?.touched
                 ) {
                   <div class="text-red-500 text-xs mt-1 font-medium">
                     Enter a valid email or PH mobile number.
@@ -270,5 +277,6 @@
       </main>
     </div>
   </div>
+
   <app-citizen-footer></app-citizen-footer>
 </div>
