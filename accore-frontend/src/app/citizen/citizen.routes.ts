@@ -15,22 +15,27 @@ export const CITIZEN_ROUTES: Routes = [
   {
     path: '',
     component: Home,
+    data: { title: 'Home' },
   },
   {
     path: 'login',
     component: Login,
+    data: { title: 'Login' },
   },
   {
     path: 'signup',
     component: Signup,
+    data: { title: 'Sign Up' },
   },
   {
     path: 'report',
     component: Report,
+    data: { title: 'Report a Hazard' },
   },
   { 
     path: 'directory', 
-    component: Directory 
+    component: Directory,
+    data: { title: 'Emergency Directory' },
   },
 
   // Legal Pages (Wrapped in LegalLayout for Header/Footer)
@@ -40,15 +45,18 @@ export const CITIZEN_ROUTES: Routes = [
     children: [
       { 
         path: 'privacy', 
-        loadComponent: () => import('./legal/privacy').then(m => m.PrivacyComponent) 
+        loadComponent: () => import('./legal/privacy').then(m => m.PrivacyComponent),
+        data: { title: 'Privacy Policy' },
       },
       { 
         path: 'terms', 
-        loadComponent: () => import('./legal/terms').then(m => m.TermsComponent) 
+        loadComponent: () => import('./legal/terms').then(m => m.TermsComponent),
+        data: { title: 'Terms and Conditions' },
       },
       { 
         path: 'cookies', 
-        loadComponent: () => import('./legal/cookies').then(m => m.CookiesComponent) 
+        loadComponent: () => import('./legal/cookies').then(m => m.CookiesComponent),
+        data: { title: 'Cookie Policy' },
       }
     ]
   },
@@ -58,15 +66,18 @@ export const CITIZEN_ROUTES: Routes = [
     path: 'dashboard',
     component: Dashboard,
     canActivate: [AuthGuard],
+    data: { title: 'Dashboard' },
   },
   {
     path: 'my-reports',
     component: MyReports,
     canActivate: [AuthGuard],
+    data: { title: 'My Reports' },
   },
   {
     path: 'my-reports/:id',
     component: ReportDetails,
     canActivate: [AuthGuard],
+    data: { title: 'Report Details' },
   },
 ];
