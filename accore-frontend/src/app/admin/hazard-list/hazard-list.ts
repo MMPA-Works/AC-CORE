@@ -38,6 +38,7 @@ import { HlmTableImports } from '@spartan-ng/helm/table';
 import { HlmPaginationImports } from '@spartan-ng/helm/pagination';
 import { HlmScrollAreaImports } from '@spartan-ng/helm/scroll-area';
 import { toast } from 'ngx-sonner';
+import { buildMobilePagination, type MobilePaginationItem } from '../../shared/mobile-pagination';
 
 @Component({
   selector: 'app-hazard-list',
@@ -307,5 +308,9 @@ export class HazardList implements OnInit, OnDestroy {
       pages.push(i);
     }
     return pages;
+  }
+
+  getMobilePageArray(): MobilePaginationItem[] {
+    return buildMobilePagination(this.currentPage(), this.totalPages(), 3);
   }
 }
