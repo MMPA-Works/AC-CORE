@@ -1,39 +1,4 @@
-<header class="sticky top-0 z-50 border-b border-gray-100 bg-white/90 backdrop-blur-md shadow-sm">
-  <div class="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-    <a
-      routerLink="/"
-      class="flex items-center gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ac1001] rounded-md"
-    >
-      <img
-        src="/logo/logo.svg"
-        alt="Official AC-CORE Municipal Logo for Angeles City"
-        class="h-8 w-8 object-contain"
-      />
-      <div class="flex flex-col justify-center text-left">
-        <span class="text-lg font-bold leading-none tracking-tight text-gray-900">AC-CORE</span>
-        <span class="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#ac1001]"
-          >Angeles City</span
-        >
-      </div>
-    </a>
-
-    <div class="flex items-center gap-4">
-      <a
-        routerLink="/citizen/login"
-        class="text-sm font-bold text-gray-600 hover:text-[#ac1001] transition-colors px-2 py-1"
-      >
-        Login
-      </a>
-      <a
-        routerLink="/citizen/signup"
-        hlmBtn
-        class="bg-gradient-to-r from-[#ac1001] to-[#f99b36] hover:opacity-90 border-0 text-white font-bold h-9 px-5 rounded-full shadow-md transition-opacity"
-      >
-        Sign Up
-      </a>
-    </div>
-  </div>
-</header>
+<app-citizen-header></app-citizen-header>
 
 <main class="flex flex-col min-h-[calc(100vh-64px)] overflow-hidden">
   <section

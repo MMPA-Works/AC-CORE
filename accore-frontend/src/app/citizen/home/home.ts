@@ -23,6 +23,7 @@ import {
   lucideChevronDown
 } from '@ng-icons/lucide';
 
+import { CitizenHeaderComponent } from '../components/citizen-header/citizen-header';
 import { CitizenFooterComponent } from '../components/citizen-footer/citizen-footer';
 
 interface FaqItem {
@@ -41,6 +42,7 @@ interface FaqItem {
     HlmAccordionImports,
     HlmIcon,
     NgIcon,
+    CitizenHeaderComponent,
     CitizenFooterComponent
   ],
   providers: [
@@ -64,7 +66,6 @@ interface FaqItem {
 })
 export class Home {
   
-  // High-value, factual questions based directly on your application architecture
   readonly faqs = signal<FaqItem[]>([
     {
       question: 'Do I need an account to report a hazard?',
