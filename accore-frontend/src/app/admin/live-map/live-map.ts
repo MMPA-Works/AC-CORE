@@ -18,6 +18,8 @@ import { HlmSkeletonImports } from '@spartan-ng/helm/skeleton';
 import { EMPTY, Subject, timer } from 'rxjs';
 import { catchError, switchMap, takeUntil } from 'rxjs/operators';
 
+L.Icon.Default.imagePath = 'https://unpkg.com/leaflet@1.9.4/dist/images/';
+
 @Component({
   selector: 'app-live-map',
   standalone: true,
