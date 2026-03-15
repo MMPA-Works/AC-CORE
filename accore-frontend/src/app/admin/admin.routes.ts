@@ -9,17 +9,21 @@ import { AuthGuard } from '../shared/auth.guard';
 import { ReportsGeneration } from './reports-generation/reports-generation';
 
 export const ADMIN_ROUTES: Routes = [
-  { path: 'login', component: Login },
+  { path: 'login', component: Login, data: { title: 'Admin Login' } },
   { 
     path: '', 
     component: AdminLayout,
     canActivate: [AuthGuard],
     children: [
-      { path: 'dashboard', component: AnalyticsDashboard },
-      { path: 'map', component: LiveMap },
-      { path: 'hazards', component: HazardList },
-      { path: 'hazards/:id', component: HazardDetails },
-      { path: 'reports-generation', component: ReportsGeneration },
+      { path: 'dashboard', component: AnalyticsDashboard, data: { title: 'Dashboard' } },
+      { path: 'map', component: LiveMap, data: { title: 'Live Map' } },
+      { path: 'hazards', component: HazardList, data: { title: 'Hazard Reports' } },
+      { path: 'hazards/:id', component: HazardDetails, data: { title: 'Hazard Details' } },
+      {
+        path: 'reports-generation',
+        component: ReportsGeneration,
+        data: { title: 'Historical Reports' },
+      },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   }

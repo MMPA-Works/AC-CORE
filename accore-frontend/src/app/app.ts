@@ -4,6 +4,7 @@ import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmInputImports } from '@spartan-ng/helm/input';
 import { HlmLabelImports } from '@spartan-ng/helm/label';
 import { HlmToasterImports } from '@spartan-ng/helm/sonner';
+import { PageTitleService } from './services/page-title.service';
 
 @Component({
   selector: 'app-root',
@@ -12,5 +13,7 @@ import { HlmToasterImports } from '@spartan-ng/helm/sonner';
   templateUrl: './app.html',
 })
 export class App {
-  title = 'accore-frontend';
+  constructor(private readonly pageTitleService: PageTitleService) {
+    void this.pageTitleService;
+  }
 }
