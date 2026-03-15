@@ -21,17 +21,27 @@
     </div>
 
     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col overflow-hidden">
-      <div class="flex flex-col gap-4 px-5 pt-5 pb-1 lg:flex-row lg:items-end lg:justify-between">
-        <div class="inline-flex self-start rounded-xl border border-gray-200 bg-gray-50 p-1">
-          <button hlmBtn variant="ghost" class="h-9 rounded-lg px-4 text-sm font-medium transition-colors" [class.bg-white]="!isArchivedView()" [class.text-gray-900]="!isArchivedView()" [class.shadow-sm]="!isArchivedView()" [class.text-gray-500]="isArchivedView()" (click)="setArchiveView('active')">
-            Active Reports
-          </button>
-          <button hlmBtn variant="ghost" class="h-9 rounded-lg px-4 text-sm font-medium transition-colors" [class.bg-white]="isArchivedView()" [class.text-gray-900]="isArchivedView()" [class.shadow-sm]="isArchivedView()" [class.text-gray-500]="!isArchivedView()" (click)="setArchiveView('archived')">
-            Archived/Spam Reports
+  <div class="flex flex-col gap-4 px-5 pt-5 pb-1 lg:flex-row lg:items-end lg:justify-between">
+    <div class="inline-flex w-full lg:w-auto justify-center lg:justify-start rounded-xl border border-gray-200 bg-gray-50 p-0.5 sm:p-1">
+      <button hlmBtn variant="ghost" class="h-8 px-2 text-xs sm:h-9 sm:px-4 sm:text-sm rounded-lg font-medium transition-colors" 
+              [class.bg-white]="!isArchivedView()" 
+              [class.text-gray-900]="!isArchivedView()" 
+              [class.shadow-sm]="!isArchivedView()" 
+              [class.text-gray-500]="isArchivedView()" 
+              (click)="setArchiveView('active')">
+        Active Reports
+      </button>
+      <button hlmBtn variant="ghost" class="h-8 px-2 text-xs sm:h-9 sm:px-4 sm:text-sm rounded-lg font-medium transition-colors" 
+              [class.bg-white]="isArchivedView()" 
+              [class.text-gray-900]="isArchivedView()" 
+              [class.shadow-sm]="isArchivedView()" 
+              [class.text-gray-500]="!isArchivedView()" 
+              (click)="setArchiveView('archived')">
+        Archived/Spam Reports
           </button>
         </div>
 
-        <div class="flex w-full max-w-2xl flex-col gap-1.5 lg:ml-auto">
+        <div class="flex w-full flex-col gap-1.5 lg:max-w-2xl lg:ml-auto">
           <div class="relative">
             <svg class="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-4.35-4.35m1.85-5.15a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"></path>
