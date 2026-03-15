@@ -57,10 +57,16 @@ const hazardReportSchema: Schema = new Schema(
       required: true,
       enum: [
         "Pothole",
+        "Uneven Sidewalk",
         "Clogged Drain",
-        "Fallen Tree",
-        "Streetlight Out",
         "Flooding",
+        "Uncollected Garbage",
+        "Illegal Dumping",
+        "Streetlight Out",
+        "Leaking Pipe",
+        "Fallen Tree",
+        "Overgrown Vegetation",
+        "Other",
       ],
     },
     severity: {

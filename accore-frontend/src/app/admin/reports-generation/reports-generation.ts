@@ -1,8 +1,16 @@
-import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  inject,
+  signal,
+  computed,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormsModule } from '@angular/forms';
 import { HazardReportService } from '../../services/hazard-report';
 import { HazardReport } from '../../shared/models/hazard-report';
+import { HAZARD_CATEGORIES } from '../../app.config';
 import { toast } from 'ngx-sonner';
 
 // Spartan Imports
@@ -30,10 +38,10 @@ import { buildMobilePagination, type MobilePaginationItem } from '../../shared/m
     HlmBadgeImports,
     HlmDatePicker,
     HlmLabel,
-    HlmPaginationImports
+    HlmPaginationImports,
   ],
   templateUrl: './reports-generation.html',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ReportsGeneration implements OnInit {
   private hazardReportService = inject(HazardReportService);
@@ -41,7 +49,7 @@ export class ReportsGeneration implements OnInit {
 
   isLoading = false;
   allReports: HazardReport[] = [];
-  
+
   // Signals for Table Data, Search & Pagination
   reports = signal<HazardReport[]>([]);
   searchQuery = signal<string>('');
@@ -53,13 +61,18 @@ export class ReportsGeneration implements OnInit {
     const query = this.searchQuery().toLowerCase().trim();
     if (!query) return this.reports();
 
-    return this.reports().filter(r => {
+    return this.reports().filter((r) => {
       const title = (r.title || '').toLowerCase();
       const category = (r.category || '').toLowerCase();
       const barangay = (r.barangay || '').toLowerCase();
       const status = (r.status || '').toLowerCase();
 
-      return title.includes(query) || category.includes(query) || barangay.includes(query) || status.includes(query);
+      return (
+        title.includes(query) ||
+        category.includes(query) ||
+        barangay.includes(query) ||
+        status.includes(query)
+      );
     });
   });
 
@@ -70,7 +83,7 @@ export class ReportsGeneration implements OnInit {
 
   totalPages = computed(() => Math.ceil(this.displayReports().length / this.itemsPerPage()) || 1);
 
-  categories: string[] = ['All', 'Pothole', 'Clogged Drain', 'Fallen Tree', 'Streetlight Out', 'Flooding'];
+  categories: string[] = ['All', ...HAZARD_CATEGORIES];
   barangays: string[] = [];
   filteredBarangays: string[] = [];
 
@@ -82,7 +95,7 @@ export class ReportsGeneration implements OnInit {
 
   reportForm = this.fb.group({
     barangay: ['All'],
-    category: ['All']
+    category: ['All'],
   });
 
   ngOnInit() {
@@ -92,13 +105,39 @@ export class ReportsGeneration implements OnInit {
 
   loadBarangays() {
     this.barangays = [
-      'Agapito del Rosario', 'Amsic', 'Anunas', 'Balibago', 'Capaya',
-      'Claro M. Recto', 'Cuayan', 'Cutcut', 'Cutud', 'Lourdes North West',
-      'Lourdes Sur', 'Lourdes Sur East', 'Malabanias', 'Margot', 'Mining',
-      'Pampang', 'Pandan', 'Pulung Cacutud', 'Pulung Maragul', 'Pulungbulu',
-      'Salapungan', 'San Jose', 'San Nicolas', 'Santa Teresita', 'Santa Trinidad',
-      'Santo Cristo', 'Santo Domingo', 'Santo Rosario (Poblacion)', 'Sapalibutad',
-      'Sapangbato', 'Tabun', 'Virgen delos Remedios', 'Ninoy Aquino (Marisol)'
+      'Agapito del Rosario',
+      'Amsic',
+      'Anunas',
+      'Balibago',
+      'Capaya',
+      'Claro M. Recto',
+      'Cuayan',
+      'Cutcut',
+      'Cutud',
+      'Lourdes North West',
+      'Lourdes Sur',
+      'Lourdes Sur East',
+      'Malabanias',
+      'Margot',
+      'Mining',
+      'Pampang',
+      'Pandan',
+      'Pulung Cacutud',
+      'Pulung Maragul',
+      'Pulungbulu',
+      'Salapungan',
+      'San Jose',
+      'San Nicolas',
+      'Santa Teresita',
+      'Santa Trinidad',
+      'Santo Cristo',
+      'Santo Domingo',
+      'Santo Rosario (Poblacion)',
+      'Sapalibutad',
+      'Sapangbato',
+      'Tabun',
+      'Virgen delos Remedios',
+      'Ninoy Aquino (Marisol)',
     ];
     this.filteredBarangays = [...this.barangays];
   }
@@ -107,13 +146,13 @@ export class ReportsGeneration implements OnInit {
     this.isLoading = true;
     this.hazardReportService.getReports().subscribe({
       next: (data: any) => {
-        this.allReports = Array.isArray(data) ? data : (data.reports || []);
+        this.allReports = Array.isArray(data) ? data : data.reports || [];
         this.isLoading = false;
       },
       error: () => {
         toast.error('Failed to load reports');
         this.isLoading = false;
-      }
+      },
     });
   }
 
@@ -135,7 +174,8 @@ export class ReportsGeneration implements OnInit {
     const filtered = this.allReports.filter((r: HazardReport) => {
       const reportDate = new Date(r.createdAt || new Date());
       if (reportDate < start || reportDate > end) return false;
-      if (searchBarangay !== 'all' && !r.barangay?.toLowerCase().includes(searchBarangay)) return false;
+      if (searchBarangay !== 'all' && !r.barangay?.toLowerCase().includes(searchBarangay))
+        return false;
       if (searchCategory !== 'all' && r.category?.toLowerCase() !== searchCategory) return false;
       return true;
     });
@@ -168,13 +208,13 @@ export class ReportsGeneration implements OnInit {
     const total = this.totalPages();
     const current = this.currentPage();
     const pages: number[] = [];
-    
+
     let start = Math.max(1, current - 2);
     let end = Math.min(total, current + 2);
-    
+
     if (current <= 2) end = Math.min(total, 5);
     if (current >= total - 1) start = Math.max(1, total - 4);
-    
+
     for (let i = start; i <= end; i++) {
       pages.push(i);
     }
@@ -190,21 +230,33 @@ export class ReportsGeneration implements OnInit {
   }
 
   getResolvedBy(report: HazardReport): string {
-    return report.statusHistory?.slice().reverse().find(s => s.adminName)?.adminName || 'N/A';
+    return (
+      report.statusHistory
+        ?.slice()
+        .reverse()
+        .find((s) => s.adminName)?.adminName || 'N/A'
+    );
   }
 
   exportToCSV(): void {
     // We export the actively displayed/searched reports
     const currentReports = this.displayReports();
     if (!currentReports.length) return;
-    
+
     const csvContent = [
       ['Title', 'Category', 'Barangay', 'Status', 'Date', 'Lat', 'Lng', 'Resolved By'].join(','),
-      ...currentReports.map(r => [
-        `"${r.title || r.category}"`, r.category, r.barangay, r.status,
-        new Date(r.createdAt!).toLocaleString(), r.location.coordinates[1],
-        r.location.coordinates[0], this.getResolvedBy(r)
-      ].join(','))
+      ...currentReports.map((r) =>
+        [
+          `"${r.title || r.category}"`,
+          r.category,
+          r.barangay,
+          r.status,
+          new Date(r.createdAt!).toLocaleString(),
+          r.location.coordinates[1],
+          r.location.coordinates[0],
+          this.getResolvedBy(r),
+        ].join(','),
+      ),
     ].join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
