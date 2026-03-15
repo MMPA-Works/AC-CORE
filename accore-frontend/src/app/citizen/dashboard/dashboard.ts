@@ -18,6 +18,7 @@ import { AuthService } from '../../shared/auth';
 import { CitizenHeaderComponent } from '../components/citizen-header/citizen-header';
 import { CitizenFooterComponent } from '../components/citizen-footer/citizen-footer';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 import * as L from 'leaflet';
 import 'leaflet.markercluster';
 
@@ -30,7 +31,13 @@ import { toast } from 'ngx-sonner';
 @Component({
   selector: 'app-citizen-dashboard',
   standalone: true,
-  imports: [RouterModule, CommonModule, CitizenHeaderComponent, CitizenFooterComponent, HlmToasterImports],
+  imports: [
+    RouterModule,
+    CommonModule,
+    CitizenHeaderComponent,
+    CitizenFooterComponent,
+    HlmToasterImports,
+  ],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.css'],
   encapsulation: ViewEncapsulation.None,
@@ -69,10 +76,8 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit() {
     if (isPlatformBrowser(this.platformId)) {
-      setTimeout(() => {
-        this.initMap();
-        this.fetchCityMapData();
-      }, 100);
+      this.initMap();
+      this.fetchCityMapData();
     }
   }
 
@@ -82,7 +87,7 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
   }
 
   fetchWeather() {
-    this.http.get('http://localhost:5000/api/weather').subscribe({
+    this.http.get(`${environment.apiUrl}/weather`).subscribe({
       next: (data) => {
         this.weather = data;
         this.cdr.detectChanges();
@@ -116,11 +121,11 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
       next: (data) => {
         this.calculateCityInsights(data);
         this.isInsightsLoading = false;
-        
+
         if (this.map) {
           this.addMapMarkers(data);
         }
-        
+
         // Forces Angular to update the HTML immediately after data arrives
         this.cdr.detectChanges();
       },
@@ -204,7 +209,12 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
       disableClusteringAtZoom: 17,
       iconCreateFunction: (cluster) => {
         const count = cluster.getChildCount();
-        const sizeClass = count < 10 ? 'ac-core-cluster--small' : count < 25 ? 'ac-core-cluster--medium' : 'ac-core-cluster--large';
+        const sizeClass =
+          count < 10
+            ? 'ac-core-cluster--small'
+            : count < 25
+              ? 'ac-core-cluster--medium'
+              : 'ac-core-cluster--large';
         return L.divIcon({
           html: `<div class="ac-core-cluster-shell"><div class="ac-core-cluster-pin"><div class="ac-core-cluster-count">${count}</div></div></div>`,
           className: `ac-core-cluster ${sizeClass}`,
@@ -262,11 +272,15 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
 
   getMarkerColor(severity: string | undefined): string {
     switch (severity?.toLowerCase()) {
-      case 'critical': return '#dc2626';
-      case 'medium': 
-      case 'high': return '#f97316';
-      case 'low': return '#eab308';
-      default: return '#737373';
+      case 'critical':
+        return '#dc2626';
+      case 'medium':
+      case 'high':
+        return '#f97316';
+      case 'low':
+        return '#eab308';
+      default:
+        return '#737373';
     }
   }
 
@@ -277,7 +291,12 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
     const markers: L.Marker[] = [];
 
     reports.forEach((report) => {
-      if (!report.location || !report.location.coordinates || report.location.coordinates.length < 2) return;
+      if (
+        !report.location ||
+        !report.location.coordinates ||
+        report.location.coordinates.length < 2
+      )
+        return;
 
       const lng = report.location.coordinates[0];
       const lat = report.location.coordinates[1];
