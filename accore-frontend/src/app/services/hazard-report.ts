@@ -18,11 +18,16 @@ export class HazardReportService {
   constructor(private http: HttpClient) {}
 
   private getCitizenToken(): string | null {
-    return localStorage.getItem('token');
+    return localStorage.getItem('token') || sessionStorage.getItem('token');
   }
 
   private getStoredToken(): string | null {
-    return localStorage.getItem('adminToken') || localStorage.getItem('token');
+    return (
+      localStorage.getItem('adminToken') ||
+      sessionStorage.getItem('adminToken') ||
+      localStorage.getItem('token') ||
+      sessionStorage.getItem('token')
+    );
   }
 
   private getAuthHeaders(token = this.getStoredToken()): HttpHeaders {

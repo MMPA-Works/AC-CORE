@@ -20,7 +20,6 @@ import { CitizenFooterComponent } from '../components/citizen-footer/citizen-foo
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import * as L from 'leaflet';
-import 'leaflet.markercluster';
 
 // Fixes the missing marker images in production builds
 L.Icon.Default.imagePath = 'https://unpkg.com/leaflet@1.9.4/dist/images/';
@@ -76,8 +75,20 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit() {
     if (isPlatformBrowser(this.platformId)) {
-      this.initMap();
-      this.fetchCityMapData();
+      // Expose Leaflet globally for the plugin
+      (window as any).L = L;
+
+      // Import the plugin dynamically, THEN initialize the map and fetch data
+      import('leaflet.markercluster')
+        .then(() => {
+          this.initMap();
+          this.fetchCityMapData(); // The insights data will now successfully fetch
+        })
+        .catch((err) => {
+          console.error('Map plugin failed to load', err);
+          // If the map fails, we still want to fetch the insights data!
+          this.fetchCityMapData();
+        });
     }
   }
 
