@@ -8,6 +8,7 @@ import { provideRouter } from '@angular/router';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { routes } from './app.routes';
 import { authInterceptor } from './shared/auth.interceptor';
+import { environment } from '../environments/environment';
 
 import {
   SocialLoginModule,
@@ -79,7 +80,7 @@ export type HazardCategory = typeof HAZARD_CATEGORIES[number];
 export type HazardSeverity = 'Low' | 'Medium' | 'Critical';
 
 export const APP_CONFIG = {
-  apiBaseUrl: 'http://localhost:5000/api',
+  apiBaseUrl: environment.apiUrl,
 
   map: {
     defaultLat: 15.145,
