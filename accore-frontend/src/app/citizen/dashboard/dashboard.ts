@@ -21,7 +21,9 @@ import { HttpClient } from '@angular/common/http';
 import * as L from 'leaflet';
 import 'leaflet.markercluster';
 
-// Sonner Toast (ngx-sonner version)
+// Fixes the missing marker images in production builds
+L.Icon.Default.imagePath = 'https://unpkg.com/leaflet@1.9.4/dist/images/';
+
 import { HlmToasterImports } from '@spartan-ng/helm/sonner';
 import { toast } from 'ngx-sonner';
 
@@ -112,13 +114,14 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
   fetchCityMapData() {
     this.hazardReportService.getAllPublicReports().subscribe({
       next: (data) => {
-        this.isInsightsLoading = false;
         this.calculateCityInsights(data);
-
+        this.isInsightsLoading = false;
+        
         if (this.map) {
           this.addMapMarkers(data);
         }
-
+        
+        // Forces Angular to update the HTML immediately after data arrives
         this.cdr.detectChanges();
       },
       error: (error: any) => {
@@ -240,9 +243,9 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
       next: () => {
         this.fetchCityMapData();
         if (isCurrentlyVerified) {
-          toast.success('Report unverified successfully!'); // ❌ Unverified Toast
+          toast.success('Report unverified successfully!');
         } else {
-          toast.success('Report verified successfully!'); // ✅ Verified Toast
+          toast.success('Report verified successfully!');
         }
       },
       error: (err: any) => {
