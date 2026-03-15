@@ -8,6 +8,7 @@ import {
   computed,
   NgZone,
   ViewEncapsulation,
+  ChangeDetectorRef,
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { HazardReportService } from '../../services/hazard-report';
@@ -16,6 +17,8 @@ import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartType } from 'chart.js';
 import * as L from 'leaflet';
 import 'leaflet.markercluster';
+
+L.Icon.Default.imagePath = 'https://unpkg.com/leaflet@1.9.4/dist/images/';
 
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
@@ -44,6 +47,7 @@ export class AnalyticsDashboard implements OnInit, OnDestroy {
   private exportService = inject(ExportService);
   private platformId = inject(PLATFORM_ID);
   private ngZone = inject(NgZone);
+  private cdr = inject(ChangeDetectorRef);
 
   maxReportCount = signal<number>(1);
   totalReports = signal<number>(0);
@@ -157,13 +161,19 @@ export class AnalyticsDashboard implements OnInit, OnDestroy {
         }
 
         this.isLoading.set(false);
+        this.cdr.detectChanges(); // Sync data instantly
+
         if (isPlatformBrowser(this.platformId)) {
-          setTimeout(() => this.initMiniMap(data?.activeHotspots || []), 100);
+          // Allow browser 50ms to paint the DOM element before Leaflet attaches
+          setTimeout(() => {
+            this.initMiniMap(data?.activeHotspots || []);
+          }, 50);
         }
       },
       error: (err) => {
         console.error('Failed to load analytics', err);
         this.isLoading.set(false);
+        this.cdr.detectChanges();
       },
     });
   }
@@ -269,7 +279,7 @@ export class AnalyticsDashboard implements OnInit, OnDestroy {
       });
 
       this.markerClusterGroup.addLayers(markers);
-      
+
       this.loadRiskPaths();
 
       setTimeout(() => {
@@ -292,14 +302,14 @@ export class AnalyticsDashboard implements OnInit, OnDestroy {
               if (target._id !== sourceId) {
                 const latlngs: L.LatLngExpression[] = [
                   [source.location.coordinates[1], source.location.coordinates[0]],
-                  [target.location.coordinates[1], target.location.coordinates[0]]
+                  [target.location.coordinates[1], target.location.coordinates[0]],
                 ];
 
                 const line = L.polyline(latlngs, {
                   color: '#c03e30',
                   weight: 4,
                   dashArray: '10, 10',
-                  opacity: 0.9
+                  opacity: 0.9,
                 }).addTo(this.map!);
 
                 // Improved the description here to be highly informative
@@ -316,7 +326,7 @@ export class AnalyticsDashboard implements OnInit, OnDestroy {
           });
         });
       },
-      error: (err) => console.error('Failed to load risk paths:', err)
+      error: (err) => console.error('Failed to load risk paths:', err),
     });
   }
 
