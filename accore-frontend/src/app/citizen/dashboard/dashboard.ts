@@ -19,10 +19,8 @@ import { CitizenHeaderComponent } from '../components/citizen-header/citizen-hea
 import { CitizenFooterComponent } from '../components/citizen-footer/citizen-footer';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import * as L from 'leaflet';
-
-// Fixes the missing marker images in production builds
-L.Icon.Default.imagePath = 'https://unpkg.com/leaflet@1.9.4/dist/images/';
+import { L, loadLeaflet } from '../../shared/leaflet';
+import type * as Leaflet from 'leaflet';
 
 import { HlmToasterImports } from '@spartan-ng/helm/sonner';
 import { toast } from 'ngx-sonner';
@@ -49,8 +47,8 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
   private http = inject(HttpClient);
 
   @ViewChild('mapContainer', { static: false }) mapContainer!: ElementRef;
-  private map: L.Map | undefined;
-  private markerClusterGroup: L.MarkerClusterGroup | undefined;
+  private map: Leaflet.Map | undefined;
+  private markerClusterGroup: Leaflet.MarkerClusterGroup | undefined;
 
   myReports: HazardReport[] = [];
   isRecentLoading = true;
@@ -75,18 +73,13 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit() {
     if (isPlatformBrowser(this.platformId)) {
-      // Expose Leaflet globally for the plugin
-      (window as any).L = L;
-
-      // Import the plugin dynamically, THEN initialize the map and fetch data
-      import('leaflet.markercluster')
+      loadLeaflet()
         .then(() => {
           this.initMap();
-          this.fetchCityMapData(); // The insights data will now successfully fetch
+          this.fetchCityMapData();
         })
         .catch((err) => {
           console.error('Map plugin failed to load', err);
-          // If the map fails, we still want to fetch the insights data!
           this.fetchCityMapData();
         });
     }
