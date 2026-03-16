@@ -2,7 +2,6 @@ import {
   Component,
   inject,
   OnDestroy,
-  OnInit,
   AfterViewInit,
   PLATFORM_ID,
   signal,
@@ -15,13 +14,12 @@ import {
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { HazardReportService } from '../../services/hazard-report';
-import * as L from 'leaflet';
+import { L, loadLeaflet } from '../../shared/leaflet';
+import type * as Leaflet from 'leaflet';
 import { LucideAngularModule } from 'lucide-angular';
 import { HlmSkeletonImports } from '@spartan-ng/helm/skeleton';
 import { EMPTY, Subject, timer } from 'rxjs';
 import { catchError, switchMap, takeUntil } from 'rxjs/operators';
-
-L.Icon.Default.imagePath = 'https://unpkg.com/leaflet@1.9.4/dist/images/';
 
 @Component({
   selector: 'app-live-map',
@@ -31,7 +29,7 @@ L.Icon.Default.imagePath = 'https://unpkg.com/leaflet@1.9.4/dist/images/';
   styleUrls: ['./live-map.css'],
   encapsulation: ViewEncapsulation.None,
 })
-export class LiveMap implements OnInit, OnDestroy, AfterViewInit {
+export class LiveMap implements OnDestroy, AfterViewInit {
   private hazardReportService = inject(HazardReportService);
   private platformId = inject(PLATFORM_ID);
   private ngZone = inject(NgZone);
@@ -49,26 +47,22 @@ export class LiveMap implements OnInit, OnDestroy, AfterViewInit {
   errorMessage = signal<string>('');
   isPanelOpen = signal<boolean>(true);
 
-  private map: L.Map | undefined;
-  private markerClusterGroup: L.MarkerClusterGroup | undefined;
+  private map: Leaflet.Map | undefined;
+  private markerClusterGroup: Leaflet.MarkerClusterGroup | undefined;
 
-  ngOnInit() {
+  ngAfterViewInit() {
     if (isPlatformBrowser(this.platformId)) {
-      (window as any).L = L;
-      import('leaflet.markercluster')
+      loadLeaflet()
         .then(() => {
+          this.initMap();
           this.startAutoRefresh();
         })
         .catch((err) => {
           console.error('Map plugin failed to load', err);
-          this.startAutoRefresh();
+          this.errorMessage.set('Map components failed to load.');
+          this.isLoading.set(false);
+          this.cdr.detectChanges();
         });
-    }
-  }
-
-  ngAfterViewInit() {
-    if (isPlatformBrowser(this.platformId)) {
-      this.initMap();
     }
   }
 
@@ -178,6 +172,12 @@ export class LiveMap implements OnInit, OnDestroy, AfterViewInit {
 
       this.map.addLayer(this.markerClusterGroup);
       this.loadRiskPaths();
+
+      setTimeout(() => {
+        if (this.map) {
+          this.map.invalidateSize();
+        }
+      }, 100);
     });
   }
 

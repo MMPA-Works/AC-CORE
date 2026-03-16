@@ -15,9 +15,8 @@ import { HazardReportService } from '../../services/hazard-report';
 import { ExportService } from '../../services/export';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartType } from 'chart.js';
-import * as L from 'leaflet';
-
-L.Icon.Default.imagePath = 'https://unpkg.com/leaflet@1.9.4/dist/images/';
+import { L, loadLeaflet } from '../../shared/leaflet';
+import type * as Leaflet from 'leaflet';
 
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
@@ -52,8 +51,8 @@ export class AnalyticsDashboard implements OnInit, AfterViewInit, OnDestroy {
   isLoading = signal<boolean>(true);
   analyticsData = signal<any>(null);
 
-  private map: L.Map | undefined;
-  private markerClusterGroup: L.MarkerClusterGroup | undefined;
+  private map: Leaflet.Map | undefined;
+  private markerClusterGroup: Leaflet.MarkerClusterGroup | undefined;
 
   activeHazardsCount = computed(() => this.analyticsData()?.totalActive || 0);
   criticalAlertsCount = computed(() => this.getSeverityCount('Critical'));
@@ -109,8 +108,7 @@ export class AnalyticsDashboard implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit() {
     if (isPlatformBrowser(this.platformId)) {
-      (window as any).L = L;
-      import('leaflet.markercluster')
+      loadLeaflet()
         .then(() => {
           this.fetchAnalytics();
         })
