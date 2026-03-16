@@ -2,11 +2,11 @@ import {
   Component,
   OnInit,
   OnDestroy,
+  AfterViewInit,
   inject,
   signal,
   PLATFORM_ID,
   computed,
-  NgZone,
   ViewEncapsulation,
   ChangeDetectorRef,
 } from '@angular/core';
@@ -38,20 +38,22 @@ import { LucideAngularModule } from 'lucide-angular';
     LucideAngularModule,
   ],
   templateUrl: './analytics-dashboard.html',
-  styleUrls: ['./analytics-dashboard.css'], // Linking the new CSS file here
+  styleUrls: ['./analytics-dashboard.css'],
   encapsulation: ViewEncapsulation.None,
 })
-export class AnalyticsDashboard implements OnInit, OnDestroy {
+export class AnalyticsDashboard implements OnInit, AfterViewInit, OnDestroy {
   private hazardService = inject(HazardReportService);
   private exportService = inject(ExportService);
   private platformId = inject(PLATFORM_ID);
-  private ngZone = inject(NgZone);
   private cdr = inject(ChangeDetectorRef);
 
   maxReportCount = signal<number>(1);
   totalReports = signal<number>(0);
   isLoading = signal<boolean>(true);
   analyticsData = signal<any>(null);
+
+  private map: L.Map | undefined;
+  private markerClusterGroup: L.MarkerClusterGroup | undefined;
 
   activeHazardsCount = computed(() => this.analyticsData()?.totalActive || 0);
   criticalAlertsCount = computed(() => this.getSeverityCount('Critical'));
@@ -75,9 +77,6 @@ export class AnalyticsDashboard implements OnInit, OnDestroy {
     const data = this.analyticsData()?.recentActivity || [];
     return data.slice(0, 5);
   });
-
-  private map: L.Map | undefined;
-  private markerClusterGroup: L.MarkerClusterGroup | undefined;
 
   public doughnutChartOptions: ChartConfiguration['options'] = {
     responsive: true,
@@ -106,17 +105,25 @@ export class AnalyticsDashboard implements OnInit, OnDestroy {
   public doughnutChartType: ChartType = 'doughnut';
   public doughnutChartData: ChartConfiguration['data'] = { labels: [], datasets: [] };
 
-  ngOnInit() {
-    this.fetchAnalytics();
+  ngOnInit() {}
+
+  ngAfterViewInit() {
+    if (isPlatformBrowser(this.platformId)) {
+      (window as any).L = L;
+      import('leaflet.markercluster')
+        .then(() => {
+          this.fetchAnalytics();
+        })
+        .catch((err) => {
+          console.error('Map plugin failed to load', err);
+          this.fetchAnalytics();
+        });
+    }
   }
 
   ngOnDestroy() {
-    if (this.markerClusterGroup) {
-      this.markerClusterGroup.clearLayers();
-    }
-    if (this.map) {
-      this.map.remove();
-    }
+    this.markerClusterGroup?.clearLayers();
+    this.map?.remove();
   }
 
   fetchAnalytics() {
@@ -160,20 +167,23 @@ export class AnalyticsDashboard implements OnInit, OnDestroy {
         }
 
         this.isLoading.set(false);
-        this.cdr.detectChanges(); // Sync data instantly
+        
+        // Ensure DOM handles *ngIf layout changes before touching the map
+        this.cdr.detectChanges();
 
-        if (isPlatformBrowser(this.platformId)) {
-          // Make Leaflet global and dynamically import the cluster plugin
-          (window as any).L = L;
+        if (!this.map) {
+          this.initMiniMap();
+        }
 
-          import('leaflet.markercluster')
-            .then(() => {
-              // Allow browser 50ms to paint the DOM element before Leaflet attaches
-              setTimeout(() => {
-                this.initMiniMap(data?.activeHotspots || []);
-              }, 50);
-            })
-            .catch((err) => console.error('Map plugin failed to load', err));
+        if (this.map) {
+          if (data?.activeHotspots && data.activeHotspots.length > 0) {
+            this.renderMarkers(data.activeHotspots);
+          } else {
+            this.hazardService.getAllPublicReports().subscribe({
+              next: (reports) => this.renderMarkers(reports),
+              error: () => this.renderMarkers([])
+            });
+          }
         }
       },
       error: (err) => {
@@ -184,151 +194,149 @@ export class AnalyticsDashboard implements OnInit, OnDestroy {
     });
   }
 
-  private initMiniMap(hotspots: any[]) {
-    if (this.map) return;
+  private initMiniMap() {
+    const mapContainer = document.getElementById('mini-map');
+    if (!mapContainer || this.map) return;
 
-    this.ngZone.runOutsideAngular(() => {
-      this.map = L.map('mini-map', { zoomControl: false }).setView([15.145, 120.5887], 13);
+    this.map = L.map(mapContainer, { zoomControl: false }).setView([15.145, 120.5887], 13);
 
-      L.control.zoom({ position: 'bottomright' }).addTo(this.map);
+    L.control.zoom({ position: 'bottomright' }).addTo(this.map);
 
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap contributors',
-      }).addTo(this.map);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors',
+    }).addTo(this.map);
 
-      this.markerClusterGroup = L.markerClusterGroup({
-        showCoverageOnHover: false,
-        spiderfyOnMaxZoom: true,
-        maxClusterRadius: 48,
-        disableClusteringAtZoom: 17,
-        iconCreateFunction: (cluster) => {
-          const count = cluster.getChildCount();
-          const sizeClass =
-            count < 10
-              ? 'ac-core-cluster--small'
-              : count < 25
-                ? 'ac-core-cluster--medium'
-                : 'ac-core-cluster--large';
-          return L.divIcon({
-            html: `<div class="ac-core-cluster-shell"><div class="ac-core-cluster-pin"><div class="ac-core-cluster-count">${count}</div></div></div>`,
-            className: `ac-core-cluster ${sizeClass}`,
-            iconSize: count < 10 ? [34, 34] : count < 25 ? [40, 40] : [46, 46],
-            iconAnchor: count < 10 ? [17, 34] : count < 25 ? [20, 40] : [23, 46],
-          });
-        },
-      });
+    this.markerClusterGroup = L.markerClusterGroup({
+      showCoverageOnHover: false,
+      spiderfyOnMaxZoom: true,
+      maxClusterRadius: 48,
+      disableClusteringAtZoom: 17,
+      iconCreateFunction: (cluster) => {
+        const count = cluster.getChildCount();
+        const sizeClass =
+          count < 10
+            ? 'ac-core-cluster--small'
+            : count < 25
+              ? 'ac-core-cluster--medium'
+              : 'ac-core-cluster--large';
+        return L.divIcon({
+          html: `<div class="ac-core-cluster-shell"><div class="ac-core-cluster-pin"><div class="ac-core-cluster-count">${count}</div></div></div>`,
+          className: `ac-core-cluster ${sizeClass}`,
+          iconSize: count < 10 ? [34, 34] : count < 25 ? [40, 40] : [46, 46],
+          iconAnchor: count < 10 ? [17, 34] : count < 25 ? [20, 40] : [23, 46],
+        });
+      },
+    });
 
-      this.map.addLayer(this.markerClusterGroup);
-      const markers: L.Marker[] = [];
+    this.map.addLayer(this.markerClusterGroup);
+    this.loadRiskPaths();
+  }
 
-      hotspots.forEach((report) => {
-        if (report.location?.coordinates?.length >= 2) {
-          const lng = report.location.coordinates[0];
-          const lat = report.location.coordinates[1];
-          const markerColor = this.getMarkerColor(report.severity);
+  private renderMarkers(hotspots: any[]) {
+    if (!this.map || !this.markerClusterGroup) return;
 
-          const customIcon = L.divIcon({
-            className: 'bg-transparent border-0',
-            html: `
-            <div style="position: relative; display: flex; justify-content: center; align-items: center; width: 32px; height: 32px; transition: transform 0.2s ease-in-out;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
-              <div style="width: 24px; height: 24px; background-color: ${markerColor}; border: 2px solid white; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); box-shadow: 0 4px 10px rgba(0,0,0,0.2); display: flex; justify-content: center; align-items: center; z-index: 10;">
-                <div style="width: 8px; height: 8px; background: white; border-radius: 50%; transform: rotate(45deg);"></div>
-              </div>
-            </div>`,
-            iconSize: [32, 32],
-            iconAnchor: [16, 32],
-            popupAnchor: [0, -32],
-          });
+    this.markerClusterGroup.clearLayers();
+    const markers: L.Marker[] = [];
 
-          const verificationCount = report.verifications?.length || 0;
+    hotspots.forEach((report) => {
+      if (report.location?.coordinates?.length >= 2) {
+        const lng = report.location.coordinates[0];
+        const lat = report.location.coordinates[1];
+        const markerColor = this.getMarkerColor(report.severity);
+        const verificationCount = report.verifications?.length || 0;
 
-          const popupContent = `
-            <div style="font-family: 'Google Sans', sans-serif; display: flex; flex-direction: column; gap: 10px; min-width: 220px; padding-top: 4px;">
-              <div style="padding-right: 16px;">
-                <h3 style="margin: 0 0 4px 0; font-size: 15px; color: #0f172a; font-weight: 700; line-height: 1.3; word-break: break-word;">
-                  ${report.title || report.category || 'Hazard Report'}
-                </h3>
-                <div style="display: flex; align-items: center; gap: 4px; color: #64748b; font-size: 12px; font-weight: 500;">
-                  <span style="text-transform: capitalize;">${report.category || 'Hazard'}</span>
-                  <span style="color: #cbd5e1;">&bull;</span>
-                  <span>Brgy. ${report.barangay || 'Unknown'}</span>
-                </div>
-              </div>
+        const customIcon = L.divIcon({
+          className: 'bg-transparent border-0',
+          html: `
+          <div style="position: relative; display: flex; justify-content: center; align-items: center; width: 32px; height: 32px; transition: transform 0.2s ease-in-out;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+            <div style="width: 24px; height: 24px; background-color: ${markerColor}; border: 2px solid white; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); box-shadow: 0 4px 10px rgba(0,0,0,0.2); display: flex; justify-content: center; align-items: center; z-index: 10;">
+              <div style="width: 8px; height: 8px; background: white; border-radius: 50%; transform: rotate(45deg);"></div>
+            </div>
+          </div>`,
+          iconSize: [32, 32],
+          iconAnchor: [16, 32],
+          popupAnchor: [0, -32],
+        });
 
-              <div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding-top: 6px; border-top: 1px solid #f1f5f9;">
-                <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 6px; background-color: ${markerColor}15; color: ${markerColor}; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase;">
-                  <span style="width: 6px; height: 6px; border-radius: 50%; background-color: ${markerColor};"></span>
-                  ${report.severity || 'Unknown'}
-                </span>
-                
-                <span style="padding: 2px 6px; background-color: #f1f5f9; color: #475569; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase;">
-                  ${report.status || 'Active'}
-                </span>
-
-                ${
-                  verificationCount > 0
-                    ? `
-                  <span style="display: inline-flex; align-items: center; gap: 3px; background-color: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 700;">
-                    <svg style="width: 10px; height: 10px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    ${verificationCount} Verified
-                  </span>
-                `
-                    : ''
-                }
+        const popupContent = `
+          <div style="font-family: 'Google Sans', sans-serif; display: flex; flex-direction: column; gap: 10px; min-width: 220px; padding-top: 4px;">
+            <div style="padding-right: 16px;">
+              <h3 style="margin: 0 0 4px 0; font-size: 15px; color: #0f172a; font-weight: 700; line-height: 1.3; word-break: break-word;">
+                ${report.title || report.category || 'Hazard Report'}
+              </h3>
+              <div style="display: flex; align-items: center; gap: 4px; color: #64748b; font-size: 12px; font-weight: 500;">
+                <span style="text-transform: capitalize;">${report.category || 'Hazard'}</span>
+                <span style="color: #cbd5e1;">&bull;</span>
+                <span>Brgy. ${report.barangay || 'Unknown'}</span>
               </div>
             </div>
-          `;
+            <div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding-top: 6px; border-top: 1px solid #f1f5f9;">
+              <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 6px; background-color: ${markerColor}15; color: ${markerColor}; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase;">
+                <span style="width: 6px; height: 6px; border-radius: 50%; background-color: ${markerColor};"></span>
+                ${report.severity || 'Unknown'}
+              </span>
+              <span style="padding: 2px 6px; background-color: #f1f5f9; color: #475569; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase;">
+                ${report.status || 'Active'}
+              </span>
+              ${
+                verificationCount > 0
+                  ? `<span style="display: inline-flex; align-items: center; gap: 3px; background-color: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 700;">
+                      <svg style="width: 10px; height: 10px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                      ${verificationCount} Verified
+                    </span>`
+                  : ''
+              }
+            </div>
+          </div>
+        `;
 
-          markers.push(L.marker([lat, lng], { icon: customIcon }).bindPopup(popupContent));
-        }
-      });
-
-      this.markerClusterGroup.addLayers(markers);
-
-      this.loadRiskPaths();
-
-      setTimeout(() => {
-        if (this.map) this.map.invalidateSize();
-      }, 500);
+        markers.push(L.marker([lat, lng], { icon: customIcon }).bindPopup(popupContent));
+      }
     });
+
+    this.markerClusterGroup.addLayers(markers);
+
+    // Force Leaflet to recalculate its bounds after the DOM paints
+    setTimeout(() => {
+      if (this.map) {
+        this.map.invalidateSize();
+      }
+    }, 100);
   }
 
   private loadRiskPaths(): void {
     this.hazardService.getDownstreamRisks().subscribe({
       next: (risks) => {
-        this.ngZone.runOutsideAngular(() => {
-          if (!this.map) return;
+        if (!this.map) return;
 
-          Object.entries(risks).forEach(([sourceId, group]) => {
-            const source = group.find((r: any) => r._id === sourceId);
-            if (!source) return;
+        Object.entries(risks).forEach(([sourceId, group]) => {
+          const source = group.find((r: any) => r._id === sourceId);
+          if (!source) return;
 
-            group.forEach((target: any) => {
-              if (target._id !== sourceId) {
-                const latlngs: L.LatLngExpression[] = [
-                  [source.location.coordinates[1], source.location.coordinates[0]],
-                  [target.location.coordinates[1], target.location.coordinates[0]],
-                ];
+          group.forEach((target: any) => {
+            if (target._id !== sourceId) {
+              const latlngs: L.LatLngExpression[] = [
+                [source.location.coordinates[1], source.location.coordinates[0]],
+                [target.location.coordinates[1], target.location.coordinates[0]],
+              ];
 
-                const line = L.polyline(latlngs, {
-                  color: '#c03e30',
-                  weight: 4,
-                  dashArray: '10, 10',
-                  opacity: 0.9,
-                }).addTo(this.map!);
+              const line = L.polyline(latlngs, {
+                color: '#c03e30',
+                weight: 4,
+                dashArray: '10, 10',
+                opacity: 0.9,
+              }).addTo(this.map!);
 
-                // Improved the description here to be highly informative
-                line.bindPopup(`
-                  <div class="p-1 font-sans">
-                    <span class="text-[10px] font-bold text-[#c03e30] uppercase tracking-wider">Geospatial Flow Risk</span>
-                    <p class="text-xs mt-1 font-medium text-gray-700 leading-relaxed">
-                      Predictive routing indicates a downstream water flow from <b>${source.title || source.category}</b> directly affecting <b>${target.title || target.category}</b>.
-                    </p>
-                  </div>
-                `);
-              }
-            });
+              line.bindPopup(`
+                <div class="p-1 font-sans">
+                  <span class="text-[10px] font-bold text-[#c03e30] uppercase tracking-wider">Geospatial Flow Risk</span>
+                  <p class="text-xs mt-1 font-medium text-gray-700 leading-relaxed">
+                    Predictive routing indicates a downstream water flow from <b>${source.title || source.category}</b> directly affecting <b>${target.title || target.category}</b>.
+                  </p>
+                </div>
+              `);
+            }
           });
         });
       },
@@ -338,15 +346,10 @@ export class AnalyticsDashboard implements OnInit, OnDestroy {
 
   private getMarkerColor(severity: string | undefined): string {
     switch (severity?.toLowerCase()) {
-      case 'critical':
-        return '#d93829';
-      case 'medium':
-      case 'high':
-        return '#f07c2b';
-      case 'low':
-        return '#f9a842';
-      default:
-        return '#737373';
+      case 'critical': return '#d93829';
+      case 'medium': case 'high': return '#f07c2b';
+      case 'low': return '#f9a842';
+      default: return '#737373';
     }
   }
 
