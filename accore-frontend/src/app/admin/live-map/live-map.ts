@@ -3,16 +3,19 @@ import {
   inject,
   OnDestroy,
   OnInit,
+  AfterViewInit,
   PLATFORM_ID,
   signal,
   computed,
   ViewEncapsulation,
   NgZone,
+  ChangeDetectorRef,
+  ViewChild,
+  ElementRef
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { HazardReportService } from '../../services/hazard-report';
 import * as L from 'leaflet';
-import 'leaflet.markercluster';
 import { LucideAngularModule } from 'lucide-angular';
 import { HlmSkeletonImports } from '@spartan-ng/helm/skeleton';
 import { EMPTY, Subject, timer } from 'rxjs';
@@ -28,13 +31,16 @@ L.Icon.Default.imagePath = 'https://unpkg.com/leaflet@1.9.4/dist/images/';
   styleUrls: ['./live-map.css'],
   encapsulation: ViewEncapsulation.None,
 })
-export class LiveMap implements OnInit, OnDestroy {
+export class LiveMap implements OnInit, OnDestroy, AfterViewInit {
   private hazardReportService = inject(HazardReportService);
   private platformId = inject(PLATFORM_ID);
   private ngZone = inject(NgZone);
+  private cdr = inject(ChangeDetectorRef);
   private readonly destroy$ = new Subject<void>();
   private readonly refreshIntervalMs = 10000;
   private readonly activeStatuses = new Set(['Reported', 'Under Review', 'In Progress']);
+
+  @ViewChild('mapContainer') mapContainer!: ElementRef;
 
   reports = signal<any[]>([]);
   reportedOnly = computed(() => this.reports().filter((r) => r.status === 'Reported'));
@@ -48,7 +54,21 @@ export class LiveMap implements OnInit, OnDestroy {
 
   ngOnInit() {
     if (isPlatformBrowser(this.platformId)) {
-      this.startAutoRefresh();
+      (window as any).L = L;
+      import('leaflet.markercluster')
+        .then(() => {
+          this.startAutoRefresh();
+        })
+        .catch((err) => {
+          console.error('Map plugin failed to load', err);
+          this.startAutoRefresh();
+        });
+    }
+  }
+
+  ngAfterViewInit() {
+    if (isPlatformBrowser(this.platformId)) {
+      this.initMap();
     }
   }
 
@@ -67,6 +87,9 @@ export class LiveMap implements OnInit, OnDestroy {
 
   togglePanel() {
     this.isPanelOpen.update((state) => !state);
+    setTimeout(() => {
+      if (this.map) this.map.invalidateSize();
+    }, 300);
   }
 
   private startAutoRefresh(): void {
@@ -85,6 +108,7 @@ export class LiveMap implements OnInit, OnDestroy {
                   : 'Could not load reports.',
               );
               this.isLoading.set(false);
+              this.cdr.detectChanges();
               return EMPTY;
             }),
           ),
@@ -102,21 +126,16 @@ export class LiveMap implements OnInit, OnDestroy {
     this.reports.set(activeReports);
     this.errorMessage.set('');
     this.isLoading.set(false);
-
-    if (!this.map) {
-      setTimeout(() => this.initMap(), 0);
-      return;
-    }
-
+    
+    this.cdr.detectChanges();
     this.refreshMarkers();
   }
 
   private initMap(): void {
-    if (this.map) return;
+    if (this.map || !this.mapContainer) return;
 
-    // Running map logic outside Angular prevents heavy change detection loops during map interactions
     this.ngZone.runOutsideAngular(() => {
-      this.map = L.map('admin-map', { zoomControl: false }).setView([15.145, 120.5887], 13);
+      this.map = L.map(this.mapContainer.nativeElement, { zoomControl: false }).setView([15.145, 120.5887], 13);
 
       L.control.zoom({ position: 'bottomleft' }).addTo(this.map);
 
@@ -158,16 +177,7 @@ export class LiveMap implements OnInit, OnDestroy {
       });
 
       this.map.addLayer(this.markerClusterGroup);
-      this.refreshMarkers();
-
-      // Load the hazard routing lines after the map and markers are ready
       this.loadRiskPaths();
-
-      setTimeout(() => {
-        if (this.map) {
-          this.map.invalidateSize();
-        }
-      }, 100);
     });
   }
 
@@ -177,7 +187,6 @@ export class LiveMap implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (risks) => {
-          // We run Leaflet modifications outside of Angular to maintain high performance
           this.ngZone.runOutsideAngular(() => {
             if (!this.map) return;
 
@@ -187,17 +196,16 @@ export class LiveMap implements OnInit, OnDestroy {
 
               group.forEach((target) => {
                 if (target._id !== sourceId) {
-                  // Leaflet requires coordinates in [latitude, longitude] order
                   const latlngs: L.LatLngExpression[] = [
                     [source.location.coordinates[1], source.location.coordinates[0]],
                     [target.location.coordinates[1], target.location.coordinates[0]],
                   ];
 
                   const line = L.polyline(latlngs, {
-                    color: '#c03e30', // Bright neon cyan
-                    weight: 6, // Thicker line
-                    dashArray: '15, 15', // Larger, clearer dashes
-                    opacity: 1.0, // Fully opaque and bright
+                    color: '#c03e30',
+                    weight: 6,
+                    dashArray: '15, 15',
+                    opacity: 1.0,
                   }).addTo(this.map!);
 
                   line.bindPopup(`
@@ -224,8 +232,14 @@ export class LiveMap implements OnInit, OnDestroy {
 
       this.reports().forEach((report) => {
         if (report.location && report.location.coordinates) {
-          const lng = report.location.coordinates[0];
-          const lat = report.location.coordinates[1];
+          
+          const lng = Number(report.location.coordinates[0]);
+          const lat = Number(report.location.coordinates[1]);
+
+          if (isNaN(lat) || isNaN(lng)) {
+             return;
+          }
+
           const markerColor = this.getMarkerColor(report.severity);
 
           const customIcon = L.divIcon({
@@ -289,6 +303,12 @@ export class LiveMap implements OnInit, OnDestroy {
       });
 
       this.markerClusterGroup!.addLayers(markers);
+
+      setTimeout(() => {
+        if (this.map) {
+          this.map.invalidateSize();
+        }
+      }, 100);
     });
   }
 
