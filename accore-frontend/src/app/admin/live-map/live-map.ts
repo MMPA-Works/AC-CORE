@@ -49,6 +49,7 @@ export class LiveMap implements OnDestroy, AfterViewInit {
 
   private map: Leaflet.Map | undefined;
   private markerClusterGroup: Leaflet.MarkerClusterGroup | undefined;
+  private pathsLayerGroup: Leaflet.LayerGroup | undefined; 
 
   ngAfterViewInit() {
     if (isPlatformBrowser(this.platformId)) {
@@ -123,6 +124,7 @@ export class LiveMap implements OnDestroy, AfterViewInit {
     
     this.cdr.detectChanges();
     this.refreshMarkers();
+    this.loadRiskPaths();
   }
 
   private initMap(): void {
@@ -130,6 +132,8 @@ export class LiveMap implements OnDestroy, AfterViewInit {
 
     this.ngZone.runOutsideAngular(() => {
       this.map = L.map(this.mapContainer.nativeElement, { zoomControl: false }).setView([15.145, 120.5887], 13);
+
+      this.pathsLayerGroup = L.layerGroup().addTo(this.map);
 
       L.control.zoom({ position: 'bottomleft' }).addTo(this.map);
 
@@ -188,13 +192,15 @@ export class LiveMap implements OnDestroy, AfterViewInit {
       .subscribe({
         next: (risks) => {
           this.ngZone.runOutsideAngular(() => {
-            if (!this.map) return;
+            if (!this.map || !this.pathsLayerGroup) return;
+
+            this.pathsLayerGroup.clearLayers();
 
             Object.entries(risks).forEach(([sourceId, group]) => {
-              const source = group.find((r) => r._id === sourceId);
+              const source = group.find((r: any) => r._id === sourceId);
               if (!source) return;
 
-              group.forEach((target) => {
+              group.forEach((target: any) => {
                 if (target._id !== sourceId) {
                   const latlngs: L.LatLngExpression[] = [
                     [source.location.coordinates[1], source.location.coordinates[0]],
@@ -206,7 +212,7 @@ export class LiveMap implements OnDestroy, AfterViewInit {
                     weight: 6,
                     dashArray: '15, 15',
                     opacity: 1.0,
-                  }).addTo(this.map!);
+                  }).addTo(this.pathsLayerGroup!);
 
                   line.bindPopup(`
                   <div class="p-1 font-sans">

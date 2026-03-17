@@ -110,6 +110,22 @@ type ReportCreator = {
   guestContact?: string | null;
 };
 
+const fetchElevationFromAPI = async (lat: number, lng: number): Promise<number> => {
+  try {
+    const response = await fetch(`https://api.open-meteo.com/v1/elevation?latitude=${lat}&longitude=${lng}`);
+    const data = await response.json();
+    
+    // Open-Meteo returns data in a different format
+    if (data && data.elevation && data.elevation.length > 0) {
+      return data.elevation[0];
+    }
+    return 0; 
+  } catch (error) {
+    console.error("Elevation fetch failed", error);
+    return 0;
+  }
+};
+
 const createAndSaveReport = async (
   req: Request,
   reporter: ReportCreator,
@@ -121,8 +137,7 @@ const createAndSaveReport = async (
     folder: "accore_hazards",
   });
 
-  const { title, description, category, severity, barangay, latitude, longitude } =
-    req.body;
+  const { title, description, category, severity, barangay, latitude, longitude, elevation } = req.body;
 
   const parsedLatitude = parseFloat(latitude);
   const parsedLongitude = parseFloat(longitude);
@@ -145,7 +160,6 @@ const createAndSaveReport = async (
   let finalSeverity = severity;
   let isHighPriority = false;
 
-  // Bump priority if it is currently raining in a commercial zone
   if (PRIORITY_COMMERCIAL_ZONES.includes(barangay) && getIsRaining()) {
     isHighPriority = true;
     finalSeverity = "Critical";
@@ -157,6 +171,9 @@ const createAndSaveReport = async (
       ? reporter.guestContact.trim()
       : null;
 
+  // Fetch elevation if it is missing
+  const finalElevation = elevation !== undefined ? parseFloat(elevation) : await fetchElevationFromAPI(parsedLatitude, parsedLongitude);
+
   const newReport = new HazardReport({
     citizenId: reporter.citizenId ?? null,
     guestContact: normalizedGuestContact,
@@ -167,6 +184,7 @@ const createAndSaveReport = async (
     barangay,
     isHighPriority,
     isPossibleDuplicate: !!possibleDuplicate,
+    elevation: finalElevation, // Saved to database
     location: {
       type: "Point",
       coordinates: [parsedLongitude, parsedLatitude],
@@ -652,24 +670,20 @@ export const getDownstreamGroupings = async (
     const activeWaterReports = await HazardReport.find({
       category: { $in: ["Flooding", "Clogged Drain"] },
       status: { $in: ["Reported", "Under Review", "In Progress"] },
-      isArchived: false,
-    }).sort({ elevation: -1 });
+      isArchived: { $ne: true },
+    });
 
     const groupedReports: Record<string, any[]> = {};
-    const processedIds = new Set<string>();
 
     activeWaterReports.forEach((sourceReport) => {
       const sourceId = sourceReport._id.toString();
-
-      if (processedIds.has(sourceId)) return;
-
-      const downstreamGroup = [sourceReport];
-      processedIds.add(sourceId);
+      let steepestTarget = null;
+      let lowestElevation = sourceReport.elevation;
 
       activeWaterReports.forEach((targetReport) => {
         const targetId = targetReport._id.toString();
 
-        if (sourceId === targetId || processedIds.has(targetId)) return;
+        if (sourceId === targetId) return;
 
         const isRisk = findDownstreamRisks(
           sourceReport.location.coordinates,
@@ -678,14 +692,16 @@ export const getDownstreamGroupings = async (
           targetReport.elevation,
         );
 
-        if (isRisk) {
-          downstreamGroup.push(targetReport);
-          processedIds.add(targetId);
+        // Only save the target if it is the lowest point found so far
+        if (isRisk && targetReport.elevation < lowestElevation) {
+          lowestElevation = targetReport.elevation;
+          steepestTarget = targetReport;
         }
       });
 
-      if (downstreamGroup.length > 1) {
-        groupedReports[sourceId] = downstreamGroup;
+      // If we found a valid drop, link the source to this single target
+      if (steepestTarget) {
+        groupedReports[sourceId] = [sourceReport, steepestTarget];
       }
     });
 
