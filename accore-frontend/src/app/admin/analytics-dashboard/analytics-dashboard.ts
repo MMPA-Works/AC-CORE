@@ -9,7 +9,10 @@ import {
   computed,
   ViewEncapsulation,
   ChangeDetectorRef,
+  NgZone,
 } from '@angular/core';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { HazardReportService } from '../../services/hazard-report';
 import { ExportService } from '../../services/export';
@@ -45,6 +48,9 @@ export class AnalyticsDashboard implements OnInit, AfterViewInit, OnDestroy {
   private exportService = inject(ExportService);
   private platformId = inject(PLATFORM_ID);
   private cdr = inject(ChangeDetectorRef);
+  private ngZone = inject(NgZone);
+
+  private readonly destroy$ = new Subject<void>();
 
   maxReportCount = signal<number>(1);
   totalReports = signal<number>(0);
@@ -53,6 +59,7 @@ export class AnalyticsDashboard implements OnInit, AfterViewInit, OnDestroy {
 
   private map: Leaflet.Map | undefined;
   private markerClusterGroup: Leaflet.MarkerClusterGroup | undefined;
+  private pathsLayerGroup: Leaflet.LayerGroup | undefined;
 
   activeHazardsCount = computed(() => this.analyticsData()?.totalActive || 0);
   criticalAlertsCount = computed(() => this.getSeverityCount('Critical'));
@@ -120,6 +127,9 @@ export class AnalyticsDashboard implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+
     this.markerClusterGroup?.clearLayers();
     this.map?.remove();
   }
@@ -165,7 +175,7 @@ export class AnalyticsDashboard implements OnInit, AfterViewInit, OnDestroy {
         }
 
         this.isLoading.set(false);
-        
+
         // Ensure DOM handles *ngIf layout changes before touching the map
         this.cdr.detectChanges();
 
@@ -179,7 +189,7 @@ export class AnalyticsDashboard implements OnInit, AfterViewInit, OnDestroy {
           } else {
             this.hazardService.getAllPublicReports().subscribe({
               next: (reports) => this.renderMarkers(reports),
-              error: () => this.renderMarkers([])
+              error: () => this.renderMarkers([]),
             });
           }
         }
@@ -197,6 +207,8 @@ export class AnalyticsDashboard implements OnInit, AfterViewInit, OnDestroy {
     if (!mapContainer || this.map) return;
 
     this.map = L.map(mapContainer, { zoomControl: false }).setView([15.145, 120.5887], 13);
+
+    this.pathsLayerGroup = L.layerGroup().addTo(this.map);
 
     L.control.zoom({ position: 'bottomright' }).addTo(this.map);
 
@@ -304,50 +316,61 @@ export class AnalyticsDashboard implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private loadRiskPaths(): void {
-    this.hazardService.getDownstreamRisks().subscribe({
-      next: (risks) => {
-        if (!this.map) return;
+    this.hazardService // Changed from hazardReportService
+      .getDownstreamRisks()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (risks: any) => { // Added explicit 'any'
+          this.ngZone.runOutsideAngular(() => {
+            if (!this.map || !this.pathsLayerGroup) return;
 
-        Object.entries(risks).forEach(([sourceId, group]) => {
-          const source = group.find((r: any) => r._id === sourceId);
-          if (!source) return;
+            this.pathsLayerGroup.clearLayers();
 
-          group.forEach((target: any) => {
-            if (target._id !== sourceId) {
-              const latlngs: L.LatLngExpression[] = [
-                [source.location.coordinates[1], source.location.coordinates[0]],
-                [target.location.coordinates[1], target.location.coordinates[0]],
-              ];
+            // Cast risks to prevent the 'unknown' object entries error
+            Object.entries(risks as Record<string, any[]>).forEach(([sourceId, group]) => {
+              const source = group.find((r: any) => r._id === sourceId);
+              if (!source) return;
 
-              const line = L.polyline(latlngs, {
-                color: '#c03e30',
-                weight: 4,
-                dashArray: '10, 10',
-                opacity: 0.9,
-              }).addTo(this.map!);
+              group.forEach((target: any) => {
+                if (target._id !== sourceId) {
+                  const latlngs: L.LatLngExpression[] = [
+                    [source.location.coordinates[1], source.location.coordinates[0]],
+                    [target.location.coordinates[1], target.location.coordinates[0]],
+                  ];
 
-              line.bindPopup(`
-                <div class="p-1 font-sans">
-                  <span class="text-[10px] font-bold text-[#c03e30] uppercase tracking-wider">Geospatial Flow Risk</span>
-                  <p class="text-xs mt-1 font-medium text-gray-700 leading-relaxed">
-                    Predictive routing indicates a downstream water flow from <b>${source.title || source.category}</b> directly affecting <b>${target.title || target.category}</b>.
-                  </p>
-                </div>
-              `);
-            }
+                  const line = L.polyline(latlngs, {
+                    color: '#c03e30',
+                    weight: 6,
+                    dashArray: '15, 15',
+                    opacity: 1.0,
+                  }).addTo(this.pathsLayerGroup!);
+
+                  line.bindPopup(`
+                  <div class="p-1 font-sans">
+                    <span class="text-xs font-bold text-red-600 uppercase tracking-wider">Geospatial Route</span>
+                    <p class="text-sm mt-1">Water flows from <b>${source.title || source.category}</b> down to <b>${target.title || target.category}</b>.</p>
+                  </div>
+                `);
+                }
+              });
+            });
           });
-        });
-      },
-      error: (err) => console.error('Failed to load risk paths:', err),
-    });
+        },
+        error: (err: any) => console.error('Failed to load risk paths:', err), // Added explicit 'any'
+      });
   }
 
   private getMarkerColor(severity: string | undefined): string {
     switch (severity?.toLowerCase()) {
-      case 'critical': return '#d93829';
-      case 'medium': case 'high': return '#f07c2b';
-      case 'low': return '#f9a842';
-      default: return '#737373';
+      case 'critical':
+        return '#d93829';
+      case 'medium':
+      case 'high':
+        return '#f07c2b';
+      case 'low':
+        return '#f9a842';
+      default:
+        return '#737373';
     }
   }
 
